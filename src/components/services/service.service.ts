@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { authService } from './auth.service';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 // Get token for auth headers
 const getAuthHeader = () => {

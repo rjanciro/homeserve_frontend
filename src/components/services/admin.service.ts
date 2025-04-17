@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { getAdminAuthHeader } from '../utils/auth';
 
-const API_URL = 'http://localhost:8080/api/admin';
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/admin`;
 
 interface VerificationParams {
   approved: boolean;
