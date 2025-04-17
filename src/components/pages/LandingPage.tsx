@@ -85,10 +85,10 @@ const Hero: React.FC = () => {
               Book trusted housekeepers for one-time cleaning or hire them long-term. Whether you need a single deep clean or regular household help, we've got you covered.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/signup" className="bg-[#133E87] text-white px-8 py-4 rounded-full hover:bg-[#3A80D2] inline-block text-center font-medium shadow-lg hover:shadow-xl transition-all">
+              <Link to="/signup" className="bg-[#133E87] text-white px-8 py-4 rounded-full hover:bg-[#1F5CD1] inline-block text-center font-medium shadow-lg hover:shadow-xl transition-all">
                 Find a Housekeeper
               </Link>
-              <a href="#how-it-works" className="border border-gray-300 text-gray-700 px-8 py-4 rounded-full hover:border-gray-400 inline-block text-center font-medium transition-all">
+              <a href="#how-it-works" className="border border-gray-300 text-gray-700 px-8 py-4 rounded-full hover:border-[#1F5CD1] inline-block text-center font-medium transition-all">
                 Learn How It Works
               </a>
             </div>
@@ -127,7 +127,7 @@ const Hero: React.FC = () => {
                 <span className="text-gray-700">Build lasting relationships with homeowners</span>
               </li>
             </ul>
-            <Link to="/signup?type=housekeeper" className="bg-[#133E87] text-white px-8 py-4 rounded-full hover:bg-[#3A80D2] flex items-center justify-center max-w-xs font-medium shadow-lg hover:shadow-xl transition-all">
+            <Link to="/signup?type=housekeeper" className="bg-[#133E87] text-white px-8 py-4 rounded-full hover:bg-[#137D13] flex items-center justify-center max-w-xs font-medium shadow-lg hover:shadow-xl transition-all">
               Join as Housekeeper <FaArrowRight className="ml-2" />
             </Link>
           </div>
