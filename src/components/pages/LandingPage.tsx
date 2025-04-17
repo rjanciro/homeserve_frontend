@@ -56,7 +56,7 @@ const Navbar: React.FC = () => {
           <a href="#services" className="text-gray-600 hover:text-gray-900 transition-colors">Services</a>
           <a href="#how-it-works" className="text-gray-600 hover:text-gray-900 transition-colors">How It Works</a>
           <Link to="/about" className="text-gray-600 hover:text-gray-900 transition-colors">About Us</Link>
-          <a href="/login" className="bg-[#133E87] text-white px-6 py-2 rounded-full hover:bg-[#3A80D2] transition-colors font-medium">
+          <a href="/login" className="bg-[#133E87] text-white px-6 py-2 rounded-full hover:bg-[#1F5CD1] transition-colors font-medium">
             Login
           </a>
         </div>
