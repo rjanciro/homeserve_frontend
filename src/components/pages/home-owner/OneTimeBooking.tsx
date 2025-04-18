@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { FaMapMarkerAlt, FaUser, FaCertificate, FaCheck, FaCalendar, FaStar, FaCalendarAlt, FaFileAlt, FaTools, FaMoneyBillWave, FaSpinner, FaTag, FaClock } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaUser, FaCertificate, FaCheck, FaCalendar, FaStar, FaCalendarAlt, FaFileAlt, FaTools, FaMoneyBillWave, FaSpinner, FaTag, FaClock, FaInfoCircle, FaCommentAlt } from 'react-icons/fa';
 import { Service } from '../../services/service.service';
 import { browseService } from '../../services/browse.service';
 import toast from 'react-hot-toast';
 import { profileService } from '../../services/profile.service';
 import HousekeeperProfileModal from '../../modals/HousekeeperProfileModal';
+import ServiceDetailsModal from '../../modals/ServiceDetailsModal';
+import BookingModal from '../../modals/BookingModal';
+import { useNavigate } from 'react-router-dom';
 
 // Define types
 interface HousekeeperReview {
@@ -41,6 +44,9 @@ interface BookingFormData {
 }
 
 const OneTimeBooking: React.FC = () => {
+  // Add the navigate hook for redirecting to messages
+  const navigate = useNavigate();
+
   // State for housekeepers, filters, selected housekeeper for profile, booking
   const [housekeepers, setHousekeepers] = useState<Housekeeper[]>([]);
   const [filteredHousekeepers, setFilteredHousekeepers] = useState<Housekeeper[]>([]);
@@ -48,6 +54,7 @@ const OneTimeBooking: React.FC = () => {
   const [serviceToBook, setServiceToBook] = useState<Service | null>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [showServiceDetails, setShowServiceDetails] = useState(false);
   const [bookingData, setBookingData] = useState<BookingFormData>({
     selectedServiceId: '',
     date: '',
@@ -82,7 +89,7 @@ const OneTimeBooking: React.FC = () => {
       return defaultImage;
     }
     // Assuming imagePath is like '/uploads/profile_pictures/...'
-    const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+    const apiBaseUrl = 'http://localhost:8080';
     // Ensure no double slashes
     const fullUrl = `${apiBaseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
     console.log("Constructed Profile Image URL:", fullUrl); // Log for debugging
@@ -95,7 +102,7 @@ const OneTimeBooking: React.FC = () => {
       return null; // No image path provided
     }
     // Assuming imagePath is like '/uploads/services_pictures/service-...'
-    const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'; 
+    const apiBaseUrl = 'http://localhost:8080'; 
     // Ensure no double slashes
     const fullUrl = `${apiBaseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
     console.log("Constructed Service Image URL:", fullUrl); // Log for debugging
@@ -258,6 +265,19 @@ const OneTimeBooking: React.FC = () => {
     return serviceToBook ? serviceToBook.price : 0;
   };
 
+  // Add handleSeeDetails function
+  const handleSeeDetails = (housekeeper: Housekeeper, service: Service) => {
+    setSelectedHousekeeper(housekeeper);
+    setServiceToBook(service);
+    setShowServiceDetails(true);
+  };
+
+  // Add handleMessage function to redirect to messages
+  const handleMessage = (housekeeper: Housekeeper) => {
+    // Navigate to messages page with housekeeper ID as a query parameter
+    navigate(`/messages?providerId=${housekeeper.id}`);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-2 text-gray-800">Find a Housekeeper Service</h1>
@@ -358,13 +378,32 @@ const OneTimeBooking: React.FC = () => {
                             </span>
                           </div>
 
-                          {/* Action Button */}
-                          <div>
+                          {/* Action Buttons - Updated to include See Details and Message */}
+                          <div className="grid grid-cols-3 gap-2">
+                            <button
+                              onClick={() => handleSeeDetails(housekeeper, service)}
+                              className="bg-gray-100 text-gray-800 hover:bg-gray-200 px-2 py-2 rounded-md font-medium text-sm flex items-center justify-center"
+                              title="See more details"
+                            >
+                              <FaInfoCircle className="mr-1" size={14} />
+                              <span className="hidden sm:inline">Details</span>
+                            </button>
+                            
+                            <button
+                              onClick={() => handleMessage(housekeeper)}
+                              className="bg-green-500 text-white hover:bg-green-600 px-2 py-2 rounded-md font-medium text-sm flex items-center justify-center"
+                              title="Message this housekeeper"
+                            >
+                              <FaCommentAlt className="mr-1" size={14} />
+                              <span className="hidden sm:inline">Message</span>
+                            </button>
+                            
                             <button
                               onClick={() => handleBookNow(housekeeper, service)}
-                              className="w-full bg-gradient-to-r from-[#133E87] to-[#1a4c9e] text-white px-4 py-2 rounded-md hover:from-[#0f2f66] hover:to-[#1a4c9e] transition-all font-semibold text-sm"
+                              className="bg-gradient-to-r from-[#133E87] to-[#1a4c9e] text-white hover:from-[#0f2f66] hover:to-[#1a4c9e] px-2 py-2 rounded-md font-medium text-sm flex items-center justify-center"
                             >
-                              Book Now
+                              <FaCalendarAlt className="mr-1" size={14} />
+                              <span className="hidden sm:inline">Book</span>
                             </button>
                           </div>
                         </div>
@@ -473,74 +512,38 @@ const OneTimeBooking: React.FC = () => {
         />
       )}
       
-      {/* Booking Form Modal */}
+      {/* New ServiceDetailsModal */}
+      {selectedHousekeeper && serviceToBook && (
+        <ServiceDetailsModal
+          isOpen={showServiceDetails}
+          onClose={() => setShowServiceDetails(false)}
+          service={serviceToBook}
+          housekeeper={{
+            id: selectedHousekeeper.id,
+            name: selectedHousekeeper.name,
+            image: selectedHousekeeper.image,
+            rating: selectedHousekeeper.rating,
+            reviewCount: selectedHousekeeper.reviewCount
+          }}
+          getProfileImageUrl={getProfileImageUrl}
+          getServiceImageUrl={getServiceImageUrl}
+          onBookService={() => {
+            setShowServiceDetails(false);
+            handleBookNow(selectedHousekeeper, serviceToBook);
+          }}
+        />
+      )}
+      
+      {/* Replace the inline booking form with BookingModal component */}
       {showBookingForm && selectedHousekeeper && serviceToBook && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-               <div className="flex justify-between items-center">
-                 <h2 className="text-xl font-bold">Book Service</h2>
-                 <button onClick={() => setShowBookingForm(false)} className="text-gray-500 hover:text-gray-700">✕</button>
-               </div>
-            </div>
-            <form onSubmit={handleSubmitBooking}>
-              <div className="p-6 max-h-[calc(90vh-10rem)] overflow-y-auto">
-                 <div className="bg-blue-50 p-4 rounded-md mb-4 border border-blue-200">
-                    <p className="font-medium text-blue-800">{serviceToBook.name}</p>
-                    <p className="text-sm text-blue-700">By: {selectedHousekeeper.name}</p>
-                    <p className="text-sm text-blue-700">{serviceToBook.category} • {serviceToBook.estimatedCompletionTime}</p>
-                    <p className="text-lg font-semibold text-blue-900 mt-1">₱{serviceToBook.price}</p>
-                 </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Date*</label>
-                    <input
-                      type="date" name="date" value={bookingData.date} onChange={handleBookingChange} required
-                      min={new Date().toISOString().split('T')[0]}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Time*</label>
-                    <input
-                      type="time" name="time" value={bookingData.time} onChange={handleBookingChange} required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87]"
-                    />
-                  </div>
-                </div>
-                
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Your Location*</label>
-                  <input
-                    type="text" name="location" value={bookingData.location} onChange={handleBookingChange} required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87]"
-                     placeholder="Your full address for the service"
-                  />
-                </div>
-                
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
-                  <textarea
-                    name="notes" value={bookingData.notes} onChange={handleBookingChange} rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87]"
-                    placeholder="Special instructions, e.g., 'Focus on the kitchen', 'We have a friendly dog'"
-                  ></textarea>
-                </div>
-                
-              </div>
-              <div className="p-4 border-t border-gray-200 bg-gray-50">
-                 <div className="flex justify-between items-center font-medium mb-2">
-                     <span>Total Price:</span>
-                     <span className="text-xl text-[#133E87]">₱{calculateEstimatedPrice()}</span>
-                 </div>
-                 <button type="submit" className="w-full bg-[#133E87] text-white py-2 rounded-lg hover:bg-[#0f2f66] font-semibold">
-                   Confirm Booking
-                 </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <BookingModal
+          isOpen={showBookingForm}
+          onClose={() => setShowBookingForm(false)}
+          service={serviceToBook}
+          housekeeper={selectedHousekeeper}
+          getProfileImageUrl={getProfileImageUrl}
+          getServiceImageUrl={getServiceImageUrl}
+        />
       )}
     </div>
   );

@@ -3,34 +3,28 @@ import { FaTimes, FaCalendarAlt, FaClock, FaMapMarkerAlt, FaCommentAlt, FaSpinne
 import toast from 'react-hot-toast';
 import { getAuthHeader } from '../utils/auth';
 import axios from 'axios';
-
-interface ServiceProvider {
-  id: string;
-  _id?: string;
-  name: string;
-  rating: number;
-  reviews: number;
-  hourlyRate: number;
-  image: string;
-  category: string;
-  description: string;
-  providerName?: string;
-  businessName?: string;
-  contactNumber?: string;
-  pricingType?: string;
-  estimatedCompletionTime?: string;
-}
+import { Service } from '../services/service.service';
+import { Housekeeper } from '../pages/home-owner/OneTimeBooking';
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  provider: ServiceProvider;
+  service: Service | null;
+  housekeeper: Housekeeper | null;
+  getProfileImageUrl?: (imagePath: string | undefined) => string;
+  getServiceImageUrl?: (imagePath: string | undefined) => string | null;
 }
 
 // Fix the API URL to ensure it has the correct format
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_URL = 'http://localhost:8080';
 
-const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }) => {
+const BookingModal: React.FC<BookingModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  service, 
+  housekeeper,
+  getProfileImageUrl
+}) => {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [location, setLocation] = useState('');
@@ -44,7 +38,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
     contactPhone: ''
   });
 
-  if (!isOpen) return null;
+  if (!isOpen || !service || !housekeeper) return null;
 
   // Format the phone number as it's being typed
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,10 +141,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
     setIsSubmitting(true);
     
     try {
-      // Use the provider._id or id property for the serviceId
-      const serviceId = provider._id || provider.id;
+      // Get the serviceId from the service object
+      const serviceId = service._id || service.id;
       
-      // Send booking request to the backend API
+      // Send booking request to the backend API - simplified payload to match backend expectations
       await axios.post(`${API_URL}/api/bookings`, {
         serviceId,
         date,
@@ -179,155 +173,151 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, provider }
 
   // Calculate minimum date (today)
   const today = new Date().toISOString().split('T')[0];
+  
+  // Get default profile image if needed
+  const getDefaultProfileImage = () => {
+    if (getProfileImageUrl && housekeeper.image) {
+      return getProfileImageUrl(housekeeper.image);
+    }
+    return "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
+  };
 
   return (
     <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Book Appointment</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <FaTimes className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="mb-6">
-          <div className="flex items-center space-x-4 mb-4">
-            <img src={provider.image} alt={provider.name} className="w-12 h-12 rounded-full object-cover" />
-            <div>
-              <h3 className="font-medium text-gray-900">{provider.name}</h3>
-              <p className="text-sm text-gray-600">{provider.category}</p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-            <div>
-              <span className="font-medium">Rate:</span> ₱{provider.hourlyRate}
-              {provider.pricingType === 'Hourly' ? '/hr' : ' fixed'}
-            </div>
-            {provider.estimatedCompletionTime && (
-              <div>
-                <span className="font-medium">Est. Time:</span> {provider.estimatedCompletionTime}
-              </div>
-            )}
-            {provider.businessName && (
-              <div className="col-span-2">
-                <span className="font-medium">Business:</span> {provider.businessName}
-              </div>
-            )}
-            {provider.providerName && (
-              <div className="col-span-2">
-                <span className="font-medium">Provider:</span> {provider.providerName}
-              </div>
-            )}
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-lg overflow-hidden">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-bold">Book Service</h2>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+              <FaTimes className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                <FaCalendarAlt className="inline mr-2 text-green-500" />
-                Preferred Date
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                min={today}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 ${
-                  errors.date ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.date && <p className="mt-1 text-sm text-red-500">{errors.date}</p>}
+          <div className="p-6 max-h-[calc(90vh-10rem)] overflow-y-auto">
+            <div className="bg-blue-50 p-4 rounded-md mb-4 border border-blue-200">
+              <div className="flex items-start mb-2">
+                <img
+                  src={getDefaultProfileImage()}
+                  alt={housekeeper.name}
+                  className="w-10 h-10 rounded-full object-cover mr-3 border border-gray-200"
+                  onError={(e) => { (e.target as HTMLImageElement).src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"; }}
+                />
+                <div>
+                  <p className="font-medium text-blue-800">{service.name}</p>
+                  <p className="text-sm text-blue-700">By: {housekeeper.name}</p>
+                  <p className="text-sm text-blue-700">{service.category} • {service.estimatedCompletionTime}</p>
+                  <p className="text-lg font-semibold text-blue-900 mt-1">₱{service.price}</p>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                <FaClock className="inline mr-2 text-green-500" />
-                Preferred Time
-              </label>
-              <input
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 ${
-                  errors.time ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {errors.time && <p className="mt-1 text-sm text-red-500">{errors.time}</p>}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <FaCalendarAlt className="inline mr-2 text-blue-500" />
+                  Date*
+                </label>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  min={today}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87] ${
+                    errors.date ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  required
+                />
+                {errors.date && <p className="mt-1 text-xs text-red-500">{errors.date}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <FaClock className="inline mr-2 text-blue-500" />
+                  Time*
+                </label>
+                <input
+                  type="time"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87] ${
+                    errors.time ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                  required
+                />
+                {errors.time && <p className="mt-1 text-xs text-red-500">{errors.time}</p>}
+              </div>
             </div>
-
-            <div>
+            
+            <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                <FaMapMarkerAlt className="inline mr-2 text-green-500" />
-                Service Location
+                <FaMapMarkerAlt className="inline mr-2 text-blue-500" />
+                Your Location*
               </label>
               <input
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="Enter your address"
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 ${
+                placeholder="Your full address for the service"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87] ${
                   errors.location ? 'border-red-500' : 'border-gray-300'
                 }`}
+                required
               />
-              {errors.location && <p className="mt-1 text-sm text-red-500">{errors.location}</p>}
+              {errors.location && <p className="mt-1 text-xs text-red-500">{errors.location}</p>}
             </div>
-
-            <div>
+            
+            <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                <FaPhone className="inline mr-2 text-green-500" />
-                Contact Phone Number
+                <FaPhone className="inline mr-2 text-blue-500" />
+                Contact Phone Number*
               </label>
               <input
                 type="tel"
                 value={contactPhone}
                 onChange={handlePhoneChange}
                 placeholder="09XX XXX XXXX"
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87] ${
                   errors.contactPhone ? 'border-red-500' : 'border-gray-300'
                 }`}
+                required
               />
-              {errors.contactPhone && <p className="mt-1 text-sm text-red-500">{errors.contactPhone}</p>}
+              {errors.contactPhone && <p className="mt-1 text-xs text-red-500">{errors.contactPhone}</p>}
               <p className="mt-1 text-xs text-gray-500">Format: 09XX XXX XXXX or +63 9XX XXX XXXX</p>
             </div>
-
-            <div>
+            
+            <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                <FaCommentAlt className="inline mr-2 text-green-500" />
-                Additional Notes (Optional)
+                <FaCommentAlt className="inline mr-2 text-blue-500" />
+                Notes (Optional)
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Describe your service needs or any special instructions"
                 rows={3}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87]"
+                placeholder="Special instructions, e.g., 'Focus on the kitchen', 'We have a friendly dog'"
               ></textarea>
             </div>
           </div>
-
-          <div className="mt-6 flex space-x-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex justify-center items-center"
+          
+          <div className="p-4 border-t border-gray-200 bg-gray-50">
+            <div className="flex justify-between items-center font-medium mb-2">
+              <span>Total Price:</span>
+              <span className="text-xl text-[#133E87]">₱{service.price}</span>
+            </div>
+            <button 
+              type="submit" 
+              className="w-full bg-[#133E87] text-white py-2 rounded-lg hover:bg-[#0f2f66] font-semibold flex items-center justify-center"
               disabled={isSubmitting}
             >
               {isSubmitting ? (
                 <>
                   <FaSpinner className="animate-spin mr-2" />
-                  Booking...
+                  Processing...
                 </>
               ) : (
-                'Book Now'
+                'Confirm Booking'
               )}
             </button>
           </div>

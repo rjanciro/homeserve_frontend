@@ -290,7 +290,7 @@ const MyServicesPage: React.FC = () => {
       return null; // No image path provided
     }
     // Assuming imagePath is like '/uploads/services_pictures/service-...'
-    const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080'; 
+    const apiBaseUrl = 'http://localhost:8080'; 
     return `${apiBaseUrl}${imagePath}`;
   };
 

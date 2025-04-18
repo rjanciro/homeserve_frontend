@@ -63,10 +63,9 @@ export class WebSocketService {
     this.token = token;
     this.notifyStatusChange(WebSocketStatus.CONNECTING);
     
-    // Use secure WebSocket if on HTTPS
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    // Use the server's actual IP address or hostname instead of localhost
-    const wsUrl = `${protocol}//127.0.0.1:8081`;
+    // Use WebSocket URL from environment variable or fallback based on protocol
+    const wsUrl = import.meta.env.VITE_WS_URL || 
+      `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//localhost:8081`;
     
     console.log('Connecting to WebSocket server at:', wsUrl);
     

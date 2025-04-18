@@ -378,7 +378,7 @@ const HomeOwnerMessaging: React.FC = () => {
                         {`${user.firstName} ${user.lastName}`}
                       </h3>
                       <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
-                        {user.userType === 'provider' ? 'Service Provider' : 'Homeowner'}
+                        {user.userType === 'housekeeper' ? 'Housekeeper' : 'Homeowner'}
                       </span>
                     </div>
                   </div>
@@ -505,7 +505,7 @@ const HomeOwnerMessaging: React.FC = () => {
                           {`${otherUser.firstName} ${otherUser.lastName}`}
                         </h2>
                         <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
-                          {otherUser.userType === 'provider' ? 'Service Provider' : 'Homeowner'}
+                          {otherUser.userType === 'housekeeper' ? 'Housekeeper' : 'Homeowner'}
                         </span>
                       </div>
                     </>
