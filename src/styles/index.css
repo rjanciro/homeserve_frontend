@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Prevent horizontal scrollbar */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 /* Scrollbar customization */
 ::-webkit-scrollbar {
   width: 8px;

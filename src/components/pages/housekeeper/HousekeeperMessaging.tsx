@@ -178,19 +178,19 @@ const ServiceProviderMessaging: React.FC = () => {
   };
   
   return (
-    <div className="h-[calc(100vh-73px)]">
+    <div className="flex flex-col h-[calc(100vh-73px)] overflow-hidden">
       {renderConnectionStatus()}
       {error && (
         <div className="bg-red-100 text-red-800 p-2 text-center">
           {error}
         </div>
       )}
-      <div className="h-full flex flex-col md:flex-row">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Conversation/Users List - Hidden on mobile when a conversation is selected */}
         <div 
           className={`${
             mobileView && !showConversationList ? 'hidden' : 'block'
-          } w-full md:w-80 border-r border-gray-200 bg-white`}
+          } w-full md:w-80 border-r border-gray-200 bg-white h-full overflow-hidden flex flex-col`}
         >
           {/* Search Bar with New Chat Button */}
           <div className="p-4 border-b border-gray-200 flex items-center">
@@ -224,7 +224,7 @@ const ServiceProviderMessaging: React.FC = () => {
           </div>
           
           {/* List Content - Either Conversations or Users */}
-          <div className="overflow-y-auto h-[calc(100%-73px)]">
+          <div className="overflow-y-auto flex-1">
             {loading && (conversations.length === 0 || users.length === 0) ? (
               <div className="p-4 text-center text-gray-500">
                 Loading {showUsersList ? 'users' : 'conversations'}...
@@ -347,7 +347,7 @@ const ServiceProviderMessaging: React.FC = () => {
         <div 
           className={`${
             mobileView && showConversationList ? 'hidden' : 'block'
-          } flex-1 flex flex-col bg-gray-50`}
+          } flex-1 flex flex-col bg-gray-50 h-full overflow-hidden`}
         >
           {!activeConversationObj ? (
             // No conversation selected
@@ -359,7 +359,7 @@ const ServiceProviderMessaging: React.FC = () => {
           ) : (
             <>
               {/* Chat Header */}
-              <div className="bg-white p-4 border-b border-gray-200 flex items-center">
+              <div className="bg-white p-4 border-b border-gray-200 flex items-center flex-shrink-0">
                 {mobileView && (
                   <button 
                     onClick={() => setShowConversationList(true)}
@@ -443,7 +443,7 @@ const ServiceProviderMessaging: React.FC = () => {
               </div>
               
               {/* Message Input */}
-              <div className="bg-white p-4 border-t border-gray-200">
+              <div className="bg-white p-4 border-t border-gray-200 flex-shrink-0">
                 <form onSubmit={handleSendMessage} className="flex">
                   <input
                     type="text"

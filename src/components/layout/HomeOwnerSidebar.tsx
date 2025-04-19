@@ -119,7 +119,7 @@ const HomeOwnerSidebar: React.FC = () => {
 
       {/* Main content */}
       <div className={`transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
-        <header className="bg-white h-[73px] border-b border-gray-200">
+        <header className="bg-white h-[73px] border-b border-gray-200 sticky top-0 z-10 shadow-sm">
           <div className="h-full flex justify-end items-center px-6">
             <div className="flex items-center space-x-4">
               <img

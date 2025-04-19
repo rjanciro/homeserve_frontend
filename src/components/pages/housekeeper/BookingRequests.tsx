@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FaCalendarCheck, FaCalendarTimes, FaClipboardCheck, FaClock, FaMapMarkerAlt, FaUser, FaSpinner, FaInfoCircle, FaPhone, FaCommentAlt, FaSearch, FaFilter, FaCheck, FaTimes, FaEye, FaCalendarAlt } from 'react-icons/fa';
+import { FaCalendarCheck, FaCalendarTimes, FaClipboardCheck, FaClock, FaMapMarkerAlt, FaUser, FaSpinner, FaInfoCircle, FaPhone, FaCommentAlt, FaSearch, FaFilter, FaCheck, FaTimes, FaEye, FaCalendarAlt, FaComments } from 'react-icons/fa';
 import useDocumentTitle from '../../../hooks/useDocumentTitle';
 import axios from 'axios';
 import { getAuthHeader } from '../../utils/auth';
 import toast from 'react-hot-toast';
 import BookingDetails, { Booking } from '../../modals/BookingDetails';
+import { useNavigate } from 'react-router-dom';
 
 const API_URL = 'http://localhost:8080/api';
 const BASE_URL = 'http://localhost:8080';
@@ -25,6 +26,7 @@ const formatImageUrl = (profileImage: string | null | undefined): string => {
 
 const BookingRequests: React.FC = () => {
   useDocumentTitle('Booking Requests');
+  const navigate = useNavigate();
   
   // State for booking requests, filters, selected booking
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -222,6 +224,11 @@ const BookingRequests: React.FC = () => {
     return `${booking.customer.firstName} ${booking.customer.lastName}`;
   };
 
+  // Handle message click - navigate to messaging interface
+  const handleMessageClick = (customerId: string) => {
+    navigate(`/housekeeper/messages?customerId=${customerId}`);
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -386,6 +393,15 @@ const BookingRequests: React.FC = () => {
                       Complete
                     </button>
                   )}
+                  
+                  {/* Message Button */}
+                  <button
+                    onClick={() => handleMessageClick(booking.customer._id)}
+                    className="flex items-center px-4 py-2 bg-blue-500/90 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  >
+                    <FaComments className="mr-2" />
+                    Message
+                  </button>
                   
                   <button
                     onClick={() => viewBookingDetails(booking)}

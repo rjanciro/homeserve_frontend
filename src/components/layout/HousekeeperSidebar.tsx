@@ -127,7 +127,7 @@ const HousekeeperSidebar: React.FC = () => {
         </div>
       </div>
       <div className={`transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
-        <header className="bg-white h-[73px] border-b border-gray-200">
+        <header className="bg-white h-[73px] border-b border-gray-200 sticky top-0 z-50 shadow-md">
           <div className="h-full flex justify-end items-center px-6">
             <div className="flex items-center space-x-4">
               <img
@@ -148,7 +148,7 @@ const HousekeeperSidebar: React.FC = () => {
             </div>
           </div>
         </header>
-        <main className="p-6">
+        <main className="p-6 overflow-y-auto" style={{ height: 'calc(100vh - 73px)' }}>
           <Outlet />
         </main>
       </div>

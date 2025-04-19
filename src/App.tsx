@@ -15,6 +15,7 @@ import Messaging from './components/pages/home-owner/HomeOwnerMessaging';
 import History from './components/pages/home-owner/History';
 import HomeOwnerProfileSettings from './components/pages/home-owner/HomeOwnerProfileSettings';
 import JobPosts from './components/pages/home-owner/JobPosts';
+import CreateJobPost from './components/pages/home-owner/CreateJobPost';
 import OneTimeBooking from './components/pages/home-owner/OneTimeBooking';
 
 // Housekeeper Components
@@ -92,6 +93,8 @@ const App: React.FC = () => {
             <Route element={<PrivateRoute element={<HomeOwnerSidebar />} userType="homeowner" />}>
               <Route path="/dashboard" element={<HomeOwnerDashboard />} />
               <Route path="/job-posts" element={<JobPosts />} />
+              <Route path="/create-job-post" element={<CreateJobPost />} />
+              <Route path="/edit-job-post/:id" element={<CreateJobPost />} />
               <Route path="/history" element={<History />} />
               <Route path="/messages" element={<Messaging />} />
               <Route path="/profile" element={<HomeOwnerProfileSettings />} />
