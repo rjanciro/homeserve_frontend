@@ -56,7 +56,7 @@ const CreateJobPost: React.FC = () => {
           }
           
           const response = await axios.get(
-            `${import.meta.env.VITE_API_URL}/api/job-posts/${id}`,
+            `${import.meta.env.VITE_API_URL}/job-posts/${id}`,
             { headers: { Authorization: `Bearer ${token}` }}
           );
           
@@ -212,7 +212,7 @@ const CreateJobPost: React.FC = () => {
       if (isEditMode) {
         // Update existing job post
         await axios.put(
-          `${import.meta.env.VITE_API_URL}/api/job-posts/${id}`,
+          `${import.meta.env.VITE_API_URL}/job-posts/${id}`,
           jobPostData,
           { headers: { Authorization: `Bearer ${token}` }}
         );
@@ -221,7 +221,7 @@ const CreateJobPost: React.FC = () => {
       } else {
         // Create new job post
         await axios.post(
-          `${import.meta.env.VITE_API_URL}/api/job-posts`,
+          `${import.meta.env.VITE_API_URL}/job-posts`,
           jobPostData,
           { headers: { Authorization: `Bearer ${token}` }}
         );
