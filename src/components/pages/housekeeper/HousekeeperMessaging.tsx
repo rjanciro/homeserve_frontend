@@ -178,7 +178,7 @@ const ServiceProviderMessaging: React.FC = () => {
   };
   
   return (
-    <div className="flex flex-col h-[calc(100vh-73px)] overflow-hidden">
+    <div className="flex flex-col h-[calc(93vh-73px)] overflow-hidden">
       {renderConnectionStatus()}
       {error && (
         <div className="bg-red-100 text-red-800 p-2 text-center">

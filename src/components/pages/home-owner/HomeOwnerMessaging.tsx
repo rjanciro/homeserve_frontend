@@ -292,7 +292,7 @@ const HomeOwnerMessaging: React.FC = () => {
   }, [conversations]);
   
   return (
-    <div className="h-[calc(100vh-80px)] flex flex-col overflow-hidden">
+    <div className="h-[calc(93vh-80px)] flex flex-col overflow-hidden">
       {renderConnectionStatus()}
       {error && (
         <div className="bg-red-100 text-red-800 p-1 text-center text-sm">

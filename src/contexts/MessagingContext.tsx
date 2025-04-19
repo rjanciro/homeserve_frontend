@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { useWebSocket, WebSocketStatus, WebSocketMessage } from '../utils/websocket';
 import { useAuth } from '../hooks/useAuth';
 
@@ -83,6 +83,16 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
   const [hasAttemptedConversationFetch, setHasAttemptedConversationFetch] = useState(false);
   const hasFetchedConversations = React.useRef(false);
 
+  // Track last request times to prevent spamming
+  const lastRequestTime = useRef({
+    conversations: 0,
+    users: 0,
+    messages: 0
+  });
+  
+  // Minimum time between similar requests (in ms)
+  const REQUEST_THROTTLE = 5000; // 5 seconds
+
   // Connect to WebSocket when user is authenticated
   useEffect(() => {
     if (token && wsStatus === WebSocketStatus.CLOSED) {
@@ -101,8 +111,11 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
 
   // Get all conversations (memoized to prevent dependency loops)
   const getConversations = useCallback(() => {
-    if (loading) return;
+    // Throttle requests
+    const now = Date.now();
+    if (loading || (now - lastRequestTime.current.conversations < REQUEST_THROTTLE)) return;
     
+    lastRequestTime.current.conversations = now;
     setLoading(true);
     setError(null);
     
@@ -119,9 +132,11 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
 
   // Get conversation messages (memoized to prevent dependency loops)
   const getConversationMessages = useCallback((otherUserId: string) => {
-    // Don't fetch if already loading
-    if (loading) return;
+    // Throttle requests
+    const now = Date.now();
+    if (loading || (now - lastRequestTime.current.messages < REQUEST_THROTTLE)) return;
     
+    lastRequestTime.current.messages = now;
     setLoading(true);
     setError(null);
     
@@ -134,9 +149,11 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
 
   // Get all users (memoized to prevent dependency loops)
   const getUsers = useCallback(() => {
-    // Don't fetch if already loading
-    if (loading) return;
+    // Throttle requests
+    const now = Date.now();
+    if (loading || (now - lastRequestTime.current.users < REQUEST_THROTTLE)) return;
     
+    lastRequestTime.current.users = now;
     setLoading(true);
     setError(null);
     
@@ -190,7 +207,12 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
         setProcessedMessageIds(prev => new Set(prev).add(latestMessage.messageId));
       }
       
-      console.log('Processing message:', latestMessage.type);
+      // Use console.debug for common message types to reduce console spam
+      if (['conversations', 'users'].includes(latestMessage.type)) {
+        console.debug('Processing message:', latestMessage.type);
+      } else {
+        console.log('Processing message:', latestMessage.type);
+      }
       
       switch (latestMessage.type) {
         case 'auth_success':
@@ -207,14 +229,14 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
           
         case 'all_conversations':
         case 'conversations':
-          console.log(`Received ${latestMessage.conversations?.length || 0} conversations`);
+          console.debug(`Received ${latestMessage.conversations?.length || 0} conversations`);
           setConversations(latestMessage.conversations || []);
           setLoading(false);
           break;
           
         case 'all_users':
         case 'users':
-          console.log(`Received ${latestMessage.users?.length || 0} users`);
+          console.debug(`Received ${latestMessage.users?.length || 0} users`);
           setUsers(latestMessage.users || []);
           setLoading(false);
           break;

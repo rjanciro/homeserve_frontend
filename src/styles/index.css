@@ -1,11 +1,13 @@
 @import "tailwindcss";
 
 /* Prevent horizontal scrollbar */
-html, body {
+html, body, #root {
   overflow-x: hidden;
   width: 100%;
   margin: 0;
   padding: 0;
+  height: 100%;
+  overflow: hidden; /* or at least no scroll */
 }
 
 /* Scrollbar customization */
