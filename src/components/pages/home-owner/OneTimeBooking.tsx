@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaMapMarkerAlt, FaUser, FaCertificate, FaCheck, FaCalendar, FaStar, FaCalendarAlt, FaFileAlt, FaTools, FaMoneyBillWave, FaSpinner, FaTag, FaClock, FaInfoCircle, FaCommentAlt } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaUser, FaCertificate, FaCheck, FaCalendar, FaStar, FaCalendarAlt, FaFileAlt, FaTools, FaMoneyBillWave, FaSpinner, FaTag, FaClock, FaInfoCircle, FaCommentAlt, FaTimes } from 'react-icons/fa';
 import { Service } from '../../services/service.service';
 import { browseService } from '../../services/browse.service';
 import toast from 'react-hot-toast';
@@ -8,6 +8,7 @@ import HousekeeperProfileModal from '../../modals/HousekeeperProfileModal';
 import ServiceDetailsModal from '../../modals/ServiceDetailsModal';
 import BookingModal from '../../modals/BookingModal';
 import { useNavigate } from 'react-router-dom';
+import useDocumentTitle from '../../../hooks/useDocumentTitle';
 
 // Define types
 interface HousekeeperReview {
@@ -43,7 +44,50 @@ interface BookingFormData {
   housekeeperName: string;
 }
 
+// ImageModal component for displaying full-size images
+interface ImageModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  imageUrl: string;
+  altText: string;
+}
+
+const ImageModal: React.FC<ImageModalProps> = ({ isOpen, onClose, imageUrl, altText }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div 
+      className="fixed inset-0 backdrop-blur-sm bg-black/40 flex items-center justify-center z-50 p-4 animate-fadeIn"
+      onClick={onClose}
+    >
+      <div 
+        className="relative max-w-5xl w-full max-h-[90vh] animate-scaleIn" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button 
+          onClick={onClose}
+          className="absolute -top-12 right-0 text-white bg-black/30 backdrop-blur-sm hover:bg-black/50 rounded-full p-2 transition-all duration-300 hover:rotate-90"
+          aria-label="Close"
+        >
+          <FaTimes size={20} />
+        </button>
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl overflow-hidden shadow-2xl border border-white/20">
+          <img 
+            src={imageUrl} 
+            alt={altText} 
+            className="max-h-[80vh] w-auto mx-auto object-contain p-2"
+          />
+          <div className="px-4 py-3 bg-gradient-to-r from-[#133E87]/10 to-[#1a4c9e]/10 backdrop-blur-sm">
+            <p className="text-center text-gray-800 font-medium">{altText}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const OneTimeBooking: React.FC = () => {
+  useDocumentTitle('One-Time Booking');
   // Add the navigate hook for redirecting to messages
   const navigate = useNavigate();
 
@@ -55,6 +99,9 @@ const OneTimeBooking: React.FC = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [showServiceDetails, setShowServiceDetails] = useState(false);
+  // Image modal state
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<{url: string, alt: string}>({url: '', alt: ''});
   const [bookingData, setBookingData] = useState<BookingFormData>({
     selectedServiceId: '',
     date: '',
@@ -107,6 +154,13 @@ const OneTimeBooking: React.FC = () => {
     const fullUrl = `${apiBaseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
     console.log("Constructed Service Image URL:", fullUrl); // Log for debugging
     return fullUrl;
+  };
+
+  // Handle opening the image modal with full-size image
+  const handleImageClick = (imageUrl: string, altText: string) => {
+    if (!imageUrl) return;
+    setSelectedImage({ url: imageUrl, alt: altText });
+    setShowImageModal(true);
   };
 
   // Fetch real data on component mount
@@ -313,10 +367,11 @@ const OneTimeBooking: React.FC = () => {
                             <div className="absolute inset-0 bg-gray-200 animate-pulse"></div>
                             <img
                               src={serviceImageUrl} alt={service.name}
-                              className="w-full h-full object-cover relative z-10"
+                              className="w-full h-full object-cover relative z-10 cursor-pointer hover:opacity-90 transition-opacity"
                               onLoad={(e) => { (e.target as HTMLImageElement).style.opacity = '1'; }}
                               style={{ opacity: 0, transition: 'opacity 0.3s ease' }}
                               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                              onClick={() => handleImageClick(serviceImageUrl, service.name)}
                             />
                             {service.featured && (
                               <span className="absolute top-2 right-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full shadow z-20">Featured</span>
@@ -392,7 +447,7 @@ const OneTimeBooking: React.FC = () => {
                             <button
                               onClick={() => handleMessage(housekeeper)}
                               className="bg-green-500 text-white hover:bg-green-600 px-2 py-2 rounded-md font-medium text-sm flex items-center justify-center"
-                              title="Message this housekeeper"
+                              title="Message the service provider"
                             >
                               <FaCommentAlt className="mr-1" size={14} />
                               <span className="hidden sm:inline">Message</span>
@@ -400,7 +455,9 @@ const OneTimeBooking: React.FC = () => {
                             
                             <button
                               onClick={() => handleBookNow(housekeeper, service)}
-                              className="bg-gradient-to-r from-[#133E87] to-[#1a4c9e] text-white hover:from-[#0f2f66] hover:to-[#1a4c9e] px-2 py-2 rounded-md font-medium text-sm flex items-center justify-center"
+                              className="bg-[#133E87] text-white hover:bg-[#0f2f66] px-2 py-2 rounded-md font-medium text-sm flex items-center justify-center"
+                              title="Book this service"
+                              disabled={!service.isAvailable}
                             >
                               <FaCalendarAlt className="mr-1" size={14} />
                               <span className="hidden sm:inline">Book</span>
@@ -501,50 +558,54 @@ const OneTimeBooking: React.FC = () => {
         </div>
       </div>
       
-      {/* Use the imported HousekeeperProfileModal component */}
-      {selectedHousekeeper && (
-        <HousekeeperProfileModal 
-          isOpen={showProfile}
-          onClose={() => setShowProfile(false)}
-          housekeeper={selectedHousekeeper}
-          onBookService={handleBookFromProfile}
-          getProfileImageUrl={getProfileImageUrl}
-        />
-      )}
+      {/* Modals */}
+      <HousekeeperProfileModal
+        isOpen={showProfile}
+        onClose={() => setShowProfile(false)}
+        housekeeper={selectedHousekeeper || {} as Housekeeper}
+        onBookService={handleBookFromProfile}
+        onViewServiceDetails={(service) => handleSeeDetails(selectedHousekeeper!, service)}
+        getProfileImageUrl={getProfileImageUrl}
+      />
       
-      {/* New ServiceDetailsModal */}
-      {selectedHousekeeper && serviceToBook && (
-        <ServiceDetailsModal
-          isOpen={showServiceDetails}
-          onClose={() => setShowServiceDetails(false)}
-          service={serviceToBook}
-          housekeeper={{
-            id: selectedHousekeeper.id,
-            name: selectedHousekeeper.name,
-            image: selectedHousekeeper.image,
-            rating: selectedHousekeeper.rating,
-            reviewCount: selectedHousekeeper.reviewCount
-          }}
-          getProfileImageUrl={getProfileImageUrl}
-          getServiceImageUrl={getServiceImageUrl}
-          onBookService={() => {
-            setShowServiceDetails(false);
+      <ServiceDetailsModal
+        isOpen={showServiceDetails}
+        onClose={() => setShowServiceDetails(false)}
+        service={serviceToBook}
+        housekeeper={selectedHousekeeper ? {
+          id: selectedHousekeeper.id,
+          name: selectedHousekeeper.name,
+          image: selectedHousekeeper.image,
+          rating: selectedHousekeeper.rating,
+          reviewCount: selectedHousekeeper.reviewCount
+        } : null}
+        getProfileImageUrl={getProfileImageUrl}
+        getServiceImageUrl={getServiceImageUrl}
+        onBookService={() => {
+          setShowServiceDetails(false);
+          if (selectedHousekeeper && serviceToBook) {
             handleBookNow(selectedHousekeeper, serviceToBook);
-          }}
-        />
-      )}
+          }
+        }}
+      />
       
-      {/* Replace the inline booking form with BookingModal component */}
-      {showBookingForm && selectedHousekeeper && serviceToBook && (
-        <BookingModal
-          isOpen={showBookingForm}
-          onClose={() => setShowBookingForm(false)}
-          service={serviceToBook}
-          housekeeper={selectedHousekeeper}
-          getProfileImageUrl={getProfileImageUrl}
-          getServiceImageUrl={getServiceImageUrl}
-        />
-      )}
+      <BookingModal
+        isOpen={showBookingForm}
+        onClose={() => setShowBookingForm(false)}
+        onSubmit={handleSubmitBooking}
+        onChange={handleBookingChange}
+        formData={bookingData}
+        estimatedPrice={calculateEstimatedPrice()}
+        service={serviceToBook}
+        housekeeperName={selectedHousekeeper?.name || ''}
+      />
+      
+      <ImageModal 
+        isOpen={showImageModal}
+        onClose={() => setShowImageModal(false)}
+        imageUrl={selectedImage.url}
+        altText={selectedImage.alt}
+      />
     </div>
   );
 };

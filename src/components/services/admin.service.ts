@@ -1,7 +1,14 @@
 import axios from 'axios';
 import { getAdminAuthHeader } from '../utils/auth';
 
-const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/admin`;
+// Fix the API_URL to avoid double /api/ in the path
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+// If baseURL already ends with /api, use it directly; otherwise append /api
+const API_URL = baseURL.endsWith('/api') 
+  ? `${baseURL}/admin` 
+  : `${baseURL}/api/admin`;
+
+console.log('Admin API URL:', API_URL); // Add logging to debug URL formation
 
 interface VerificationParams {
   approved: boolean;
@@ -115,6 +122,9 @@ export const adminService = {
   // Update housekeeper status
   updateHousekeeperStatus: async (housekeeperId: string, data: { isActive: boolean, notes: string }) => {
     try {
+      console.log(`Updating housekeeper status at endpoint: ${API_URL}/housekeepers/status/${housekeeperId}`);
+      console.log('Data:', data);
+      
       const response = await axios.put(
         `${API_URL}/housekeepers/status/${housekeeperId}`,
         data,

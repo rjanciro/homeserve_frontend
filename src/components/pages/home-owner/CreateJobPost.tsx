@@ -11,7 +11,7 @@ const CreateJobPost: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [fetchingJob, setFetchingJob] = useState(isEditMode);
   
-  // Form state
+  // Updated form state to support new time format
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -20,6 +20,12 @@ const CreateJobPost: React.FC = () => {
     startDate: '',
     endDate: '',
     time: '',
+    startHour: '09',
+    startMinute: '00',
+    startPeriod: 'am',
+    endHour: '05',
+    endMinute: '00',
+    endPeriod: 'pm',
     days: [] as string[],
     frequency: 'weekly',
     budgetType: 'fixed',
@@ -32,6 +38,11 @@ const CreateJobPost: React.FC = () => {
   
   // Skill input state
   const [skillInput, setSkillInput] = useState('');
+  
+  // Generate time options
+  const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+  const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+  const periods = ['am', 'pm'];
   
   // Fetch job post data if in edit mode
   useEffect(() => {
@@ -51,6 +62,38 @@ const CreateJobPost: React.FC = () => {
           
           const jobPost = response.data;
           
+          // Parse existing time format (e.g., "9:00 AM - 5:00 PM")
+          let startHour = '09';
+          let startMinute = '00';
+          let startPeriod = 'am';
+          let endHour = '05';
+          let endMinute = '00';
+          let endPeriod = 'pm';
+          
+          if (jobPost.schedule?.time) {
+            const timeParts = jobPost.schedule.time.split(' - ');
+            if (timeParts.length === 2) {
+              const startTime = timeParts[0].trim();
+              const endTime = timeParts[1].trim();
+              
+              // Parse start time
+              const startMatch = startTime.match(/(\d+):(\d+)\s*(am|pm)/i);
+              if (startMatch) {
+                startHour = String(parseInt(startMatch[1], 10)).padStart(2, '0');
+                startMinute = startMatch[2];
+                startPeriod = startMatch[3].toLowerCase();
+              }
+              
+              // Parse end time
+              const endMatch = endTime.match(/(\d+):(\d+)\s*(am|pm)/i);
+              if (endMatch) {
+                endHour = String(parseInt(endMatch[1], 10)).padStart(2, '0');
+                endMinute = endMatch[2];
+                endPeriod = endMatch[3].toLowerCase();
+              }
+            }
+          }
+          
           setFormData({
             title: jobPost.title || '',
             description: jobPost.description || '',
@@ -59,6 +102,12 @@ const CreateJobPost: React.FC = () => {
             startDate: jobPost.schedule?.startDate ? new Date(jobPost.schedule.startDate).toISOString().split('T')[0] : '',
             endDate: jobPost.schedule?.endDate ? new Date(jobPost.schedule.endDate).toISOString().split('T')[0] : '',
             time: jobPost.schedule?.time || '',
+            startHour,
+            startMinute,
+            startPeriod,
+            endHour,
+            endMinute,
+            endPeriod,
             days: jobPost.schedule?.days || [],
             frequency: jobPost.schedule?.frequency || 'weekly',
             budgetType: jobPost.budget?.type || 'fixed',
@@ -134,6 +183,9 @@ const CreateJobPost: React.FC = () => {
         throw new Error('Authentication required');
       }
       
+      // Format the time from individual components
+      const formattedTime = `${formData.startHour}:${formData.startMinute} ${formData.startPeriod} - ${formData.endHour}:${formData.endMinute} ${formData.endPeriod}`;
+      
       // Format the data for the API
       const jobPostData = {
         title: formData.title,
@@ -145,7 +197,7 @@ const CreateJobPost: React.FC = () => {
           endDate: formData.endDate || undefined,
           days: formData.scheduleType === 'recurring' ? formData.days : undefined,
           frequency: formData.scheduleType === 'recurring' ? formData.frequency : undefined,
-          time: formData.time || undefined
+          time: formattedTime
         },
         budget: {
           type: formData.budgetType,
@@ -283,18 +335,82 @@ const CreateJobPost: React.FC = () => {
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87]"
                   />
                 </div>
+                
                 <div>
-                  <label htmlFor="time" className="block text-gray-700 text-sm mb-1">Time *</label>
-                  <input
-                    type="text"
-                    id="time"
-                    name="time"
-                    value={formData.time}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87]"
-                    placeholder="e.g., 9:00 AM - 5:00 PM"
-                  />
+                  <label className="block text-gray-700 text-sm mb-1">Time *</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Start Time</p>
+                      <div className="flex">
+                        <select
+                          name="startHour"
+                          value={formData.startHour}
+                          onChange={handleChange}
+                          className="w-1/3 px-2 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[#133E87] appearance-none bg-white text-center"
+                        >
+                          {hours.map(hour => (
+                            <option key={`start-h-${hour}`} value={hour}>{hour}</option>
+                          ))}
+                        </select>
+                        <select
+                          name="startMinute"
+                          value={formData.startMinute}
+                          onChange={handleChange}
+                          className="w-1/3 px-2 py-2 border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#133E87] appearance-none bg-white text-center"
+                        >
+                          {minutes.map(minute => (
+                            <option key={`start-m-${minute}`} value={minute}>{minute}</option>
+                          ))}
+                        </select>
+                        <select
+                          name="startPeriod"
+                          value={formData.startPeriod}
+                          onChange={handleChange}
+                          className="w-1/3 px-2 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-[#133E87] appearance-none bg-white text-center"
+                        >
+                          {periods.map(period => (
+                            <option key={`start-p-${period}`} value={period}>{period}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">End Time</p>
+                      <div className="flex">
+                        <select
+                          name="endHour"
+                          value={formData.endHour}
+                          onChange={handleChange}
+                          className="w-1/3 px-2 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[#133E87] appearance-none bg-white text-center"
+                        >
+                          {hours.map(hour => (
+                            <option key={`end-h-${hour}`} value={hour}>{hour}</option>
+                          ))}
+                        </select>
+                        <select
+                          name="endMinute"
+                          value={formData.endMinute}
+                          onChange={handleChange}
+                          className="w-1/3 px-2 py-2 border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#133E87] appearance-none bg-white text-center"
+                        >
+                          {minutes.map(minute => (
+                            <option key={`end-m-${minute}`} value={minute}>{minute}</option>
+                          ))}
+                        </select>
+                        <select
+                          name="endPeriod"
+                          value={formData.endPeriod}
+                          onChange={handleChange}
+                          className="w-1/3 px-2 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-[#133E87] appearance-none bg-white text-center"
+                        >
+                          {periods.map(period => (
+                            <option key={`end-p-${period}`} value={period}>{period}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -348,17 +464,80 @@ const CreateJobPost: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label htmlFor="time" className="block text-gray-700 text-sm mb-1">Time *</label>
-                    <input
-                      type="text"
-                      id="time"
-                      name="time"
-                      value={formData.time}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87]"
-                      placeholder="e.g., 9:00 AM - 5:00 PM"
-                    />
+                    <label className="block text-gray-700 text-sm mb-1">Time *</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Start Time</p>
+                        <div className="flex">
+                          <select
+                            name="startHour"
+                            value={formData.startHour}
+                            onChange={handleChange}
+                            className="w-1/3 px-2 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[#133E87] appearance-none bg-white text-center"
+                          >
+                            {hours.map(hour => (
+                              <option key={`start-h-${hour}`} value={hour}>{hour}</option>
+                            ))}
+                          </select>
+                          <select
+                            name="startMinute"
+                            value={formData.startMinute}
+                            onChange={handleChange}
+                            className="w-1/3 px-2 py-2 border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#133E87] appearance-none bg-white text-center"
+                          >
+                            {minutes.map(minute => (
+                              <option key={`start-m-${minute}`} value={minute}>{minute}</option>
+                            ))}
+                          </select>
+                          <select
+                            name="startPeriod"
+                            value={formData.startPeriod}
+                            onChange={handleChange}
+                            className="w-1/3 px-2 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-[#133E87] appearance-none bg-white text-center"
+                          >
+                            {periods.map(period => (
+                              <option key={`start-p-${period}`} value={period}>{period}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">End Time</p>
+                        <div className="flex">
+                          <select
+                            name="endHour"
+                            value={formData.endHour}
+                            onChange={handleChange}
+                            className="w-1/3 px-2 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[#133E87] appearance-none bg-white text-center"
+                          >
+                            {hours.map(hour => (
+                              <option key={`end-h-${hour}`} value={hour}>{hour}</option>
+                            ))}
+                          </select>
+                          <select
+                            name="endMinute"
+                            value={formData.endMinute}
+                            onChange={handleChange}
+                            className="w-1/3 px-2 py-2 border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#133E87] appearance-none bg-white text-center"
+                          >
+                            {minutes.map(minute => (
+                              <option key={`end-m-${minute}`} value={minute}>{minute}</option>
+                            ))}
+                          </select>
+                          <select
+                            name="endPeriod"
+                            value={formData.endPeriod}
+                            onChange={handleChange}
+                            className="w-1/3 px-2 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-[#133E87] appearance-none bg-white text-center"
+                          >
+                            {periods.map(period => (
+                              <option key={`end-p-${period}`} value={period}>{period}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

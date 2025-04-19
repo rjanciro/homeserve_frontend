@@ -10,9 +10,23 @@ interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   service: Service | null;
-  housekeeper: Housekeeper | null;
+  housekeeperName: string;
+  formData?: {
+    selectedServiceId: string;
+    date: string;
+    time: string;
+    duration: number;
+    location: string;
+    notes: string;
+    housekeeperId: string;
+    housekeeperName: string;
+  };
+  estimatedPrice?: number;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
+  onSubmit?: (e: React.FormEvent) => void;
   getProfileImageUrl?: (imagePath: string | undefined) => string;
   getServiceImageUrl?: (imagePath: string | undefined) => string | null;
+  housekeeper?: Housekeeper | null;
 }
 
 // Fix the API URL to ensure it has the correct format
@@ -22,8 +36,13 @@ const BookingModal: React.FC<BookingModalProps> = ({
   isOpen, 
   onClose, 
   service, 
-  housekeeper,
-  getProfileImageUrl
+  housekeeperName,
+  formData,
+  estimatedPrice,
+  onChange,
+  onSubmit,
+  getProfileImageUrl,
+  housekeeper
 }) => {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
@@ -38,7 +57,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
     contactPhone: ''
   });
 
-  if (!isOpen || !service || !housekeeper) return null;
+  if (!isOpen || !service) return null;
 
   // Format the phone number as it's being typed
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,17 +115,17 @@ const BookingModal: React.FC<BookingModalProps> = ({
     };
     let isValid = true;
 
-    if (!date) {
+    if (!date && !formData?.date) {
       newErrors.date = 'Please select a date';
       isValid = false;
     }
 
-    if (!time) {
+    if (!time && !formData?.time) {
       newErrors.time = 'Please select a time';
       isValid = false;
     }
 
-    if (!location) {
+    if (!location && !formData?.location) {
       newErrors.location = 'Please enter a location';
       isValid = false;
     }
@@ -133,7 +152,7 @@ const BookingModal: React.FC<BookingModalProps> = ({
     return isValid;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleDefaultSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
@@ -147,11 +166,11 @@ const BookingModal: React.FC<BookingModalProps> = ({
       // Send booking request to the backend API - simplified payload to match backend expectations
       await axios.post(`${API_URL}/api/bookings`, {
         serviceId,
-        date,
-        time,
-        location,
+        date: formData?.date || date,
+        time: formData?.time || time,
+        location: formData?.location || location,
         contactPhone,
-        notes
+        notes: formData?.notes || notes
       }, { headers: getAuthHeader() });
       
       toast.success('Booking request sent successfully!');
@@ -176,11 +195,14 @@ const BookingModal: React.FC<BookingModalProps> = ({
   
   // Get default profile image if needed
   const getDefaultProfileImage = () => {
-    if (getProfileImageUrl && housekeeper.image) {
+    if (getProfileImageUrl && housekeeper?.image) {
       return getProfileImageUrl(housekeeper.image);
     }
     return "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
   };
+
+  // Use the handler that was passed in props if available, otherwise use the local one
+  const handleSubmitForm = onSubmit || handleDefaultSubmit;
 
   return (
     <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
@@ -194,21 +216,23 @@ const BookingModal: React.FC<BookingModalProps> = ({
           </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmitForm}>
           <div className="p-6 max-h-[calc(90vh-10rem)] overflow-y-auto">
             <div className="bg-blue-50 p-4 rounded-md mb-4 border border-blue-200">
               <div className="flex items-start mb-2">
-                <img
-                  src={getDefaultProfileImage()}
-                  alt={housekeeper.name}
-                  className="w-10 h-10 rounded-full object-cover mr-3 border border-gray-200"
-                  onError={(e) => { (e.target as HTMLImageElement).src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"; }}
-                />
+                {housekeeper && (
+                  <img
+                    src={getDefaultProfileImage()}
+                    alt={housekeeper.name}
+                    className="w-10 h-10 rounded-full object-cover mr-3 border border-gray-200"
+                    onError={(e) => { (e.target as HTMLImageElement).src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"; }}
+                  />
+                )}
                 <div>
                   <p className="font-medium text-blue-800">{service.name}</p>
-                  <p className="text-sm text-blue-700">By: {housekeeper.name}</p>
+                  <p className="text-sm text-blue-700">By: {housekeeperName || (housekeeper?.name || 'Service Provider')}</p>
                   <p className="text-sm text-blue-700">{service.category} • {service.estimatedCompletionTime}</p>
-                  <p className="text-lg font-semibold text-blue-900 mt-1">₱{service.price}</p>
+                  <p className="text-lg font-semibold text-blue-900 mt-1">₱{estimatedPrice || service.price}</p>
                 </div>
               </div>
             </div>
@@ -221,8 +245,9 @@ const BookingModal: React.FC<BookingModalProps> = ({
                 </label>
                 <input
                   type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  name="date"
+                  value={formData?.date || date}
+                  onChange={onChange || ((e) => setDate(e.target.value))}
                   min={today}
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87] ${
                     errors.date ? 'border-red-500' : 'border-gray-300'
@@ -238,8 +263,9 @@ const BookingModal: React.FC<BookingModalProps> = ({
                 </label>
                 <input
                   type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
+                  name="time"
+                  value={formData?.time || time}
+                  onChange={onChange || ((e) => setTime(e.target.value))}
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87] ${
                     errors.time ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -249,16 +275,20 @@ const BookingModal: React.FC<BookingModalProps> = ({
               </div>
             </div>
             
+            {/* Continue with the rest of the form, adapting each input to use either formData or local state */}
+            
+            {/* Location input */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <FaMapMarkerAlt className="inline mr-2 text-blue-500" />
-                Your Location*
+                Service Location*
               </label>
               <input
                 type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="Your full address for the service"
+                name="location"
+                value={formData?.location || location}
+                onChange={onChange || ((e) => setLocation(e.target.value))}
+                placeholder="Enter the complete address"
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87] ${
                   errors.location ? 'border-red-500' : 'border-gray-300'
                 }`}
@@ -267,10 +297,11 @@ const BookingModal: React.FC<BookingModalProps> = ({
               {errors.location && <p className="mt-1 text-xs text-red-500">{errors.location}</p>}
             </div>
             
+            {/* Contact Phone */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <FaPhone className="inline mr-2 text-blue-500" />
-                Contact Phone Number*
+                Contact Number*
               </label>
               <input
                 type="tel"
@@ -286,35 +317,33 @@ const BookingModal: React.FC<BookingModalProps> = ({
               <p className="mt-1 text-xs text-gray-500">Format: 09XX XXX XXXX or +63 9XX XXX XXXX</p>
             </div>
             
+            {/* Notes textarea */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 <FaCommentAlt className="inline mr-2 text-blue-500" />
-                Notes (Optional)
+                Special Instructions (Optional)
               </label>
               <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                name="notes"
+                value={formData?.notes || notes}
+                onChange={onChange || ((e) => setNotes(e.target.value))}
                 rows={3}
+                placeholder="Any special instructions or requests..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#133E87]"
-                placeholder="Special instructions, e.g., 'Focus on the kitchen', 'We have a friendly dog'"
               ></textarea>
             </div>
           </div>
           
-          <div className="p-4 border-t border-gray-200 bg-gray-50">
-            <div className="flex justify-between items-center font-medium mb-2">
-              <span>Total Price:</span>
-              <span className="text-xl text-[#133E87]">₱{service.price}</span>
-            </div>
-            <button 
-              type="submit" 
-              className="w-full bg-[#133E87] text-white py-2 rounded-lg hover:bg-[#0f2f66] font-semibold flex items-center justify-center"
+          <div className="p-6 bg-gray-50 border-t border-gray-200">
+            <button
+              type="submit"
               disabled={isSubmitting}
+              className="w-full bg-[#133E87] text-white font-medium py-3 px-4 rounded-md hover:bg-[#0f2f66] transition-colors focus:outline-none focus:ring-2 focus:ring-[#133E87] focus:ring-opacity-50 disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {isSubmitting ? (
                 <>
                   <FaSpinner className="animate-spin mr-2" />
-                  Processing...
+                  Submitting...
                 </>
               ) : (
                 'Confirm Booking'

@@ -116,7 +116,7 @@ const mockJobPosts: JobPost[] = [
 ];
 
 const HomeOwnerDashboard: React.FC = () => {
-  useDocumentTitle('Dashboard | HomeServe');
+  useDocumentTitle('Dashboard');
   
   const [user, setUser] = useState<User | null>(null);
   const [activeBookings, setActiveBookings] = useState<Booking[]>([]);

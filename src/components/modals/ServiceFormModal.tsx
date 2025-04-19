@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FaSpinner, FaTimes } from 'react-icons/fa';
+import React, { useState, useEffect, useRef } from 'react';
+import { FaSpinner, FaTimes, FaClock } from 'react-icons/fa';
 import { Service } from '../services/service.service';
 
 // Define the props for the modal
@@ -27,6 +27,14 @@ const serviceCategories = [
 // Only Fixed pricing
 const pricingTypes = ['Fixed'];
 
+// Days of the week
+const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+// Time options
+const hours = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+const periods = ['am', 'pm'];
+
 const ServiceFormModal: React.FC<ServiceFormModalProps> = ({ 
   isOpen, 
   onClose, 
@@ -34,7 +42,7 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
   onSave,
   submitting 
 }) => {
-  // Updated state to include tags
+  // Updated state to include formatted time components
   const [formData, setFormData] = useState({
     name: '', // This will be the "Custom Service Title"
     category: '',
@@ -49,8 +57,12 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
       friday: false,
       saturday: false,
       sunday: false,
-      startTime: '09:00',
-      endTime: '17:00'
+      startHour: '09',
+      startMinute: '00',
+      startPeriod: 'am',
+      endHour: '05',
+      endMinute: '00',
+      endPeriod: 'pm'
     },
     estimatedCompletionTime: '',
     pricingType: 'Fixed' as 'Fixed',
@@ -60,9 +72,6 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
     contactNumber: ''
   });
   
-  // Remove customCategory state as it's handled by 'Other Services' now
-  // const [customCategory, setCustomCategory] = useState(''); 
-
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
@@ -70,13 +79,55 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       if (currentService) {
+        // Parse existing time format (e.g., "09:00" and "17:00")
+        let startHour = '09';
+        let startMinute = '00';
+        let startPeriod = 'am';
+        let endHour = '05';
+        let endMinute = '00';
+        let endPeriod = 'pm';
+        
+        if (currentService.availability?.startTime) {
+          const startMatch = currentService.availability.startTime.match(/(\d+):(\d+)/);
+          if (startMatch) {
+            const hour = parseInt(startMatch[1], 10);
+            startHour = String(hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour)).padStart(2, '0');
+            startMinute = startMatch[2];
+            startPeriod = hour >= 12 ? 'pm' : 'am';
+          }
+        }
+        
+        if (currentService.availability?.endTime) {
+          const endMatch = currentService.availability.endTime.match(/(\d+):(\d+)/);
+          if (endMatch) {
+            const hour = parseInt(endMatch[1], 10);
+            endHour = String(hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour)).padStart(2, '0');
+            endMinute = endMatch[2];
+            endPeriod = hour >= 12 ? 'pm' : 'am';
+          }
+        }
+        
         setFormData({
           name: currentService.name, // Service Title
           category: currentService.category,
           description: currentService.description,
           tags: currentService.tags || '', // Set tags, default to empty string
           serviceLocation: currentService.serviceLocation,
-          availability: currentService.availability,
+          availability: {
+            monday: currentService.availability.monday,
+            tuesday: currentService.availability.tuesday,
+            wednesday: currentService.availability.wednesday,
+            thursday: currentService.availability.thursday,
+            friday: currentService.availability.friday,
+            saturday: currentService.availability.saturday,
+            sunday: currentService.availability.sunday,
+            startHour,
+            startMinute,
+            startPeriod,
+            endHour,
+            endMinute,
+            endPeriod
+          },
           estimatedCompletionTime: currentService.estimatedCompletionTime,
           pricingType: 'Fixed',
           price: currentService.price,
@@ -90,9 +141,6 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
         } else {
           setImagePreview(null);
         }
-        
-        // No need for custom category logic here anymore if we use 'Other Services'
-        
       } else {
         // Reset form for new service
         setFormData({
@@ -109,8 +157,12 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
             friday: false,
             saturday: false,
             sunday: false,
-            startTime: '09:00',
-            endTime: '17:00'
+            startHour: '09',
+            startMinute: '00',
+            startPeriod: 'am',
+            endHour: '05',
+            endMinute: '00',
+            endPeriod: 'pm'
           },
           estimatedCompletionTime: '',
           pricingType: 'Fixed',
@@ -119,7 +171,6 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
           contactNumber: '',
           image: ''
         });
-        // setCustomCategory(''); // Remove this
         setImagePreview(null);
       }
       // Reset file selection when modal opens
@@ -154,7 +205,7 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
       ...formData,
       availability: {
         ...formData.availability,
-        [day]: !formData.availability[day as keyof typeof formData.availability]
+        [day.toLowerCase()]: !formData.availability[day.toLowerCase() as keyof typeof formData.availability]
       }
     });
   };
@@ -172,15 +223,38 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Directly use formData since customCategory is removed
+    // Create a copy of form data for submission
     const submissionData = { ...formData }; 
+    
+    // Format the time from individual components to 24-hour format
+    const formatTime = (hour: string, minute: string, period: string) => {
+      let hourNum = parseInt(hour, 10);
+      if (period === 'pm' && hourNum < 12) hourNum += 12;
+      if (period === 'am' && hourNum === 12) hourNum = 0;
+      return `${String(hourNum).padStart(2, '0')}:${minute}`;
+    };
+    
+    // Create a simplified availability object with formatted time
+    const availabilityData = {
+      ...submissionData.availability,
+      startTime: formatTime(
+        submissionData.availability.startHour,
+        submissionData.availability.startMinute,
+        submissionData.availability.startPeriod
+      ),
+      endTime: formatTime(
+        submissionData.availability.endHour,
+        submissionData.availability.endMinute,
+        submissionData.availability.endPeriod
+      )
+    };
     
     const formDataWithFile = new FormData();
     
     // Add all form fields, including tags
     Object.entries(submissionData).forEach(([key, value]) => {
       if (key === 'availability') {
-        formDataWithFile.append(key, JSON.stringify(value));
+        formDataWithFile.append(key, JSON.stringify(availabilityData));
       } else if (value !== null && value !== undefined) { // Ensure value is not null/undefined
         formDataWithFile.append(key, value.toString());
       }
@@ -307,46 +381,100 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
             {/* Availability Section */}
             <div>
               <label className="block text-gray-700 text-sm font-medium mb-1">Availability*</label>
-              <div className="grid grid-cols-7 gap-2 mb-3">
-                {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => (
-                  <div key={day} className="flex flex-col items-center">
-                    <label className="text-xs text-gray-600 capitalize mb-1">{day.slice(0, 3)}</label>
+              
+              {/* Days of Week */}
+              <div className="mb-3">
+                <label className="block text-gray-700 text-sm mb-2">Days of Week *</label>
+                <div className="flex flex-wrap gap-2">
+                  {daysOfWeek.map(day => (
                     <button
+                      key={day}
                       type="button"
                       onClick={() => handleAvailabilityChange(day)}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm transition-colors ${
-                        formData.availability[day as keyof typeof formData.availability]
-                          ? 'bg-blue-500 text-white hover:bg-blue-600'
-                          : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                        formData.availability[day.toLowerCase() as keyof typeof formData.availability]
+                          ? 'bg-blue-500 text-white shadow-md'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
                       }`}
                       disabled={submitting}
                     >
-                      {formData.availability[day as keyof typeof formData.availability] ? 'On' : 'Off'}
+                      {day}
                     </button>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              {/* Time Selection */}
+              <div className="grid grid-cols-2 gap-4 mb-3">
                 <div>
-                  <label className="block text-gray-700 text-xs mb-1">Start Time</label>
-                  <input
-                    type="time"
-                    value={formData.availability.startTime}
-                    onChange={(e) => handleTimeChange('startTime', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    disabled={submitting}
-                  />
+                  <label className="block text-gray-700 text-sm mb-2">Start Time</label>
+                  <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+                    <select
+                      value={formData.availability.startHour}
+                      onChange={(e) => handleTimeChange('startHour', e.target.value)}
+                      className="w-1/3 py-2 px-3 bg-white text-center appearance-none border-r border-gray-300 focus:outline-none"
+                      disabled={submitting}
+                    >
+                      {hours.map(hour => (
+                        <option key={`start-hour-${hour}`} value={hour}>{hour}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={formData.availability.startMinute}
+                      onChange={(e) => handleTimeChange('startMinute', e.target.value)}
+                      className="w-1/3 py-2 px-3 bg-white text-center appearance-none border-r border-gray-300 focus:outline-none"
+                      disabled={submitting}
+                    >
+                      {minutes.map(minute => (
+                        <option key={`start-minute-${minute}`} value={minute}>{minute}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={formData.availability.startPeriod}
+                      onChange={(e) => handleTimeChange('startPeriod', e.target.value)}
+                      className="w-1/3 py-2 px-3 bg-white text-center appearance-none focus:outline-none"
+                      disabled={submitting}
+                    >
+                      {periods.map(period => (
+                        <option key={`start-period-${period}`} value={period}>{period}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-gray-700 text-xs mb-1">End Time</label>
-                  <input
-                    type="time"
-                    value={formData.availability.endTime}
-                    onChange={(e) => handleTimeChange('endTime', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    disabled={submitting}
-                  />
+                  <label className="block text-gray-700 text-sm mb-2">End Time</label>
+                  <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+                    <select
+                      value={formData.availability.endHour}
+                      onChange={(e) => handleTimeChange('endHour', e.target.value)}
+                      className="w-1/3 py-2 px-3 bg-white text-center appearance-none border-r border-gray-300 focus:outline-none"
+                      disabled={submitting}
+                    >
+                      {hours.map(hour => (
+                        <option key={`end-hour-${hour}`} value={hour}>{hour}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={formData.availability.endMinute}
+                      onChange={(e) => handleTimeChange('endMinute', e.target.value)}
+                      className="w-1/3 py-2 px-3 bg-white text-center appearance-none border-r border-gray-300 focus:outline-none"
+                      disabled={submitting}
+                    >
+                      {minutes.map(minute => (
+                        <option key={`end-minute-${minute}`} value={minute}>{minute}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={formData.availability.endPeriod}
+                      onChange={(e) => handleTimeChange('endPeriod', e.target.value)}
+                      className="w-1/3 py-2 px-3 bg-white text-center appearance-none focus:outline-none"
+                      disabled={submitting}
+                    >
+                      {periods.map(period => (
+                        <option key={`end-period-${period}`} value={period}>{period}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>

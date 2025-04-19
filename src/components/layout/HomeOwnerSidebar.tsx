@@ -64,8 +64,31 @@ const HomeOwnerSidebar: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Fixed Top Navigation Bar */}
+      <header className="bg-white h-[73px] border-b border-gray-200 fixed top-0 left-0 right-0 z-20 shadow-sm transition-all duration-300" style={{ left: isCollapsed ? '4rem' : '16rem' }}>
+        <div className="h-full flex justify-end items-center px-6">
+          <div className="flex items-center space-x-4">
+            <img
+              src={user?.profileImage 
+                ? profileService.getFullImageUrl(user.profileImage) 
+                : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"}
+              alt="Profile"
+              className="w-10 h-10 rounded-full ring-2 ring-[#133E87]"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
+                console.log("Failed to load image:", user?.profileImage);
+              }}
+            />
+            <span className="font-medium text-gray-700">
+              {user ? `${user.firstName} ${user.lastName}` : ''}
+            </span>
+          </div>
+        </div>
+      </header>
+
       {/* Sidebar */}
-      <div className={`bg-white border-r border-gray-200 h-screen fixed left-0 transition-all duration-500 ease-in-out flex flex-col ${
+      <div className={`bg-white border-r border-gray-200 h-screen fixed top-0 left-0 transition-all duration-500 ease-in-out flex flex-col z-30 ${
         isCollapsed ? 'w-16' : 'w-64'
       }`}>
         {/* Logo and toggle button */}
@@ -84,7 +107,7 @@ const HomeOwnerSidebar: React.FC = () => {
         </div>
 
         {/* Navigation */}
-        <nav className="pt-6 pb-2 flex-1">
+        <nav className="pt-6 pb-2 flex-1 overflow-y-auto">
           <ul className="space-y-1">
             {getNavItems().map(({ path, icon: Icon, label }) => (
               <li key={path}>
@@ -118,28 +141,7 @@ const HomeOwnerSidebar: React.FC = () => {
       </div>
 
       {/* Main content */}
-      <div className={`transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
-        <header className="bg-white h-[73px] border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-          <div className="h-full flex justify-end items-center px-6">
-            <div className="flex items-center space-x-4">
-              <img
-                src={user?.profileImage 
-                  ? profileService.getFullImageUrl(user.profileImage) 
-                  : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"}
-                alt="Profile"
-                className="w-10 h-10 rounded-full ring-2 ring-[#133E87]"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
-                  console.log("Failed to load image:", user?.profileImage);
-                }}
-              />
-              <span className="font-medium text-gray-700">
-                {user ? `${user.firstName} ${user.lastName}` : ''}
-              </span>
-            </div>
-          </div>
-        </header>
+      <div className={`transition-all duration-300 pt-[73px] ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
         <main className="p-6">
           <Outlet />
         </main>

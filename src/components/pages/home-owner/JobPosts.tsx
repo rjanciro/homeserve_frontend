@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import CreateJobPostModal from '../../modals/CreateJobPostModal';
+import useDocumentTitle  from '../../../hooks/useDocumentTitle';
 
 // Define types
 type JobStatus = 'active' | 'paused' | 'hired' | 'archived';
@@ -79,6 +80,8 @@ interface CreateJobPostData {
 }
 
 const JobPosts: React.FC = () => {
+  useDocumentTitle('Job Posts');
+
   const [activeFilter, setActiveFilter] = useState<JobStatus>('active');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [jobPosts, setJobPosts] = useState<JobPost[]>([]);

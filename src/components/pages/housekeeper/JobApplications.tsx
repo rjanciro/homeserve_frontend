@@ -184,7 +184,7 @@ const JobApplications: React.FC = () => {
         ...prev,
           [selectedJob.id]: newApplication
       }));
-      
+        
         setShowApplyModal(false);
       setSelectedJob(null);
       toast.success('Application submitted successfully');

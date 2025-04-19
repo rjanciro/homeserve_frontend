@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaUser, FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaCheck, FaShieldAlt, FaCreditCard, FaBell, FaCalendarAlt, FaLock, FaQuestionCircle, FaCamera, FaSpinner, FaEdit, FaBriefcase, FaTools } from 'react-icons/fa';
+import { FaUser, FaLock, FaQuestionCircle, FaCamera, FaSpinner, FaEdit, FaMapMarkerAlt, FaEnvelope, FaPhone, FaHome, FaCity, FaMapPin, FaBriefcase, FaTools } from 'react-icons/fa';
 import useDocumentTitle from '../../../hooks/useDocumentTitle';
-import Swal from 'sweetalert2';
 import toast from 'react-hot-toast';
 import { profileService } from '../../services/profile.service';
 import { authService } from '../../services/auth.service';
@@ -10,9 +9,6 @@ import ChangePasswordModal from '../../modals/ChangePasswordModal';
 import EditProfileModal, { EditProfileModalProps } from '../../modals/EditProfileModal';
 import { User } from '../../../types';
 import axios from 'axios';
-
-// Define a type for notification keys
-type NotificationType = 'email' | 'push' | 'sms';
 
 // Define the housekeeper profile data structure
 interface HousekeeperProfileData {
@@ -26,8 +22,8 @@ interface HousekeeperProfileData {
   cityMunicipality: string;
   province: string;
   zipCode: string;
-  experience?: string;  // Make optional
-  specialties?: string; // Make optional
+  experience?: string;
+  specialties?: string;
   bio: string;
 }
 
@@ -36,7 +32,6 @@ const HousekeeperProfileSettings: React.FC = () => {
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('profile');
   
   // State for profile data
   const [formData, setFormData] = useState<HousekeeperProfileData>({
@@ -53,12 +48,6 @@ const HousekeeperProfileSettings: React.FC = () => {
     experience: '',
     specialties: '',
     bio: ''
-  });
-  
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: true,
-    sms: false
   });
 
   // State for profile image
@@ -135,13 +124,6 @@ const HousekeeperProfileSettings: React.FC = () => {
     fetchProfile();
   }, []);
 
-  const handleNotificationChange = (type: NotificationType) => {
-    setNotifications({
-      ...notifications,
-      [type]: !notifications[type]
-    });
-  };
-
   // Open file picker when profile image is clicked
   const handleProfileImageClick = () => {
     fileInputRef.current?.click();
@@ -150,7 +132,17 @@ const HousekeeperProfileSettings: React.FC = () => {
   // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      
+      // Check file size (10MB limit)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (file.size > maxSize) {
+        toast.error('File is too large. Maximum size is 10MB.');
+        e.target.value = ''; // Clear the input
+        return;
+      }
+      
+      setSelectedFile(file);
       
       // Show preview of selected image
       const reader = new FileReader();
@@ -159,22 +151,18 @@ const HousekeeperProfileSettings: React.FC = () => {
           setProfileImage(event.target.result as string);
         }
       };
-      reader.readAsDataURL(e.target.files[0]);
-      
-      // Remove auto-upload - let user confirm with button instead
-      // handleImageUpload(e.target.files[0]);
+      reader.readAsDataURL(file);
     }
   };
 
   // Handle image upload
-  const handleImageUpload = async (file: File) => {
-    if (!file) return;
+  const handleImageUpload = async () => {
+    if (!selectedFile) return;
     
     setIsUploading(true);
     
     try {
-      const response = await profileService.uploadProfileImage(file);
-      console.log('Upload successful:', response);
+      const response = await profileService.uploadProfileImage(selectedFile);
       
       // Update profileImage URL in state
       if (response.imageUrl) {
@@ -202,19 +190,20 @@ const HousekeeperProfileSettings: React.FC = () => {
     }
   };
 
-  const handleUpdatePassword = () => {
+  const handleChangePasswordClick = () => {
     setIsPasswordModalOpen(true);
+  };
+
+  const handleEditProfileClick = () => {
+    setIsEditProfileModalOpen(true);
   };
 
   // Handle profile update from modal
   const handleProfileUpdate = async (updatedData: EditProfileModalProps['formData']) => {
     try {
-      console.log('About to update profile with data:', updatedData);
-      
-      // Ensure all address fields are included
+      // Ensure all fields are included
       const dataToUpdate = {
         ...updatedData,
-        // Make sure these are explicitly included if they might be undefined
         houseNumber: updatedData.houseNumber || '',
         streetName: updatedData.streetName || '',
         barangay: updatedData.barangay || '',
@@ -226,7 +215,6 @@ const HousekeeperProfileSettings: React.FC = () => {
       };
       
       const response = await profileService.updateProfile(dataToUpdate);
-      console.log('Update successful, response:', response);
       
       // Update local state with the new data
       setFormData({
@@ -247,362 +235,349 @@ const HousekeeperProfileSettings: React.FC = () => {
       }
       
       toast.success('Profile updated successfully');
-      
-      // Close the modal
-      setIsEditProfileModalOpen(false);
+      return Promise.resolve();
     } catch (error) {
       console.error('Update error:', error);
       
       if (axios.isAxiosError(error)) {
-        console.error('Error response:', error.response?.data);
         toast.error(`Failed to update profile: ${error.response?.data?.message || error.message || 'Unknown error'}`);
       } else {
         toast.error(`Failed to update profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
+      return Promise.reject(error);
     }
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <FaSpinner className="text-green-600 text-3xl animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full px-4 py-8">
-      <h1 className="text-2xl font-bold mb-8 text-left">Profile Settings</h1>
-      
-      {/* Profile Image Section */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8 transition-all hover:shadow-lg">
-        <h2 className="text-xl font-semibold mb-6 text-left">Profile Image</h2>
-        
-        <div className="flex flex-col items-start">
-          <div className="relative mb-4">
-            <div 
-              className="w-28 h-28 rounded-full overflow-hidden border-4 border-green-500/20 bg-gray-100 flex items-center justify-center cursor-pointer group transition-transform hover:scale-105"
-              onClick={handleProfileImageClick}
-            >
-              {profileImage ? (
-                <img 
-                  src={profileImage} 
-                  alt="Profile" 
-                  className="w-full h-full object-cover"
+    <div className="w-full text-left max-w-5xl mx-auto">
+      <header className="relative mb-10">
+        {/* Profile section with decorative background and card-like design */}
+        <div className="bg-gradient-to-r from-[#f2f9f2] to-[#e5f5e5] rounded-xl shadow-sm border border-gray-100 p-8 relative overflow-hidden">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full transform translate-x-16 -translate-y-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-green-500/5 rounded-full transform -translate-x-12 translate-y-12"></div>
+          <div className="absolute top-1/2 left-1/4 w-8 h-8 bg-green-500/10 rounded-full"></div>
+          
+          <div className="flex flex-col md:flex-row items-center">
+            {/* Profile picture section */}
+            <div className="flex flex-col items-center mb-6 md:mb-0 md:mr-8 relative z-10">
+              <div className="relative group transition-all duration-300 animate-scaleIn">
+                <div 
+                  className="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-lg cursor-pointer group-hover:border-green-500 transition-all duration-300"
+                  onClick={handleProfileImageClick}
+                >
+                  <img 
+                    src={profileImage || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
+                    }}
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                    <div className="bg-white/90 p-2 rounded-full transform scale-0 group-hover:scale-100 transition-transform duration-300">
+                      <FaCamera className="text-green-600 text-xl" />
+                    </div>
+                  </div>
+                </div>
+                
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden"
+                  accept="image/*"
                 />
-              ) : (
-                <FaUser className="text-gray-400 text-5xl" />
-              )}
-              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
-                <FaCamera className="text-white text-2xl" />
+                
+                {/* Confirm upload button repositioned */}
+                {selectedFile && !isUploading && (
+                  <div className="absolute -bottom-14 left-1/2 transform -translate-x-1/2 w-full flex justify-center">
+                    <button
+                      onClick={handleImageUpload}
+                      className="px-2 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full hover:shadow-lg transition-all duration-300 flex items-center animate-fadeIn"
+                    >
+                      <FaCamera className="mr-2" />
+                      Confirm Upload
+                    </button>
+                  </div>
+                )}
               </div>
-              {isUploading && (
-                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                  <FaSpinner className="text-white text-2xl animate-spin" />
-                </div>
-              )}
+              
+              {/* Upload status indicators - only keep loading indicator */}
+              <div className="mt-2 h-8 flex items-center justify-center">
+                {isUploading && (
+                  <div className="flex items-center justify-center text-green-600 bg-white px-4 py-2 rounded-full shadow animate-pulse">
+                    <FaSpinner className="animate-spin mr-2" />
+                    <span>Uploading...</span>
+                  </div>
+                )}
+              </div>
             </div>
-            <input 
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept="image/*"
-              onChange={handleFileChange}
-            />
-          </div>
-          <p className="text-sm text-gray-500 mb-4 text-left">
-            Click on the image to upload a new profile picture. Max size: 5MB.
-          </p>
-        </div>
-      </div>
-      
-      {/* Profile Image Preview Section */}
-      {selectedFile && (
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-6 text-left">Profile Image Preview</h2>
-          <div className="flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-green-500/20 bg-gray-100 mb-4">
-              <img 
-                src={profileImage} 
-                alt="Profile Preview" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <button
-              onClick={() => handleImageUpload(selectedFile)}
-              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors flex items-center"
-              disabled={isUploading}
-            >
-              {isUploading ? (
-                <span className="flex items-center">
-                  <FaSpinner className="animate-spin mr-2" /> Uploading...
+            
+            {/* User info summary section */}
+            <div className="flex flex-col items-center md:items-start md:ml-4 relative z-10">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-2">{formData.firstName} {formData.lastName}</h2>
+              <p className="text-green-600 mb-3 flex items-center">
+                <FaEnvelope className="mr-2" /> {formData.email}
+              </p>
+              <div className="flex space-x-3 mb-2">
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  Housekeeper
                 </span>
-              ) : (
-                <span className="flex items-center">
-                  <FaCamera className="mr-2" /> Upload Image
-                </span>
-              )}
-            </button>
+                {user?.isEmailVerified && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Verified Account
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-gray-500 mb-4">Click on profile image to upload a new photo. Max size: 10MB.</p>
+              <button 
+                className="px-4 py-2 bg-white text-green-600 border border-green-600 rounded-full hover:bg-green-600 hover:text-white transition-all duration-300 flex items-center shadow-sm"
+                onClick={handleEditProfileClick}
+              >
+                <FaEdit className="mr-2" />
+                Edit Profile
+              </button>
+            </div>
           </div>
         </div>
-      )}
+      </header>
       
-      {/* Profile Information Section */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8 transition-all hover:shadow-lg">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center">
-            <FaUser className="text-green-600 mr-2" />
-            <h2 className="text-xl font-semibold">Personal Information</h2>
-          </div>
-          <button 
-            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-all flex items-center gap-2 shadow-sm hover:shadow"
-            onClick={() => setIsEditProfileModalOpen(true)}
-          >
-            <FaEdit /> Edit Profile
-          </button>
-        </div>
-        
-        {loading ? (
-          <div className="flex justify-center items-center h-48">
-            <FaSpinner className="text-green-500 text-3xl animate-spin" />
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
-                  {formData.firstName}
-                </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left column - Personal and contact info */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Personal Information Section */}
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow duration-300">
+            <div className="flex items-center mb-6">
+              <div className="p-2 rounded-full bg-green-500/10 mr-3">
+                <FaUser className="text-green-600 text-xl" />
               </div>
-              <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
-                  {formData.lastName}
-                </div>
-              </div>
+              <h2 className="text-xl font-semibold text-gray-800">Personal Information</h2>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
-                  {formData.email}
+            <div className="space-y-6">
+              {/* Name Information */}
+              <div>
+                <h3 className="font-medium mb-3 text-gray-700 text-left border-b border-gray-100 pb-2">Name Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InfoItem 
+                    label="First Name" 
+                    value={formData.firstName} 
+                    icon={<FaUser className="text-green-600" />} 
+                  />
+                  <InfoItem 
+                    label="Last Name" 
+                    value={formData.lastName} 
+                    icon={<FaUser className="text-green-600" />} 
+                  />
                 </div>
               </div>
-              <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
-                  {formData.phone || 'Not provided'}
+              
+              {/* Contact Information */}
+              <div>
+                <h3 className="font-medium mb-3 text-gray-700 text-left border-b border-gray-100 pb-2">Contact Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InfoItem 
+                    label="Email" 
+                    value={formData.email} 
+                    icon={<FaEnvelope className="text-green-600" />}
+                    badge={user?.isEmailVerified ? {
+                      text: "Verified",
+                      color: "green"
+                    } : {
+                      text: "Not Verified",
+                      color: "yellow"
+                    }}
+                  />
+                  <InfoItem 
+                    label="Phone Number" 
+                    value={formData.phone} 
+                    icon={<FaPhone className="text-green-600" />} 
+                  />
                 </div>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                  <FaBriefcase className="mr-2 text-green-600" /> Experience
-                </label>
-                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner min-h-[50px]">
-                  {formData.experience ? (
-                    <div className="flex flex-wrap gap-2">
-                      {formData.experience.split(',').map((tag, index) => (
-                        tag.trim() && (
-                          <span key={index} className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full inline-block">
-                            {tag.trim()}
-                          </span>
-                        )
-                      ))}
+              
+              {/* Professional Information */}
+              <div>
+                <h3 className="font-medium mb-3 text-gray-700 text-left border-b border-gray-100 pb-2">Professional Information</h3>
+                <div className="space-y-4">
+                  <div className="text-left">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Experience</label>
+                    <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-white transition-colors flex flex-wrap gap-2">
+                      {formData.experience ? (
+                        formData.experience.split(',').map((exp, index) => (
+                          exp.trim() && (
+                            <span key={index} className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full inline-block">
+                              {exp.trim()}
+                            </span>
+                          )
+                        ))
+                      ) : (
+                        <span className="text-gray-500">Not provided</span>
+                      )}
                     </div>
-                  ) : (
-                    'Not provided'
-                  )}
-                </div>
-              </div>
-              <div className="text-left">
-                <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
-                  <FaTools className="mr-2 text-green-600" /> Specialties
-                </label>
-                <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner min-h-[50px]">
-                  {formData.specialties ? (
-                    <div className="flex flex-wrap gap-2">
-                      {formData.specialties.split(',').map((tag, index) => (
-                        tag.trim() && (
-                          <span key={index} className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full inline-block">
-                            {tag.trim()}
-                          </span>
-                        )
-                      ))}
+                  </div>
+                  
+                  <div className="text-left">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Specialties</label>
+                    <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-white transition-colors flex flex-wrap gap-2">
+                      {formData.specialties ? (
+                        formData.specialties.split(',').map((specialty, index) => (
+                          specialty.trim() && (
+                            <span key={index} className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full inline-block">
+                              {specialty.trim()}
+                            </span>
+                          )
+                        ))
+                      ) : (
+                        <span className="text-gray-500">Not provided</span>
+                      )}
                     </div>
-                  ) : (
-                    'Not provided'
-                  )}
-                </div>
-              </div>
-            </div>
-            
-            <div className="text-left">
-              <h3 className="font-medium mb-2 text-gray-700">Address Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">House/Building Number</label>
-                  <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
-                    {formData.houseNumber || 'Not provided'}
+                  </div>
+                  
+                  <div className="text-left">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                    <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-white transition-colors min-h-[100px] whitespace-pre-wrap">
+                      {formData.bio || 'No bio provided'}
+                    </div>
                   </div>
                 </div>
-                <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Street Name</label>
-                  <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
-                    {formData.streetName || 'Not provided'}
+              </div>
+            </div>
+          </div>
+          
+          {/* Address Information */}
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow duration-300">
+            <div className="flex items-center mb-6">
+              <div className="p-2 rounded-full bg-green-500/10 mr-3">
+                <FaMapMarkerAlt className="text-green-600 text-xl" />
+              </div>
+              <h2 className="text-xl font-semibold text-gray-800">Address Information</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <InfoItem 
+                label="House/Building Number" 
+                value={formData.houseNumber} 
+                icon={<FaHome className="text-green-600" />} 
+              />
+              <InfoItem 
+                label="Street Name" 
+                value={formData.streetName} 
+                icon={<FaMapPin className="text-green-600" />} 
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <InfoItem 
+                label="Barangay" 
+                value={formData.barangay} 
+                icon={<FaMapMarkerAlt className="text-green-600" />} 
+              />
+              <InfoItem 
+                label="City/Municipality" 
+                value={formData.cityMunicipality} 
+                icon={<FaCity className="text-green-600" />} 
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InfoItem 
+                label="Province" 
+                value={formData.province} 
+                icon={<FaMapMarkerAlt className="text-green-600" />} 
+              />
+              <InfoItem 
+                label="ZIP Code" 
+                value={formData.zipCode} 
+                icon={<FaMapMarkerAlt className="text-green-600" />} 
+              />
+            </div>
+          </div>
+        </div>
+        
+        {/* Right column - Security section */}
+        <div className="lg:col-span-1">
+          {/* Security Section */}
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow duration-300">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="p-3 rounded-full bg-green-500/10">
+                <FaLock className="text-green-600 text-xl" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Security</h2>
+                <p className="text-sm text-gray-600">Manage your security settings</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="p-4 bg-[#f2f9f2] rounded-lg">
+                <div className="flex items-start">
+                  <FaQuestionCircle className="text-green-600 mt-1 mr-3" />
+                  <div>
+                    <h3 className="font-medium text-gray-800">Why is security important?</h3>
+                    <p className="text-sm text-gray-600 mt-1">Keeping your account secure ensures that your personal information and bookings are protected.</p>
                   </div>
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Barangay</label>
-                  <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
-                    {formData.barangay || 'Not provided'}
-                  </div>
-                </div>
-                <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">City/Municipality</label>
-                  <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
-                    {formData.cityMunicipality || 'Not provided'}
-                  </div>
-                </div>
+              <button
+                onClick={handleChangePasswordClick}
+                className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-300 flex items-center justify-center shadow-sm hover:shadow transform hover:-translate-y-0.5"
+              >
+                <FaLock className="mr-2" />
+                Change Password
+              </button>
+            </div>
+          </div>
+          
+          {/* Availability Status */}
+          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow duration-300 mt-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="p-3 rounded-full bg-green-500/10">
+                <FaBriefcase className="text-green-600 text-xl" />
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Province</label>
-                  <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
-                    {formData.province || 'Not provided'}
-                  </div>
-                </div>
-                <div className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">ZIP Code</label>
-                  <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 shadow-inner">
-                    {formData.zipCode || 'Not provided'}
-                  </div>
-                </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Work Status</h2>
+                <p className="text-sm text-gray-600">Your current availability</p>
               </div>
             </div>
             
-            <div className="text-left">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
-              <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 min-h-[100px] whitespace-pre-wrap shadow-inner">
-                {formData.bio || 'No bio provided'}
+            <div className="flex items-center justify-between p-4 bg-green-100 rounded-lg mb-4">
+              <div className="flex items-center">
+                <div className="h-3 w-3 bg-green-500 rounded-full mr-2"></div>
+                <span className="font-medium text-green-800">Available for work</span>
               </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" className="sr-only peer" checked />
+                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-green-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+              </label>
+            </div>
+            
+            <div className="text-sm text-gray-600">
+              <p>Toggle your availability to control whether homeowners can book your services.</p>
             </div>
           </div>
-        )}
-      </div>
-      
-      {/* Security Section */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-        <div className="flex items-center mb-4 text-left">
-          <FaShieldAlt className="text-green-500 mr-2" />
-          <h2 className="text-xl font-semibold">Security</h2>
-        </div>
-        <p className="text-gray-600 mb-6 text-left">Manage your account security settings</p>
-        
-        <div className="space-y-6">
-          <div className="text-left">
-            <h3 className="font-medium mb-4">Password</h3>
-            <button 
-              className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-              onClick={handleUpdatePassword}
+          
+          {/* Additional info card */}
+          <div className="bg-gradient-to-br from-green-600 to-green-700 text-white rounded-xl shadow-md p-6 mt-6">
+            <h3 className="font-semibold text-xl mb-3">Need Help?</h3>
+            <p className="text-white/90 mb-4">If you have any questions about your account settings, please email our support team at:</p>
+            <a 
+              href="mailto:rjanciro@gmail.com"
+              className="block w-full text-center bg-white text-green-600 py-2 rounded-lg font-medium hover:bg-white/90 transition-colors"
             >
-              Change Password
-            </button>
-          </div>
-          
-          <div className="text-left">
-            <h3 className="font-medium mb-4">Two-Factor Authentication</h3>
-            <button className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors">
-              Setup 2FA
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      {/* Notifications Section */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-        <div className="flex items-center mb-4 text-left">
-          <FaBell className="text-green-500 mr-2" />
-          <h2 className="text-xl font-semibold">Notifications</h2>
-        </div>
-        <p className="text-gray-600 mb-6 text-left">Control how you receive notifications</p>
-        
-        <div className="space-y-4">
-          <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-            <div className="text-left">
-              <h3 className="font-medium">Email Notifications</h3>
-              <p className="text-gray-500 text-sm">Receive notifications via email</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input 
-                type="checkbox" 
-                className="sr-only peer"
-                checked={notifications.email}
-                onChange={() => handleNotificationChange('email')}
-              />
-              <div className="w-12 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-green-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-            </label>
-          </div>
-          
-          <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-            <div className="text-left">
-              <h3 className="font-medium">Push Notifications</h3>
-              <p className="text-gray-500 text-sm">Receive notifications on your device</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input 
-                type="checkbox" 
-                className="sr-only peer"
-                checked={notifications.push}
-                onChange={() => handleNotificationChange('push')}
-              />
-              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-            </label>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div className="text-left">
-              <h3 className="font-medium">SMS Notifications</h3>
-              <p className="text-gray-500 text-sm">Receive notifications via text message</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input 
-                type="checkbox" 
-                className="sr-only peer"
-                checked={notifications.sms}
-                onChange={() => handleNotificationChange('sms')}
-              />
-              <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-            </label>
-          </div>
-        </div>
-      </div>
-      
-      {/* Help & Support Section */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <div className="flex items-center mb-4 text-left">
-          <FaQuestionCircle className="text-green-500 mr-2" />
-          <h2 className="text-xl font-semibold">Help & Support</h2>
-        </div>
-        <p className="text-gray-600 mb-6 text-left">Get help with your account</p>
-        
-        <div className="space-y-4 text-left">
-          <div className="border-b border-gray-200 pb-4">
-            <h3 className="font-medium mb-2">FAQs</h3>
-            <p className="text-gray-500 text-sm mb-2">Find answers to common questions</p>
-            <a href="#" className="text-green-500 hover:text-green-600 text-sm">View FAQs</a>
-          </div>
-          
-          <div className="border-b border-gray-200 pb-4">
-            <h3 className="font-medium mb-2">Contact Support</h3>
-            <p className="text-gray-500 text-sm mb-2">Get help from our support team</p>
-            <a href="#" className="text-green-500 hover:text-green-600 text-sm">Contact Us</a>
-          </div>
-          
-          <div>
-            <h3 className="font-medium mb-2">Report an Issue</h3>
-            <p className="text-gray-500 text-sm mb-2">Let us know if you're experiencing problems</p>
-            <a href="#" className="text-green-500 hover:text-green-600 text-sm">Report Issue</a>
+              rjanciro@gmail.com
+            </a>
           </div>
         </div>
       </div>
@@ -620,6 +595,47 @@ const HousekeeperProfileSettings: React.FC = () => {
         formData={formData}
         onSave={handleProfileUpdate}
       />
+    </div>
+  );
+};
+
+// Helper component for displaying information items
+interface InfoItemProps {
+  label: string;
+  value: string | number | undefined;
+  icon: React.ReactNode;
+  badge?: {
+    text: string;
+    color: "blue" | "green" | "red" | "yellow" | "gray"
+  };
+}
+
+const InfoItem: React.FC<InfoItemProps> = ({ label, value, icon, badge }) => {
+  const badgeColors = {
+    blue: "bg-blue-100 text-blue-800 border-blue-200",
+    green: "bg-green-100 text-green-800 border-green-200",
+    red: "bg-red-100 text-red-800 border-red-200",
+    yellow: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    gray: "bg-gray-100 text-gray-800 border-gray-200"
+  };
+  
+  return (
+    <div className="text-left">
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-white transition-colors flex items-center">
+        <div className="mr-3 opacity-70">
+          {icon}
+        </div>
+        <div className="flex-grow">
+          <span className="text-gray-800">{value || 'Not provided'}</span>
+          
+          {badge && (
+            <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${badgeColors[badge.color]} border`}>
+              {badge.text}
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

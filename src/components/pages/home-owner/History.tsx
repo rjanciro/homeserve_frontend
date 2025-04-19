@@ -159,7 +159,7 @@ class ErrorBoundary extends Component<{ children: ReactNode, fallback?: ReactNod
 }
 
 const MyAppointmentsPage: React.FC = () => {
-  useDocumentTitle('My Appointments');
+  useDocumentTitle('History');
   
   const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);

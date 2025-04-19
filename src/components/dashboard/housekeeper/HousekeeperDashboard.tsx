@@ -9,7 +9,7 @@ interface User {
 }
 
 const HousekeeperDashboard: React.FC = () => {
-  useDocumentTitle('Housekeeper Dashboard');
+  useDocumentTitle('Dashboard');
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
