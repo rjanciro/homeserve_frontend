@@ -22,6 +22,7 @@ export interface User {
   bio?: string;
   createdAt: Date;
   isEmailVerified?: boolean;
+  isAvailable?: boolean;
 }
 
 export interface FormData {

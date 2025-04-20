@@ -1,11 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaSearch, FaUserCircle, FaPaperPlane, FaChevronLeft, FaPlus, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaUserCircle, FaPaperPlane, FaChevronLeft, FaPlus, FaTimes, FaCircle } from 'react-icons/fa';
 import useDocumentTitle from '../../../hooks/useDocumentTitle';
 import { useMessaging, Conversation, Message, User } from '../../../contexts/MessagingContext';
 import { useAuth } from '../../../hooks/useAuth';
 import { WebSocketStatus } from '../../../utils/websocket';
 import { profileService } from '../../services/profile.service';
 import { useLocation } from 'react-router-dom';
+
+// Online Status Indicator component
+const OnlineStatusIndicator: React.FC<{ isOnline?: boolean, className?: string }> = ({ isOnline, className = "" }) => (
+  <FaCircle 
+    className={`${isOnline ? 'text-green-500' : 'text-gray-400'} text-xs ${className}`} 
+  />
+);
 
 const ServiceProviderMessaging: React.FC = () => {
   useDocumentTitle('Messages');
@@ -240,7 +247,7 @@ const ServiceProviderMessaging: React.FC = () => {
                     onClick={() => handleSelectUser(user._id)}
                     className="p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer flex items-center"
                   >
-                    <div className="flex-shrink-0 mr-3">
+                    <div className="flex-shrink-0 mr-3 relative">
                       {user.profileImage ? (
                         <img 
                           src={profileService.getFullImageUrl(user.profileImage)} 
@@ -257,11 +264,18 @@ const ServiceProviderMessaging: React.FC = () => {
                           <FaUserCircle className="text-gray-500 w-12 h-12" />
                         </div>
                       )}
+                      <OnlineStatusIndicator isOnline={user.isOnline} className="absolute bottom-0 right-0" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">
-                        {`${user.firstName} ${user.lastName}`}
-                      </h3>
+                      <div className="flex items-center">
+                        <h3 className="font-medium text-gray-900">
+                          {`${user.firstName} ${user.lastName}`}
+                        </h3>
+                        <OnlineStatusIndicator isOnline={user.isOnline} className="ml-1.5" />
+                      </div>
+                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                        {user.userType === 'housekeeper' ? 'Housekeeper' : 'Homeowner'}
+                      </span>
                     </div>
                   </div>
                 ))
@@ -284,7 +298,7 @@ const ServiceProviderMessaging: React.FC = () => {
                       }`}
                     >
                       {/* User Avatar */}
-                      <div className="flex-shrink-0 mr-3">
+                      <div className="flex-shrink-0 mr-3 relative">
                         {otherUser.profileImage ? (
                           <img 
                             src={profileService.getFullImageUrl(otherUser.profileImage)} 
@@ -301,15 +315,19 @@ const ServiceProviderMessaging: React.FC = () => {
                             <FaUserCircle className="text-gray-500 w-12 h-12" />
                           </div>
                         )}
+                        <OnlineStatusIndicator isOnline={otherUser.isOnline} className="absolute bottom-0 right-0" />
                       </div>
                       
                       {/* Conversation Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between">
                           <div>
-                            <h3 className="font-medium text-gray-900 truncate">
-                              {`${otherUser.firstName} ${otherUser.lastName}`}
-                            </h3>
+                            <div className="flex items-center">
+                              <h3 className="font-medium text-gray-900 truncate">
+                                {`${otherUser.firstName} ${otherUser.lastName}`}
+                              </h3>
+                              <OnlineStatusIndicator isOnline={otherUser.isOnline} className="ml-1.5" />
+                            </div>
                             {/* {otherUser.userType && (
                               <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
                                 {otherUser.userType === 'provider' ? 'Service Provider' : 'Homeowner'}
@@ -375,7 +393,7 @@ const ServiceProviderMessaging: React.FC = () => {
                   
                   return (
                     <>
-                      <div className="flex-shrink-0 mr-3">
+                      <div className="flex-shrink-0 mr-3 relative">
                         {otherUser.profileImage ? (
                           <img 
                             src={profileService.getFullImageUrl(otherUser.profileImage)} 
@@ -392,11 +410,15 @@ const ServiceProviderMessaging: React.FC = () => {
                             <FaUserCircle className="text-gray-500 w-10 h-10" />
                           </div>
                         )}
+                        <OnlineStatusIndicator isOnline={otherUser.isOnline} className="absolute bottom-0 right-0" />
                       </div>
                       <div>
-                        <h2 className="font-medium text-gray-900">
-                          {`${otherUser.firstName} ${otherUser.lastName}`}
-                        </h2>
+                        <div className="flex items-center">
+                          <h2 className="font-medium text-gray-900">
+                            {`${otherUser.firstName} ${otherUser.lastName}`}
+                          </h2>
+                          <OnlineStatusIndicator isOnline={otherUser.isOnline} className="ml-1.5" />
+                        </div>
                         {otherUser.userType && (
                           <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
                             {otherUser.userType === 'provider' ? 'Service Provider' : 'Homeowner'}

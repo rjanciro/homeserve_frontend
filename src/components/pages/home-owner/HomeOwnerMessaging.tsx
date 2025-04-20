@@ -1,11 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaSearch, FaUserCircle, FaPaperPlane, FaChevronLeft, FaPlus, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaUserCircle, FaPaperPlane, FaChevronLeft, FaPlus, FaTimes, FaCircle } from 'react-icons/fa';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useDocumentTitle from '../../../hooks/useDocumentTitle';
 import { useMessaging, Conversation, Message, User } from '../../../contexts/MessagingContext';
 import { useAuth } from '../../../hooks/useAuth';
 import { WebSocketStatus } from '../../../utils/websocket';
 import { profileService } from '../../services/profile.service';
+
+// Add Online Status Indicator component
+const OnlineStatusIndicator: React.FC<{ isOnline?: boolean, className?: string }> = ({ isOnline, className = "" }) => (
+  <FaCircle 
+    className={`${isOnline ? 'text-green-500' : 'text-gray-400'} text-xs ${className}`} 
+  />
+);
 
 const HomeOwnerMessaging: React.FC = () => {
   useDocumentTitle('Messages');
@@ -355,7 +362,7 @@ const HomeOwnerMessaging: React.FC = () => {
                     className="p-2 border-b border-gray-100 hover:bg-gray-50 cursor-pointer flex items-center"
                   >
                     {/* User content */}
-                    <div className="flex-shrink-0 mr-2">
+                    <div className="flex-shrink-0 mr-2 relative">
                       {user.profileImage ? (
                         <img 
                           src={profileService.getFullImageUrl(user.profileImage)} 
@@ -372,11 +379,15 @@ const HomeOwnerMessaging: React.FC = () => {
                           <FaUserCircle className="text-gray-500 w-8 h-8" />
                         </div>
                       )}
+                      <OnlineStatusIndicator isOnline={user.isOnline} className="absolute bottom-0 right-0" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900 text-sm">
-                        {`${user.firstName} ${user.lastName}`}
-                      </h3>
+                      <div className="flex items-center">
+                        <h3 className="font-medium text-gray-900 text-sm">
+                          {`${user.firstName} ${user.lastName}`}
+                        </h3>
+                        <OnlineStatusIndicator isOnline={user.isOnline} className="ml-1.5" />
+                      </div>
                       <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
                         {user.userType === 'housekeeper' ? 'Housekeeper' : 'Homeowner'}
                       </span>
@@ -402,7 +413,7 @@ const HomeOwnerMessaging: React.FC = () => {
                       }`}
                     >
                       {/* User Avatar */}
-                      <div className="flex-shrink-0 mr-2">
+                      <div className="flex-shrink-0 mr-2 relative">
                         {otherUser.profileImage ? (
                           <img 
                             src={profileService.getFullImageUrl(otherUser.profileImage)} 
@@ -419,13 +430,17 @@ const HomeOwnerMessaging: React.FC = () => {
                             <FaUserCircle className="text-gray-500 w-8 h-8" />
                           </div>
                         )}
+                        <OnlineStatusIndicator isOnline={otherUser.isOnline} className="absolute bottom-0 right-0" />
                       </div>
                       
                       {/* Conversation Info */}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-gray-900 text-sm truncate">
-                          {`${otherUser.firstName} ${otherUser.lastName}`}
-                        </h3>
+                        <div className="flex items-center">
+                          <h3 className="font-medium text-gray-900 text-sm truncate">
+                            {`${otherUser.firstName} ${otherUser.lastName}`}
+                          </h3>
+                          <OnlineStatusIndicator isOnline={otherUser.isOnline} className="ml-1.5 flex-shrink-0" />
+                        </div>
                         {conversation.lastMessage && (
                           <p className="text-xs text-gray-600 truncate">
                             {conversation.lastMessage.content}
@@ -482,7 +497,7 @@ const HomeOwnerMessaging: React.FC = () => {
                   
                   return (
                     <>
-                      <div className="flex-shrink-0 mr-2">
+                      <div className="flex-shrink-0 mr-2 relative">
                         {otherUser.profileImage ? (
                           <img 
                             src={profileService.getFullImageUrl(otherUser.profileImage)} 
@@ -499,11 +514,15 @@ const HomeOwnerMessaging: React.FC = () => {
                             <FaUserCircle className="text-gray-500 w-8 h-8" />
                           </div>
                         )}
+                        <OnlineStatusIndicator isOnline={otherUser.isOnline} className="absolute bottom-0 right-0" />
                       </div>
                       <div>
-                        <h2 className="font-medium text-gray-900 text-sm">
-                          {`${otherUser.firstName} ${otherUser.lastName}`}
-                        </h2>
+                        <div className="flex items-center">
+                          <h2 className="font-medium text-gray-900 text-sm">
+                            {`${otherUser.firstName} ${otherUser.lastName}`}
+                          </h2>
+                          <OnlineStatusIndicator isOnline={otherUser.isOnline} className="ml-1.5" />
+                        </div>
                         <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
                           {otherUser.userType === 'housekeeper' ? 'Housekeeper' : 'Homeowner'}
                         </span>

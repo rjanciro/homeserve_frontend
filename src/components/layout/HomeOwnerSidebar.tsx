@@ -42,11 +42,20 @@ const HomeOwnerSidebar: React.FC = () => {
       cancelButtonColor: '#EF4444',
       confirmButtonText: 'Yes, logout',
       cancelButtonText: 'Cancel'
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        authService.logout();
-        navigate('/login');
-        toast.success('Successfully logged out');
+        try {
+          // First logout from the auth service (this will handle setting offline status)
+          await authService.logout();
+          // Then navigate to login page
+          navigate('/login');
+          toast.success('Successfully logged out');
+        } catch (error) {
+          console.error('Error during logout:', error);
+          // Still navigate to login even if the API call fails
+          navigate('/login');
+          toast.success('Successfully logged out');
+        }
       }
     });
   };

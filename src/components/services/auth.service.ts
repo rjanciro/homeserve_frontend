@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { User, UserType } from '../../types';
+import WebSocketService from '../../utils/websocket';
 
-const API_URL = 'http://localhost:8080/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 export const authService = {
   async register(userData: {
@@ -112,9 +113,29 @@ export const authService = {
     }
   },
 
-  logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  async logout() {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Only make the API call if we have a token
+      if (token) {
+        // Explicitly disconnect WebSocket with forceOffline flag
+        WebSocketService.disconnect(true);
+        
+        // Call the logout API endpoint
+        await axios.post(`${API_URL}/auth/logout`, {}, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    } finally {
+      // Always clear local storage regardless of API call success/failure
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    }
   },
 
   isAuthenticated(): boolean {

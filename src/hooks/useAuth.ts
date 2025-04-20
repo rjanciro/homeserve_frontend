@@ -8,6 +8,8 @@ interface User {
   email: string;
   userType: 'homeowner' | 'housekeeper' | 'admin';
   profileImage?: string;
+  isOnline?: boolean;
+  lastSeen?: Date;
 }
 
 // Auth state interface
@@ -52,7 +54,7 @@ export const useAuth = () => {
   const login = (token: string, user: User) => {
     setAuthState({
       token,
-      user,
+      user: { ...user, isOnline: true },
       isAuthenticated: true,
       loading: false
     });
@@ -68,9 +70,24 @@ export const useAuth = () => {
     });
   };
 
+  // Update user status
+  const updateUserStatus = (isOnline: boolean) => {
+    if (authState.user) {
+      setAuthState({
+        ...authState,
+        user: { 
+          ...authState.user, 
+          isOnline,
+          lastSeen: isOnline ? undefined : new Date()
+        }
+      });
+    }
+  };
+
   return {
     ...authState,
     login,
-    logout
+    logout,
+    updateUserStatus
   };
 }; 

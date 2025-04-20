@@ -30,7 +30,7 @@ interface BookingModalProps {
 }
 
 // Fix the API URL to ensure it has the correct format
-const API_URL = 'http://localhost:8080';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 const BookingModal: React.FC<BookingModalProps> = ({ 
   isOpen, 
@@ -155,23 +155,71 @@ const BookingModal: React.FC<BookingModalProps> = ({
   const handleDefaultSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    console.log('=== BOOKING SUBMISSION STARTED ===');
+    console.log('Form submission started');
+    
+    if (!validateForm()) {
+      console.log('Form validation failed');
+      toast.error('Please fill in all required fields correctly.');
+      return;
+    }
+    
+    // Double check the contact phone before submitting
+    if (!contactPhone) {
+      alert('Contact phone number is required!');
+      return;
+    }
+    
+    // Check authentication token
+    const authHeaders = getAuthHeader();
+    console.log('Auth headers:', authHeaders);
+    const token = localStorage.getItem('token');
+    console.log('Token in localStorage:', token ? 'Present' : 'Missing');
+    
+    if (!authHeaders.Authorization) {
+      toast.error('You must be logged in to book a service');
+      console.error('Missing authentication token');
+      return;
+    }
     
     setIsSubmitting(true);
     
     try {
       // Get the serviceId from the service object
-      const serviceId = service._id || service.id;
+      const serviceId = service._id;
+      console.log('Service ID:', serviceId);
       
-      // Send booking request to the backend API - simplified payload to match backend expectations
-      await axios.post(`${API_URL}/api/bookings`, {
+      if (!serviceId) {
+        throw new Error('Service ID is missing');
+      }
+      
+      // Prepare the booking payload
+      const bookingPayload = {
         serviceId,
         date: formData?.date || date,
         time: formData?.time || time,
         location: formData?.location || location,
-        contactPhone,
+        contactPhone, // This is critical - must have a value
         notes: formData?.notes || notes
-      }, { headers: getAuthHeader() });
+      };
+      
+      console.log('Submitting booking to API:', bookingPayload);
+      console.log('API URL being used:', `${API_URL}/bookings`);
+      console.log('Full request:', {
+        url: `${API_URL}/bookings`,
+        method: 'POST',
+        headers: authHeaders,
+        data: bookingPayload
+      });
+      
+      // Send booking request to the backend API
+      console.log('Sending axios request now...');
+      const response = await axios.post(`${API_URL}/bookings`, bookingPayload, { 
+        headers: authHeaders
+      });
+      
+      console.log('Booking response received:', response.status);
+      console.log('Booking response data:', response.data);
       
       toast.success('Booking request sent successfully!');
       onClose();
@@ -182,9 +230,18 @@ const BookingModal: React.FC<BookingModalProps> = ({
       setLocation('');
       setContactPhone('');
       setNotes('');
-    } catch (error) {
+      console.log('=== BOOKING SUBMISSION COMPLETED SUCCESSFULLY ===');
+    } catch (error: any) {
+      console.error('=== BOOKING SUBMISSION FAILED ===');
       console.error('Error booking service:', error);
-      toast.error('Failed to book service. Please try again.');
+      console.error('Error details:', error.response?.data || 'No response data');
+      console.error('Error status:', error.response?.status);
+      
+      if (error.response?.data?.message) {
+        toast.error(`Booking failed: ${error.response.data.message}`);
+      } else {
+        toast.error('Failed to book service. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -201,8 +258,18 @@ const BookingModal: React.FC<BookingModalProps> = ({
     return "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
   };
 
-  // Use the handler that was passed in props if available, otherwise use the local one
-  const handleSubmitForm = onSubmit || handleDefaultSubmit;
+  // ALWAYS use our own submit handler first, then call the parent onSubmit if provided
+  const handleSubmitForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // First handle the submission internally with our API call
+    await handleDefaultSubmit(e);
+    
+    // Then call the parent's onSubmit if provided (for state updates, etc.)
+    if (onSubmit) {
+      onSubmit(e);
+    }
+  };
 
   return (
     <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
@@ -229,10 +296,10 @@ const BookingModal: React.FC<BookingModalProps> = ({
                   />
                 )}
                 <div>
-                  <p className="font-medium text-blue-800">{service.name}</p>
+                  <p className="font-medium text-blue-800">{service?.name}</p>
                   <p className="text-sm text-blue-700">By: {housekeeperName || (housekeeper?.name || 'Service Provider')}</p>
-                  <p className="text-sm text-blue-700">{service.category} • {service.estimatedCompletionTime}</p>
-                  <p className="text-lg font-semibold text-blue-900 mt-1">₱{estimatedPrice || service.price}</p>
+                  <p className="text-sm text-blue-700">{service?.category} • {service?.estimatedCompletionTime}</p>
+                  <p className="text-lg font-semibold text-blue-900 mt-1">₱{estimatedPrice || service?.price}</p>
                 </div>
               </div>
             </div>
@@ -274,8 +341,6 @@ const BookingModal: React.FC<BookingModalProps> = ({
                 {errors.time && <p className="mt-1 text-xs text-red-500">{errors.time}</p>}
               </div>
             </div>
-            
-            {/* Continue with the rest of the form, adapting each input to use either formData or local state */}
             
             {/* Location input */}
             <div className="mb-4">
@@ -356,4 +421,4 @@ const BookingModal: React.FC<BookingModalProps> = ({
   );
 };
 
-export default BookingModal; 
+export default BookingModal;

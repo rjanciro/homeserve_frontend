@@ -25,6 +25,7 @@ interface HousekeeperProfileData {
   experience?: string;
   specialties?: string;
   bio: string;
+  isAvailable?: boolean;
 }
 
 const HousekeeperProfileSettings: React.FC = () => {
@@ -32,6 +33,7 @@ const HousekeeperProfileSettings: React.FC = () => {
 
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAvailable, setIsAvailable] = useState(true);
   
   // State for profile data
   const [formData, setFormData] = useState<HousekeeperProfileData>({
@@ -78,8 +80,12 @@ const HousekeeperProfileSettings: React.FC = () => {
         zipCode: user.zipCode || '',
         experience: user.experience || '',
         specialties: user.specialties || '',
-        bio: user.bio || ''
+        bio: user.bio || '',
+        isAvailable: user.isAvailable !== undefined ? user.isAvailable : true
       });
+      
+      // Set availability from user data
+      setIsAvailable(user.isAvailable !== undefined ? user.isAvailable : true);
       
       if (user.profileImage) {
         // Ensure we have a complete URL
@@ -105,8 +111,12 @@ const HousekeeperProfileSettings: React.FC = () => {
             zipCode: updatedUser.zipCode || '',
             experience: updatedUser.experience || '',
             specialties: updatedUser.specialties || '',
-            bio: updatedUser.bio || ''
+            bio: updatedUser.bio || '',
+            isAvailable: updatedUser.isAvailable !== undefined ? updatedUser.isAvailable : true
           });
+          
+          // Set availability from updated user data
+          setIsAvailable(updatedUser.isAvailable !== undefined ? updatedUser.isAvailable : true);
           
           if (updatedUser.profileImage) {
             setProfileImage(profileService.getFullImageUrl(updatedUser.profileImage) || '');
@@ -245,6 +255,37 @@ const HousekeeperProfileSettings: React.FC = () => {
         toast.error(`Failed to update profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
       return Promise.reject(error);
+    }
+  };
+
+  // Handle availability toggle
+  const handleAvailabilityChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newAvailability = e.target.checked;
+    setIsAvailable(newAvailability);
+    
+    try {
+      // Update availability in backend
+      await profileService.updateProfile({
+        isAvailable: newAvailability
+      });
+      
+      // Update user in localStorage
+      const user = authService.getCurrentUser();
+      if (user) {
+        const updatedUser = {
+          ...user,
+          isAvailable: newAvailability
+        };
+        
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        profileEvents.emitProfileUpdate();
+      }
+      
+      toast.success(`You are now ${newAvailability ? 'available' : 'unavailable'} for work`);
+    } catch (error) {
+      console.error('Error updating availability:', error);
+      setIsAvailable(!newAvailability); // Revert UI state on error
+      toast.error('Failed to update availability. Please try again.');
     }
   };
 
@@ -554,11 +595,18 @@ const HousekeeperProfileSettings: React.FC = () => {
             
             <div className="flex items-center justify-between p-4 bg-green-100 rounded-lg mb-4">
               <div className="flex items-center">
-                <div className="h-3 w-3 bg-green-500 rounded-full mr-2"></div>
-                <span className="font-medium text-green-800">Available for work</span>
+                <div className={`h-3 w-3 ${isAvailable ? 'bg-green-500' : 'bg-gray-400'} rounded-full mr-2`}></div>
+                <span className="font-medium text-green-800">
+                  {isAvailable ? 'Available for work' : 'Not available for work'}
+                </span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" className="sr-only peer" checked />
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={isAvailable}
+                  onChange={handleAvailabilityChange}
+                />
                 <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-green-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
               </label>
             </div>

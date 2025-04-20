@@ -31,7 +31,10 @@ export class WebSocketService {
   private connectionHealthCheckInterval: NodeJS.Timeout | null = null;
   private connecting: boolean = false;
 
-  private constructor() {}
+  private constructor() {
+    // Setup window unload event to properly close connection and set user as offline
+    window.addEventListener('beforeunload', this.handleBeforeUnload.bind(this));
+  }
 
   // Get singleton instance
   public static getInstance(): WebSocketService {
@@ -182,6 +185,17 @@ export class WebSocketService {
             timestamp: Date.now(),
             messageId: `ping-${Date.now()}`
           });
+          
+          // Every minute, also send a status update to ensure we're marked as online
+          const now = Date.now();
+          if (now % (60 * 1000) < 15000) { // Send approx once a minute
+            this.send({
+              type: 'set_status',
+              isOnline: true,
+              messageId: `status-update-${Date.now()}`
+            });
+            console.log('Sent periodic online status update');
+          }
         } catch (error) {
           console.error('Error sending ping:', error);
         }
@@ -226,14 +240,29 @@ export class WebSocketService {
   }
 
   // Close the WebSocket connection - ONLY call this when explicitly needed
-  public disconnect(): void {
-    console.log('Explicitly disconnecting WebSocket');
+  public disconnect(forceOffline = false): void {
+    console.log('Explicitly disconnecting WebSocket, forceOffline:', forceOffline);
     this.clearIntervals();
     
-    if (this.socket) {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      // When force offline is true, it means this is an explicit logout, not just navigation/refresh
+      if (forceOffline) {
+        try {
+          console.log('Sending explicit offline status before disconnecting');
+          const offlineMessage = {
+            type: 'set_status',
+            isOnline: false,
+            messageId: `offline-${Date.now()}`
+          };
+          this.socket.send(JSON.stringify(offlineMessage));
+        } catch (error) {
+          console.error('Error sending offline status on disconnect:', error);
+        }
+      }
+      
       this.notifyStatusChange(WebSocketStatus.CLOSING);
       try {
-        this.socket.close(1000, 'Client disconnected normally');
+        this.socket.close(1000, forceOffline ? 'User logged out' : 'Client disconnected normally');
       } catch (error) {
         console.error('Error closing WebSocket:', error);
       }
@@ -318,8 +347,16 @@ export class WebSocketService {
     }
 
     this.reconnectAttempts++;
-    // Exponential backoff with a maximum of 30 seconds
-    const delay = Math.min(1000 * Math.pow(1.5, this.reconnectAttempts), 30000);
+    
+    // Use very short delay for first attempt (likely a page refresh)
+    // Then increase exponentially for further attempts
+    let delay;
+    if (this.reconnectAttempts === 1) {
+      delay = 500; // First attempt after 500ms
+    } else {
+      // Exponential backoff with a maximum of 30 seconds
+      delay = Math.min(1000 * Math.pow(1.5, this.reconnectAttempts - 1), 30000);
+    }
     
     console.log(`Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
     
@@ -332,6 +369,21 @@ export class WebSocketService {
         this.connect(this.token);
       }
     }, delay);
+  }
+
+  // Handle beforeunload event to set user as offline
+  private handleBeforeUnload(): void {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      // We don't send an offline status immediately, as the user may be refreshing
+      // The server will handle this case by waiting a bit before marking as offline
+      
+      // Close the socket cleanly
+      try {
+        this.socket.close(1000, 'User left the page');
+      } catch (error) {
+        console.error('Error closing WebSocket on page unload:', error);
+      }
+    }
   }
 }
 

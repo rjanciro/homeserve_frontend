@@ -8,10 +8,8 @@ import { profileService } from '../../services/profile.service';
 import { User } from '../../../types';
 import toast from 'react-hot-toast';
 
-// Get API URL from environment variable
-const API_URL = import.meta.env.VITE_API_URL ? 
-  `${import.meta.env.VITE_API_URL}` : 
-  'http://localhost:8080';
+// Fix the API URL definition to avoid adding /api twice
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 // Define booking interface
 interface Booking {
@@ -140,7 +138,7 @@ const HomeOwnerDashboard: React.FC = () => {
       try {
         // Try to fetch active bookings
         try {
-          const bookingsResponse = await axios.get(`${API_URL}/api/bookings/customer`, {
+          const bookingsResponse = await axios.get(`${API_URL}/bookings/customer`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -166,7 +164,7 @@ const HomeOwnerDashboard: React.FC = () => {
         
         // Try to fetch recent job posts
         try {
-          const jobPostsResponse = await axios.get(`${API_URL}/api/job-posts/homeowner`, {
+          const jobPostsResponse = await axios.get(`${API_URL}/job-posts/my-posts`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token')}`
             }

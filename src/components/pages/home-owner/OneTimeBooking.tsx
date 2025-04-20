@@ -107,7 +107,7 @@ const OneTimeBooking: React.FC = () => {
     date: '',
     time: '',
     duration: 0,
-    location: '123 Sample St, Quezon City',
+    location: '',
     notes: '',
     housekeeperId: '',
     housekeeperName: ''
@@ -139,7 +139,7 @@ const OneTimeBooking: React.FC = () => {
     const apiBaseUrl = 'http://localhost:8080';
     // Ensure no double slashes
     const fullUrl = `${apiBaseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
-    console.log("Constructed Profile Image URL:", fullUrl); // Log for debugging
+    // Removed console.log for performance
     return fullUrl;
   };
 
@@ -152,7 +152,7 @@ const OneTimeBooking: React.FC = () => {
     const apiBaseUrl = 'http://localhost:8080'; 
     // Ensure no double slashes
     const fullUrl = `${apiBaseUrl}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
-    console.log("Constructed Service Image URL:", fullUrl); // Log for debugging
+    // Removed console.log for performance
     return fullUrl;
   };
 
@@ -267,7 +267,7 @@ const OneTimeBooking: React.FC = () => {
     setBookingData(prev => ({
       ...prev,
       selectedServiceId: service._id || '',
-      duration: 0,
+      duration: service.estimatedCompletionTime ? parseInt(service.estimatedCompletionTime) : 0,
       location: prev.location,
       notes: '',
       housekeeperId: housekeeper.id,
@@ -293,25 +293,33 @@ const OneTimeBooking: React.FC = () => {
   };
 
   // Handle booking submission
-  const handleSubmitBooking = (e: React.FormEvent) => {
+  const handleSubmitBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!serviceToBook || !selectedHousekeeper) return;
 
-    alert(`Booking submitted for "${serviceToBook.name}" with ${selectedHousekeeper.name}.`);
-    setShowBookingForm(false);
-    // In a real app, you would submit this to your backend
-    console.log('Booking data:', {
-      housekeeperId: selectedHousekeeper.id,
-      serviceId: serviceToBook._id,
-      serviceName: serviceToBook.name,
-      date: bookingData.date,
-      time: bookingData.time,
-      duration: bookingData.duration,
-      location: bookingData.location,
-      notes: bookingData.notes,
-      price: serviceToBook.price,
-    });
-    setServiceToBook(null);
+    try {
+      // The actual submission will be handled by the BookingModal component now
+      // Just close the modal and reset booking data after the submission from BookingModal
+      setShowBookingForm(false);
+      
+      // Reset booking data after submission
+      setBookingData({
+        selectedServiceId: '',
+        date: '',
+        time: '',
+        duration: 0,
+        location: '',
+        notes: '',
+        housekeeperId: '',
+        housekeeperName: ''
+      });
+      
+      setServiceToBook(null);
+      // Don't display success message here - it should come from BookingModal after actual API success
+    } catch (error) {
+      console.error('Error preparing booking:', error);
+      toast.error('There was a problem with your booking. Please try again.');
+    }
   };
 
   // Calculate estimated price
@@ -598,6 +606,9 @@ const OneTimeBooking: React.FC = () => {
         estimatedPrice={calculateEstimatedPrice()}
         service={serviceToBook}
         housekeeperName={selectedHousekeeper?.name || ''}
+        housekeeper={selectedHousekeeper}
+        getProfileImageUrl={getProfileImageUrl}
+        getServiceImageUrl={getServiceImageUrl}
       />
       
       <ImageModal 

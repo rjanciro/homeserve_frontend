@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Component, ErrorInfo, ReactNode } from 'react';
-import { FaCalendar, FaClock, FaMapMarkerAlt, FaSpinner, FaCheckCircle, FaTimesCircle, FaHourglassHalf, FaCheck, FaBan, FaFilter, FaEye } from 'react-icons/fa';
+import { FaCalendar, FaClock, FaMapMarkerAlt, FaSpinner, FaCheckCircle, FaTimesCircle, FaHourglassHalf, FaCheck, FaBan, FaFilter, FaEye, FaSearch, FaInfoCircle, FaComments, FaUser, FaPhone } from 'react-icons/fa';
 import useDocumentTitle from '../../../hooks/useDocumentTitle';
 import axios from 'axios';
 import { getAuthHeader } from '../../utils/auth';
@@ -78,46 +78,51 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
     rejected: <FaTimesCircle className="mr-1.5" />
   };
 
-  // Get status color based on status
-  const getStatusColorClass = (status: string) => {
-    return statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800 border-gray-200';
-  };
-
   return (
-    <div className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-md transition-all">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-4">
-          <div className="bg-green-100 p-3 rounded-lg">
-            <FaCalendar className="w-5 h-5 text-green-600" />
+    <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-200">
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          {/* Status Badge */}
+          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${statusColors[status]}`}>
+            {statusIcons[status]}
+            {status.charAt(0).toUpperCase() + status.slice(1)}
+          </span>
+          
+          {/* Date & Time */}
+          <div className="flex items-center text-gray-600 text-sm">
+            <FaCalendar className="text-[#137D13] mr-2" />
+            <span>{date}</span>
+            <span className="mx-1">•</span>
+            <FaClock className="text-[#137D13] mr-1" />
+            <span>{time}</span>
           </div>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">{service}</h3>
-            <p className="text-gray-600">{provider}</p>
+        </div>
+        
+        {/* Service Info */}
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-gray-800 mb-1">{service}</h3>
+          <div className="flex items-center text-gray-600">
+            <FaUser className="mr-2 text-sm text-[#137D13]" />
+            <p className="text-sm">{provider}</p>
           </div>
         </div>
-        <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${getStatusColorClass(status)}`}>
-          {statusIcons[status as keyof typeof statusIcons]}
-          {status.charAt(0).toUpperCase() + status.slice(1)}
-        </span>
-      </div>
-      <div className="space-y-3">
-        <div className="flex items-center text-gray-600">
-          <FaClock className="w-4 h-4 mr-2 text-gray-500" />
-          <span>{date} at {time}</span>
+        
+        {/* Location */}
+        <div className="mb-5 flex items-start">
+          <FaMapMarkerAlt className="text-[#137D13] mr-2 mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-gray-700">{location}</p>
         </div>
-        <div className="flex items-center text-gray-600">
-          <FaMapMarkerAlt className="w-4 h-4 mr-2 text-gray-500" />
-          <span>{location}</span>
+        
+        {/* Action buttons */}
+        <div className="flex flex-wrap gap-2 justify-end border-t border-gray-100 pt-4">
+          <button
+            onClick={onViewDetails}
+            className="flex items-center px-4 py-2 bg-[#137D13] text-white rounded-lg hover:bg-[#0c5c0c] transition-colors"
+          >
+            <FaEye className="mr-2" />
+            View Details
+          </button>
         </div>
-      </div>
-      <div className="mt-4 pt-4 border-t border-gray-100 flex justify-end">
-        <button 
-          onClick={onViewDetails}
-          className="flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium"
-        >
-          <FaEye className="mr-1.5" />
-          View Details
-        </button>
       </div>
     </div>
   );
@@ -166,9 +171,39 @@ const MyAppointmentsPage: React.FC = () => {
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  
+  // Initialize filters from local storage or default values
+  const [statusFilter, setStatusFilter] = useState<string>(() => {
+    const savedFilter = localStorage.getItem('homeowner_history_status_filter');
+    return savedFilter || 'all';
+  });
+  
+  const [searchTerm, setSearchTerm] = useState<string>(() => {
+    const savedSearch = localStorage.getItem('homeowner_history_search_term');
+    return savedSearch || '';
+  });
+  
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  
+  // Save filters to local storage when they change
+  useEffect(() => {
+    localStorage.setItem('homeowner_history_status_filter', statusFilter);
+  }, [statusFilter]);
+  
+  useEffect(() => {
+    localStorage.setItem('homeowner_history_search_term', searchTerm);
+  }, [searchTerm]);
+  
+  // Function to clear all filters
+  const clearFilters = () => {
+    setStatusFilter('all');
+    setSearchTerm('');
+    
+    // Clear local storage as well
+    localStorage.removeItem('homeowner_history_status_filter');
+    localStorage.removeItem('homeowner_history_search_term');
+  };
   
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
   
@@ -236,14 +271,37 @@ const MyAppointmentsPage: React.FC = () => {
     fetchBookings();
   }, [API_URL]);
   
-  // Apply status filter
+  // Apply filters when they change
   useEffect(() => {
-    if (statusFilter === 'all') {
-      setFilteredBookings(bookings);
-    } else {
-      setFilteredBookings(bookings.filter(booking => booking.status === statusFilter));
+    console.log('Filters changed - Status:', statusFilter, 'Search:', searchTerm);
+    console.log('Total bookings before filtering:', bookings.length);
+    
+    if (bookings.length === 0) return;
+    
+    let filtered = [...bookings];
+    
+    // Filter by status
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(booking => booking.status === statusFilter);
+      console.log(`After status filter (${statusFilter}):`, filtered.length);
     }
-  }, [statusFilter, bookings]);
+    
+    // Search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(booking => 
+        (booking.service.name && booking.service.name.toLowerCase().includes(term)) ||
+        (booking.housekeeper.firstName && booking.housekeeper.firstName.toLowerCase().includes(term)) ||
+        (booking.housekeeper.lastName && booking.housekeeper.lastName.toLowerCase().includes(term)) ||
+        (booking.housekeeper.businessName && booking.housekeeper.businessName.toLowerCase().includes(term)) ||
+        (booking.location && booking.location.toLowerCase().includes(term))
+      );
+      console.log('After search filter:', filtered.length);
+    }
+    
+    console.log('Final filtered bookings:', filtered.length);
+    setFilteredBookings(filtered);
+  }, [bookings, statusFilter, searchTerm]);
   
   // Format date string to a more readable format
   const formatDate = (dateString: string | undefined) => {
@@ -302,20 +360,32 @@ const MyAppointmentsPage: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="p-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900 mb-2">Booking History</h1>
-            <p className="text-gray-600">View your service appointments history</p>
-          </div>
-          
-          <div className="mt-4 md:mt-0 relative">
-            <div className="flex items-center">
-              <FaFilter className="absolute left-3 top-3 text-gray-400" />
+      <div className="container mx-auto px-4 py-6 max-w-6xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Booking History</h1>
+          <p className="text-gray-600">View your past and upcoming service appointments</p>
+        </div>
+        
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-8">
+          <div className="flex flex-col lg:flex-row items-start gap-4">
+            {/* Search input */}
+            <div className="relative flex-grow w-full lg:w-1/3">
+              <input
+                type="text"
+                placeholder="Search by service, provider, location..."
+                className="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#137D13] focus:border-transparent"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <FaSearch className="absolute right-3 top-3.5 text-gray-400" />
+            </div>
+            
+            {/* Status filter */}
+            <div className="relative w-full lg:w-1/3">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="appearance-none pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="appearance-none w-full px-4 py-3 pl-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#137D13] focus:border-transparent"
               >
                 <option value="all">All Bookings</option>
                 <option value="pending">Pending</option>
@@ -324,40 +394,87 @@ const MyAppointmentsPage: React.FC = () => {
                 <option value="rejected">Rejected</option>
                 <option value="cancelled">Cancelled</option>
               </select>
+              <FaFilter className="absolute left-3 top-3.5 text-gray-400" />
             </div>
+            
+            {/* Clear filters button - only show if filters are applied */}
+            {(statusFilter !== 'all' || searchTerm) && (
+              <button
+                onClick={clearFilters}
+                className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center font-medium"
+              >
+                Clear Filters
+              </button>
+            )}
           </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center items-center h-64">
-            <FaSpinner className="animate-spin h-8 w-8 text-green-500" />
+            <div className="p-6 bg-white rounded-lg shadow-md">
+              <FaSpinner className="animate-spin text-4xl text-[#137D13]" />
+            </div>
           </div>
         ) : error ? (
-          <div className="text-center p-6 bg-red-50 rounded-lg text-red-600">
-            {error}
+          <div className="bg-red-50 rounded-lg p-4 mb-6">
+            <div className="flex items-center">
+              <FaTimesCircle className="text-red-500 mr-3" />
+              <span>{error}</span>
+              <button 
+                className="ml-auto px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200"
+                onClick={() => window.location.reload()}
+              >
+                Retry
+              </button>
+            </div>
           </div>
         ) : filteredBookings.length === 0 ? (
-          <div className="text-center p-8 bg-gray-50 rounded-lg">
-            <p className="text-gray-600 mb-2">
-              {statusFilter === 'all' 
+          <div className="bg-yellow-50 rounded-lg p-6 text-center border border-yellow-100">
+            <FaInfoCircle className="text-yellow-500 text-2xl mx-auto mb-2" />
+            <h3 className="text-lg font-medium text-gray-700 mb-1">No bookings found</h3>
+            <p className="text-gray-600 mb-4">
+              {statusFilter === 'all' && !searchTerm
                 ? "You don't have any bookings yet." 
-                : `You don't have any ${statusFilter} bookings.`}
+                : "No bookings match your current filters."}
             </p>
-            {statusFilter !== 'all' && (
+            {(statusFilter !== 'all' || searchTerm) && (
               <button 
-                onClick={() => setStatusFilter('all')}
-                className="text-green-600 hover:text-green-700 font-medium"
+                onClick={clearFilters}
+                className="px-4 py-2 bg-yellow-100 text-yellow-700 font-medium rounded-lg hover:bg-yellow-200 transition-colors"
               >
-                View all bookings
+                Clear filters
               </button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {getAppointmentCards().map((appointment, index) => (
-              <AppointmentCard key={filteredBookings[index]._id} {...appointment} />
-            ))}
-          </div>
+          <>
+            {/* Filter info - show when filters are applied */}
+            {(statusFilter !== 'all' || searchTerm) && (
+              <div className="mb-6 p-4 bg-[#e8f5e8] rounded-lg text-[#137D13] flex justify-between items-center border border-[#c8e6c8]">
+                <div>
+                  <span className="font-medium">Filtered results:</span> Showing {filteredBookings.length} of {bookings.length} bookings
+                  {statusFilter !== 'all' && (
+                    <span className="ml-2">• Status: <span className="font-medium capitalize">{statusFilter}</span></span>
+                  )}
+                  {searchTerm && (
+                    <span className="ml-2">• Search: <span className="font-medium">"{searchTerm}"</span></span>
+                  )}
+                </div>
+                <button
+                  onClick={clearFilters}
+                  className="text-[#137D13] hover:text-[#0c5c0c] font-medium text-sm bg-white px-3 py-1 rounded-md shadow-sm"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {getAppointmentCards().map((appointment, index) => (
+                <AppointmentCard key={filteredBookings[index]._id} {...appointment} />
+              ))}
+            </div>
+          </>
         )}
 
         {/* Details Modal */}

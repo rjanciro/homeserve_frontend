@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaCalendarCheck, FaCalendarTimes, FaClipboardCheck, FaClock, FaMapMarkerAlt, FaUser, FaSpinner, FaInfoCircle, FaPhone, FaCommentAlt, FaSearch, FaFilter, FaCheck, FaTimes, FaEye, FaCalendarAlt, FaComments } from 'react-icons/fa';
+import { FaCalendarCheck, FaCalendarTimes, FaClipboardCheck, FaClock, FaMapMarkerAlt, FaUser, FaSpinner, FaInfoCircle, FaPhone, FaCommentAlt, FaSearch, FaFilter, FaCheck, FaTimes, FaEye, FaCalendarAlt, FaComments, FaTimesCircle } from 'react-icons/fa';
 import useDocumentTitle from '../../../hooks/useDocumentTitle';
 import axios from 'axios';
 import { getAuthHeader } from '../../utils/auth';
@@ -36,14 +36,41 @@ const BookingRequests: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // Filter state
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  // Filter state - initialize from local storage
+  const [statusFilter, setStatusFilter] = useState<string>(() => {
+    const savedFilter = localStorage.getItem('housekeeper_bookings_status_filter');
+    return savedFilter || 'all';
+  });
   
-  // Rejection modal state
-  const [showRejectionModal, setShowRejectionModal] = useState(false);
-  const [rejectionNote, setRejectionNote] = useState('');
-  const [bookingToReject, setBookingToReject] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>(() => {
+    const savedSearch = localStorage.getItem('housekeeper_bookings_search_term');
+    return savedSearch || '';
+  });
+  
+  // Save filters to local storage when they change
+  useEffect(() => {
+    localStorage.setItem('housekeeper_bookings_status_filter', statusFilter);
+  }, [statusFilter]);
+  
+  useEffect(() => {
+    localStorage.setItem('housekeeper_bookings_search_term', searchTerm);
+  }, [searchTerm]);
+  
+  // Rejection/cancellation modal state
+  const [showReasonModal, setShowReasonModal] = useState(false);
+  const [reasonNote, setReasonNote] = useState('');
+  const [bookingToUpdate, setBookingToUpdate] = useState<string | null>(null);
+  const [actionType, setActionType] = useState<'rejected' | 'cancelled'>('rejected');
+
+  // Function to clear all filters
+  const clearFilters = () => {
+    setStatusFilter('all');
+    setSearchTerm('');
+    
+    // Clear local storage as well
+    localStorage.removeItem('housekeeper_bookings_status_filter');
+    localStorage.removeItem('housekeeper_bookings_search_term');
+  };
 
   // Status colors mapping
   const statusColors = {
@@ -102,6 +129,9 @@ const BookingRequests: React.FC = () => {
 
   // Apply filters when they change
   useEffect(() => {
+    console.log('Filters changed - Status:', statusFilter, 'Search:', searchTerm);
+    console.log('Total bookings before filtering:', bookings.length);
+    
     if (bookings.length === 0) return;
     
     let filtered = [...bookings];
@@ -109,42 +139,48 @@ const BookingRequests: React.FC = () => {
     // Filter by status
     if (statusFilter !== 'all') {
       filtered = filtered.filter(booking => booking.status === statusFilter);
+      console.log(`After status filter (${statusFilter}):`, filtered.length);
     }
     
     // Search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(booking => 
-        booking.customer.firstName.toLowerCase().includes(term) ||
-        booking.customer.lastName.toLowerCase().includes(term) ||
-        booking.service.name.toLowerCase().includes(term) ||
-        booking.location.toLowerCase().includes(term)
+        (booking.customer?.firstName && booking.customer.firstName.toLowerCase().includes(term)) ||
+        (booking.customer?.lastName && booking.customer.lastName.toLowerCase().includes(term)) ||
+        (booking.service?.name && booking.service.name.toLowerCase().includes(term)) ||
+        (booking.service?.category && booking.service.category.toLowerCase().includes(term)) ||
+        (booking.location && booking.location.toLowerCase().includes(term)) ||
+        (booking.contactPhone && booking.contactPhone.includes(term))
       );
+      console.log('After search filter:', filtered.length);
     }
     
+    console.log('Final filtered bookings:', filtered.length);
     setFilteredBookings(filtered);
   }, [bookings, statusFilter, searchTerm]);
 
-  // Open rejection modal
-  const openRejectionModal = (bookingId: string) => {
-    setBookingToReject(bookingId);
-    setRejectionNote('');
-    setShowRejectionModal(true);
+  // Open rejection/cancellation modal
+  const openReasonModal = (bookingId: string, type: 'rejected' | 'cancelled') => {
+    setBookingToUpdate(bookingId);
+    setReasonNote('');
+    setActionType(type);
+    setShowReasonModal(true);
   };
 
-  // Handle rejection with note
-  const handleReject = () => {
-    if (!bookingToReject) return;
+  // Handle rejection/cancellation with note
+  const handleReasonSubmit = () => {
+    if (!bookingToUpdate) return;
     
-    if (!rejectionNote.trim()) {
-      toast.error('Please provide a reason for rejection');
+    if (!reasonNote.trim()) {
+      toast.error(`Please provide a reason for ${actionType === 'rejected' ? 'rejection' : 'cancellation'}`);
       return;
     }
     
-    handleStatusChange(bookingToReject, 'rejected', rejectionNote);
-    setShowRejectionModal(false);
-    setBookingToReject(null);
-    setRejectionNote('');
+    handleStatusChange(bookingToUpdate, actionType, reasonNote);
+    setShowReasonModal(false);
+    setBookingToUpdate(null);
+    setReasonNote('');
   };
 
   // Handle updating the booking status
@@ -240,29 +276,32 @@ const BookingRequests: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4 sm:mb-0">Booking Requests</h1>
-        
-        <div className="flex flex-col sm:flex-row w-full sm:w-auto space-y-2 sm:space-y-0 sm:space-x-3">
+    <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">Booking Requests</h1>
+        <p className="text-gray-600">Manage your service bookings and appointments</p>
+      </div>
+      
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-8">
+        <div className="flex flex-col lg:flex-row items-start gap-4">
           {/* Search input */}
-          <div className="relative flex-grow sm:max-w-xs">
+          <div className="relative flex-grow w-full lg:w-1/3">
             <input
               type="text"
-              placeholder="Search by name, service..."
-              className="w-full px-4 py-2 pr-10 border border-gray-300/60 bg-white/80 backdrop-blur-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-[#137D13] focus:border-transparent"
+              placeholder="Search by name, service, location..."
+              className="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#137D13] focus:border-transparent"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <FaSearch className="absolute right-3 top-3 text-gray-400" />
+            <FaSearch className="absolute right-3 top-3.5 text-gray-400" />
           </div>
           
           {/* Status filter */}
-          <div className="relative flex-shrink-0">
+          <div className="relative w-full lg:w-1/3">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="appearance-none w-full px-4 py-2 pl-10 border border-gray-300/60 bg-white/80 backdrop-blur-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-[#137D13] focus:border-transparent"
+              className="appearance-none w-full px-4 py-3 pl-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#137D13] focus:border-transparent"
             >
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
@@ -271,186 +310,253 @@ const BookingRequests: React.FC = () => {
               <option value="rejected">Rejected</option>
               <option value="cancelled">Cancelled</option>
             </select>
-            <FaFilter className="absolute left-3 top-3 text-gray-400" />
+            <FaFilter className="absolute left-3 top-3.5 text-gray-400" />
           </div>
+          
+          {/* Clear filters button - only show if filters are applied */}
+          {(statusFilter !== 'all' || searchTerm) && (
+            <button
+              onClick={clearFilters}
+              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center font-medium"
+            >
+              Clear Filters
+            </button>
+          )}
         </div>
       </div>
       
-      {/* Loading and error states */}
+      {/* Loading state */}
       {loading && (
         <div className="flex justify-center items-center py-12">
-          <div className="p-6 bg-white/70 backdrop-blur-sm rounded-lg shadow-md">
+          <div className="p-6 bg-white rounded-lg shadow-md">
             <FaSpinner className="animate-spin text-4xl text-[#137D13]" />
           </div>
         </div>
       )}
       
+      {/* Error state */}
       {error && !loading && (
-        <div className="bg-red-50/70 backdrop-blur-sm border border-red-100/60 text-red-700 rounded-lg p-4 mb-6">
-          {error}
-          <button 
-            className="ml-2 underline"
-            onClick={() => window.location.reload()}
-          >
-            Refresh
-          </button>
+        <div className="bg-red-50 rounded-lg p-4 mb-6">
+          <div className="flex items-center">
+            <FaTimesCircle className="text-red-500 mr-3" />
+            <span>{error}</span>
+            <button 
+              className="ml-auto px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200"
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </button>
+          </div>
         </div>
       )}
       
       {/* Booking Requests List */}
       {filteredBookings.length === 0 ? (
-        <div className="bg-yellow-50/70 backdrop-blur-sm border border-yellow-100/60 text-yellow-700 rounded-lg p-4 text-center">
-          No booking requests found. {statusFilter !== 'all' && (
-            <span>Try changing the status filter.</span>
+        <div className="bg-yellow-50 rounded-lg p-6 text-center border border-yellow-100">
+          <FaInfoCircle className="text-yellow-500 text-2xl mx-auto mb-2" />
+          <h3 className="text-lg font-medium text-gray-700 mb-1">No bookings found</h3>
+          <p className="text-gray-600 mb-4">
+            {statusFilter === 'all' && !searchTerm
+              ? "You don't have any booking requests yet."
+              : "No bookings match your current filters."}
+          </p>
+          {(statusFilter !== 'all' || searchTerm) && (
+            <button 
+              onClick={clearFilters}
+              className="px-4 py-2 bg-yellow-100 text-yellow-700 font-medium rounded-lg hover:bg-yellow-200 transition-colors"
+            >
+              Clear filters
+            </button>
           )}
         </div>
       ) : (
-        <div className="space-y-4">
-          {filteredBookings.map((booking) => (
-            <div 
-              key={booking._id}
-              className="bg-white/90 backdrop-blur-sm rounded-lg shadow-md border border-gray-200/60 overflow-hidden hover:shadow-lg transition-all duration-200"
-            >
-              <div className="p-4 sm:p-6">
-                <div className="sm:flex justify-between items-start">
-                  {/* Client and Service Info */}
-                  <div className="mb-4 sm:mb-0">
-                    <div className="flex items-center mb-2">
-                      <div className="w-12 h-12 rounded-full bg-gray-200 mr-3 overflow-hidden shadow-sm border-2 border-white">
-                        {booking.customer.profileImage ? (
-                          <img 
-                            src={formatImageUrl(booking.customer.profileImage)} 
-                            alt={`${booking.customer.firstName} ${booking.customer.lastName}`}
-                            className="w-full h-full object-cover" 
-                            onError={(e) => { (e.target as HTMLImageElement).src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"; }}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-[#137D13] text-white text-lg font-bold">
-                            {booking.customer.firstName.charAt(0)}
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-800">{booking.customer.firstName} {booking.customer.lastName}</h3>
-                        <p className="text-sm text-gray-500">{booking.contactPhone}</p>
-                      </div>
-                    </div>
-                    <div className="ml-13 sm:ml-0">
-                      <h4 className="font-medium">{booking.service.name}</h4>
-                      <p className="text-sm text-gray-600">{booking.service.category}</p>
-                    </div>
-                  </div>
-                  
-                  {/* Date, Price & Status */}
-                  <div className="sm:text-right">
-                    <div className="flex items-center sm:justify-end mb-2">
+        <>
+          {/* Filter info - show when filters are applied */}
+          {(statusFilter !== 'all' || searchTerm) && (
+            <div className="mb-6 p-4 bg-[#e8f5e8] rounded-lg text-[#137D13] flex justify-between items-center border border-[#c8e6c8]">
+              <div>
+                <span className="font-medium">Filtered results:</span> Showing {filteredBookings.length} of {bookings.length} bookings
+                {statusFilter !== 'all' && (
+                  <span className="ml-2">• Status: <span className="font-medium capitalize">{statusFilter}</span></span>
+                )}
+                {searchTerm && (
+                  <span className="ml-2">• Search: <span className="font-medium">"{searchTerm}"</span></span>
+                )}
+              </div>
+              <button
+                onClick={clearFilters}
+                className="text-[#137D13] hover:text-[#0c5c0c] font-medium text-sm bg-white px-3 py-1 rounded-md shadow-sm"
+              >
+                Clear
+              </button>
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {filteredBookings.map((booking) => (
+              <div 
+                key={booking._id}
+                className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-200"
+              >
+                <div className="p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    {/* Status Badge */}
+                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border ${statusColors[booking.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-700 border-gray-200'}`}>
+                      {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                    </span>
+                    
+                    {/* Date & Time */}
+                    <div className="flex items-center text-gray-600 text-sm">
                       <FaCalendarAlt className="text-[#137D13] mr-2" />
-                      <span>{formatDate(booking.date)} at {formatTime(booking.time)}</span>
-                    </div>
-                    <p className="font-bold text-[#137D13] text-lg">₱{booking.service.price}</p>
-                    <div className="mt-2">
-                      <span className={`inline-block px-3 py-1 rounded-full text-sm border ${statusColors[booking.status as keyof typeof statusColors] || 'bg-gray-100 text-gray-700 border-gray-200'}`}>
-                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                      </span>
+                      <span>{formatDate(booking.date)}</span>
+                      <span className="mx-1">•</span>
+                      <FaClock className="text-[#137D13] mr-1" />
+                      <span>{formatTime(booking.time)}</span>
                     </div>
                   </div>
-                </div>
-                
-                {/* Location */}
-                <div className="mt-4">
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Location:</span> {booking.location}
-                  </p>
-                </div>
-                
-                {/* Action buttons */}
-                <div className="mt-4 sm:mt-6 flex justify-end space-x-2">
-                  {booking.status === 'pending' && (
-                    <>
-                      <button
-                        onClick={() => handleStatusChange(booking._id, 'confirmed')}
-                        className="flex items-center px-4 py-2 bg-[#137D13]/90 text-white rounded-lg hover:bg-[#0c5c0c] transition-colors"
-                      >
-                        <FaCheck className="mr-2" />
-                        Accept
-                      </button>
-                      <button
-                        onClick={() => openRejectionModal(booking._id)}
-                        className="flex items-center px-4 py-2 bg-red-500/90 text-white rounded-lg hover:bg-red-600 transition-colors"
-                      >
-                        <FaTimes className="mr-2" />
-                        Reject
-                      </button>
-                    </>
-                  )}
                   
-                  {booking.status === 'confirmed' && (
+                  {/* Client Info */}
+                  <div className="flex items-center mb-4">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden shadow border-2 border-white">
+                      {booking.customer.profileImage ? (
+                        <img 
+                          src={formatImageUrl(booking.customer.profileImage)} 
+                          alt={`${booking.customer.firstName} ${booking.customer.lastName}`}
+                          className="w-full h-full object-cover" 
+                          onError={(e) => { (e.target as HTMLImageElement).src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"; }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-[#137D13] text-white text-lg font-bold">
+                          {booking.customer.firstName.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="font-semibold text-gray-800">{booking.customer.firstName} {booking.customer.lastName}</h3>
+                      <p className="text-sm text-gray-500 flex items-center">
+                        <FaPhone className="mr-1 text-xs" /> {booking.contactPhone}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Service Info */}
+                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="font-medium text-gray-800">{booking.service.name}</h4>
+                        <p className="text-sm text-gray-600">{booking.service.category}</p>
+                      </div>
+                      <p className="font-bold text-[#137D13] text-lg">₱{booking.service.price}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Location */}
+                  <div className="mb-5 flex items-start">
+                    <FaMapMarkerAlt className="text-[#137D13] mr-2 mt-0.5" />
+                    <p className="text-sm text-gray-700">{booking.location}</p>
+                  </div>
+                  
+                  {/* Action buttons */}
+                  <div className="flex flex-wrap gap-2 justify-end border-t border-gray-100 pt-4">
+                    {booking.status === 'pending' && (
+                      <>
+                        <button
+                          onClick={() => handleStatusChange(booking._id, 'confirmed')}
+                          className="flex items-center px-4 py-2 bg-[#137D13] text-white rounded-lg hover:bg-[#0c5c0c] transition-colors"
+                        >
+                          <FaCheck className="mr-2" />
+                          Accept
+                        </button>
+                        <button
+                          onClick={() => openReasonModal(booking._id, 'rejected')}
+                          className="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                        >
+                          <FaTimes className="mr-2" />
+                          Reject
+                        </button>
+                      </>
+                    )}
+                    
+                    {booking.status === 'confirmed' && (
+                      <>
+                        <button
+                          onClick={() => handleStatusChange(booking._id, 'completed')}
+                          className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                        >
+                          <FaCheck className="mr-2" />
+                          Complete
+                        </button>
+                        <button
+                          onClick={() => openReasonModal(booking._id, 'cancelled')}
+                          className="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                        >
+                          <FaCalendarTimes className="mr-2" />
+                          Cancel
+                        </button>
+                      </>
+                    )}
+                    
                     <button
-                      onClick={() => handleStatusChange(booking._id, 'completed')}
-                      className="flex items-center px-4 py-2 bg-blue-500/90 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                      onClick={() => handleMessageClick(booking.customer._id)}
+                      className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                     >
-                      <FaCheck className="mr-2" />
-                      Complete
+                      <FaComments className="mr-2" />
+                      Message
                     </button>
-                  )}
-                  
-                  {/* Message Button */}
-                  <button
-                    onClick={() => handleMessageClick(booking.customer._id)}
-                    className="flex items-center px-4 py-2 bg-blue-500/90 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                  >
-                    <FaComments className="mr-2" />
-                    Message
-                  </button>
-                  
-                  <button
-                    onClick={() => viewBookingDetails(booking)}
-                    className="flex items-center px-4 py-2 bg-gray-200/90 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                  >
-                    <FaEye className="mr-2" />
-                    View Details
-                  </button>
+                    
+                    <button
+                      onClick={() => viewBookingDetails(booking)}
+                      className="flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    >
+                      <FaEye className="mr-2" />
+                      Details
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </>
       )}
       
-      {/* Rejection Note Modal */}
-      {showRejectionModal && (
+      {/* Rejection/Cancellation Note Modal */}
+      {showReasonModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-6 transform transition-all">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Provide Reason for Rejection
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-auto p-6">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+              {actionType === 'rejected' 
+                ? 'Provide Reason for Rejection' 
+                : 'Provide Reason for Cancellation'}
             </h3>
             
-            <p className="text-sm text-gray-600 mb-4">
-              Please provide a reason why you are rejecting this booking request. This will be visible to the homeowner.
+            <p className="text-gray-600 mb-4">
+              {actionType === 'rejected'
+                ? 'Please provide a reason why you are rejecting this booking request. This will be visible to the homeowner.'
+                : 'Please provide a reason why you are cancelling this confirmed booking. This will be visible to the homeowner.'}
             </p>
             
             <textarea
-              value={rejectionNote}
-              onChange={(e) => setRejectionNote(e.target.value)}
-              placeholder="Enter reason for rejection..."
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#137D13] focus:border-transparent resize-none h-32"
+              value={reasonNote}
+              onChange={(e) => setReasonNote(e.target.value)}
+              placeholder={`Enter reason for ${actionType === 'rejected' ? 'rejection' : 'cancellation'}...`}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#137D13] focus:border-transparent resize-none h-32"
               required
             ></textarea>
             
-            <div className="mt-5 flex justify-end space-x-3">
+            <div className="mt-6 flex justify-end space-x-3">
               <button
                 type="button"
-                onClick={() => setShowRejectionModal(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+                onClick={() => setShowReasonModal(false)}
+                className="px-5 py-2.5 bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors font-medium"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                onClick={handleReject}
-                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                onClick={handleReasonSubmit}
+                className="px-5 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium"
               >
-                Reject Booking
+                {actionType === 'rejected' ? 'Reject Booking' : 'Cancel Booking'}
               </button>
             </div>
           </div>

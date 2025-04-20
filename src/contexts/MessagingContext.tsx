@@ -26,6 +26,8 @@ export interface Conversation {
     lastName: string;
     profileImage?: string;
     userType: string;
+    isOnline?: boolean;
+    lastSeen?: string;
   }[];
   lastMessage: Message;
   createdAt: string;
@@ -40,6 +42,8 @@ export interface User {
   lastName: string;
   profileImage?: string;
   userType: string;
+  isOnline?: boolean;
+  lastSeen?: string;
 }
 
 // Messaging context interface
@@ -51,6 +55,7 @@ interface MessagingContextType {
   loading: boolean;
   error: string | null;
   wsStatus: WebSocketStatus;
+  onlineUsers: Record<string, boolean>;
   setActiveConversation: (conversationId: string | null) => void;
   sendMessage: (content: string, receiverId: string) => void;
   markAsRead: (messageId: string) => void;
@@ -58,6 +63,7 @@ interface MessagingContextType {
   getConversationMessages: (otherUserId: string) => void;
   getUsers: () => void;
   startNewConversation: (userId: string) => void;
+  isUserOnline: (userId: string) => boolean;
 }
 
 // Create the messaging context
@@ -70,7 +76,7 @@ interface MessagingProviderProps {
 
 // Messaging provider component
 export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }) => {
-  const { user, token } = useAuth();
+  const { user, token, updateUserStatus } = useAuth();
   const { status: wsStatus, messages: wsMessages, connect, disconnect, send, clearMessages } = useWebSocket();
   
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -82,6 +88,7 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
   const [processedMessageIds, setProcessedMessageIds] = useState<Set<string>>(new Set());
   const [hasAttemptedConversationFetch, setHasAttemptedConversationFetch] = useState(false);
   const hasFetchedConversations = React.useRef(false);
+  const [onlineUsers, setOnlineUsers] = useState<Record<string, boolean>>({});
 
   // Track last request times to prevent spamming
   const lastRequestTime = useRef({
@@ -187,6 +194,20 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
     }
   }, [wsStatus, conversations.length, getConversations, loading, hasAttemptedConversationFetch]);
 
+  // Poll for active users status periodically
+  useEffect(() => {
+    if (wsStatus === WebSocketStatus.OPEN && user) {
+      // Poll for users and conversations every 30 seconds to keep status up to date
+      const statusInterval = setInterval(() => {
+        getUsers();
+        getConversations();
+        console.log('Polling for updated user statuses');
+      }, 30000);
+      
+      return () => clearInterval(statusInterval);
+    }
+  }, [wsStatus, user, getUsers, getConversations]);
+
   // Handle WebSocket messages
   useEffect(() => {
     if (wsMessages.length > 0) {
@@ -197,29 +218,27 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
         return;
       }
       
-      // Skip ping/pong messages
-      if (latestMessage.type === 'ping' || latestMessage.type === 'pong' || latestMessage.type === 'welcome') {
-        return;
-      }
-      
-      // Add message ID to processed set if it exists
+      // Add the message ID to the set of processed messages
       if (latestMessage.messageId) {
-        setProcessedMessageIds(prev => new Set(prev).add(latestMessage.messageId));
+        setProcessedMessageIds(prev => new Set([...prev, latestMessage.messageId!]));
       }
       
-      // Use console.debug for common message types to reduce console spam
-      if (['conversations', 'users'].includes(latestMessage.type)) {
-        console.debug('Processing message:', latestMessage.type);
-      } else {
-        console.log('Processing message:', latestMessage.type);
-      }
+      console.log('Received WebSocket message:', latestMessage.type);
       
+      // Handle different message types
       switch (latestMessage.type) {
         case 'auth_success':
-          console.log('WebSocket authentication successful');
-          // Only fetch if we don't already have data
-          if (users.length === 0) getUsers();
-          if (conversations.length === 0) getConversations();
+          // When successfully authenticated, set current user as online and get data
+          if (user) {
+            updateUserStatus(true);
+            
+            // Request the current online status of all users
+            setTimeout(() => {
+              console.log('Getting initial user data after auth');
+              getUsers();
+              getConversations();
+            }, 500);
+          }
           break;
           
         case 'auth_error':
@@ -231,21 +250,18 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
         case 'conversations':
           console.debug(`Received ${latestMessage.conversations?.length || 0} conversations`);
           setConversations(latestMessage.conversations || []);
-          setLoading(false);
           break;
           
         case 'all_users':
         case 'users':
           console.debug(`Received ${latestMessage.users?.length || 0} users`);
           setUsers(latestMessage.users || []);
-          setLoading(false);
           break;
           
         case 'conversation_history':
         case 'messages':
           console.log(`Received ${latestMessage.messages?.length || 0} messages`);
           setMessages(latestMessage.messages || []);
-          setLoading(false);
           break;
           
         case 'new_message':
@@ -313,12 +329,56 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
           setLoading(false);
           break;
           
+        case 'user_status_change':
+          const { user: statusUser, isOnline } = latestMessage;
+          console.log(`User status change: ${statusUser.firstName} ${statusUser.lastName} is now ${isOnline ? 'online' : 'offline'}`);
+          
+          // Update the online users record
+          setOnlineUsers(prev => ({
+            ...prev,
+            [statusUser._id]: isOnline
+          }));
+          
+          // Update users list with online status
+          setUsers(prev => {
+            // Check if user exists in our list
+            const userExists = prev.some(u => u._id === statusUser._id);
+            
+            if (!userExists) {
+              console.log(`Adding new user ${statusUser.firstName} to users list`);
+              // Add the user if they're not already in the list
+              return [...prev, { ...statusUser, isOnline }];
+            }
+            
+            // Otherwise update the existing user
+            return prev.map(u => 
+              u._id === statusUser._id 
+                ? { ...u, isOnline: isOnline, lastSeen: isOnline ? undefined : new Date().toISOString() } 
+                : u
+            );
+          });
+          
+          // Also update the user in conversations participants
+          setConversations(prev => 
+            prev.map(conv => ({
+              ...conv,
+              participants: conv.participants.map(p => 
+                p._id === statusUser._id 
+                  ? { ...p, isOnline: isOnline, lastSeen: isOnline ? undefined : new Date().toISOString() } 
+                  : p
+              )
+            }))
+          );
+          break;
+          
         default:
           console.log('Unhandled message type:', latestMessage.type);
           setLoading(false);
       }
+      
+      setLoading(false);
     }
-  }, [wsMessages, processedMessageIds, getConversations, getConversationMessages, getUsers, activeConversation, conversations, user, users.length]);
+  }, [wsMessages, processedMessageIds, getConversations, getConversationMessages, getUsers, activeConversation, conversations, user, users.length, updateUserStatus]);
 
   // Reconnect logic when status changes
   useEffect(() => {
@@ -440,14 +500,18 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
               firstName: user?.firstName || '',
               lastName: user?.lastName || '',
               profileImage: user?.profileImage,
-              userType: user?.userType || ''
+              userType: user?.userType || '',
+              isOnline: false,
+              lastSeen: undefined
             },
             {
               _id: selectedUser._id,
               firstName: selectedUser.firstName,
               lastName: selectedUser.lastName,
               profileImage: selectedUser.profileImage,
-              userType: selectedUser.userType
+              userType: selectedUser.userType,
+              isOnline: false,
+              lastSeen: undefined
             }
           ],
           lastMessage: {
@@ -505,15 +569,17 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
     }
   }, [conversations, user, getConversationMessages]);
 
+  // Helper function to check if a user is online
+  const isUserOnline = useCallback((userId: string) => {
+    return onlineUsers[userId] || false;
+  }, [onlineUsers]);
+
+  // When receiving users list from the server, process and update online status
   const processUserData = (userData: User): User => {
-    if (userData.profileImage && !userData.profileImage.startsWith('http')) {
-      const serverUrl = process.env.REACT_APP_SERVER_URL || 'http://localhost:8080';
-      return {
-        ...userData,
-        profileImage: `${serverUrl}${userData.profileImage}`
-      };
-    }
-    return userData;
+    return {
+      ...userData,
+      isOnline: onlineUsers[userData._id] || false
+    };
   };
 
   const value = {
@@ -524,13 +590,15 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
     loading,
     error,
     wsStatus,
+    onlineUsers,
     setActiveConversation: handleSetActiveConversation,
     sendMessage,
     markAsRead,
     getConversations,
     getConversationMessages,
     getUsers,
-    startNewConversation
+    startNewConversation,
+    isUserOnline
   };
 
   return (

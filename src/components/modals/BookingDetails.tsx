@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FaUser, FaCalendarCheck, FaClock, FaMapMarkerAlt, FaCommentAlt, 
-  FaPhone, FaInfoCircle, FaTimesCircle, FaCheckCircle, FaSpinner } from 'react-icons/fa';
+  FaPhone, FaInfoCircle, FaTimesCircle, FaCheckCircle, FaSpinner, FaCalendarTimes } from 'react-icons/fa';
 
 const BASE_URL = 'http://localhost:8080';
 
@@ -82,6 +82,8 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({
 }) => {
   const [rejectReason, setRejectReason] = useState('');
   const [showRejectForm, setShowRejectForm] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [showCancelForm, setShowCancelForm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -157,6 +159,26 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({
       setRejectReason('');
     } catch (error) {
       console.error('Error rejecting booking:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle booking cancelation
+  const handleCancel = async () => {
+    if (!cancelReason.trim()) {
+      alert('Please provide a reason for cancelation');
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      await onStatusChange(booking._id, 'cancelled', cancelReason);
+      setShowCancelForm(false);
+      setCancelReason('');
+      onClose(); // Close the modal after successful cancellation
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
     } finally {
       setIsLoading(false);
     }
@@ -312,23 +334,6 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({
           )}
           
           {/* Rejection Form */}
-          {showRejectForm && (
-            <div className="mb-6 border-t border-gray-200/60 pt-4">
-              <h4 className="text-lg font-semibold mb-3 text-gray-800">Rejection Reason</h4>
-              <p className="text-sm text-gray-500 mb-2">
-                Please provide a reason for rejecting this booking. This will be visible to the customer.
-              </p>
-              <textarea
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-                placeholder="Enter reason for rejection..."
-                className="w-full border border-gray-300 rounded-lg p-3 h-24 focus:outline-none focus:ring-2 focus:ring-[#137D13] focus:border-transparent bg-white/80"
-              ></textarea>
-            </div>
-          )}
-        </div>
-        
-        <div className="p-4 border-t border-gray-100 bg-white">
           {isHousekeeper && booking.status === 'pending' && !showRejectForm && (
             <div className="grid grid-cols-2 gap-3 w-full">
               <button
@@ -378,19 +383,70 @@ const BookingDetails: React.FC<BookingDetailsProps> = ({
             </div>
           )}
           
-          {isHousekeeper && booking.status === 'confirmed' && (
-            <button
-              onClick={handleComplete}
-              disabled={isLoading}
-              className="w-full bg-[#137D13] border-none text-white font-medium py-3 rounded-md hover:bg-[#0c5c0c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-            >
-              {isLoading ? (
-                <FaSpinner className="animate-spin inline-block mr-2" />
-              ) : (
-                <FaCheckCircle className="inline-block mr-2" />
-              )}
-              Mark as Completed
-            </button>
+          {isHousekeeper && booking.status === 'confirmed' && !showCancelForm && (
+            <div className="grid grid-cols-2 gap-3 w-full">
+              <button
+                onClick={handleComplete}
+                disabled={isLoading}
+                className="bg-[#137D13] border-none text-white font-medium py-3 rounded-md hover:bg-[#0c5c0c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {isLoading ? (
+                  <FaSpinner className="animate-spin inline-block mr-2" />
+                ) : (
+                  <FaCheckCircle className="inline-block mr-2" />
+                )}
+                Mark as Completed
+              </button>
+              <button
+                onClick={() => setShowCancelForm(true)}
+                disabled={isLoading}
+                className="bg-red-500 border-none text-white font-medium py-3 rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {isLoading ? (
+                  <FaSpinner className="animate-spin inline-block mr-2" />
+                ) : (
+                  <FaCalendarTimes className="inline-block mr-2" />
+                )}
+                Cancel Booking
+              </button>
+            </div>
+          )}
+          
+          {isHousekeeper && booking.status === 'confirmed' && showCancelForm && (
+            <div>
+              <p className="text-sm text-gray-600 mb-3">
+                Please provide a reason for cancellation. This will be visible to the homeowner.
+              </p>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Enter reason for cancellation..."
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#137D13] focus:border-transparent resize-none h-32 mb-3"
+                required
+              ></textarea>
+              
+              <div className="grid grid-cols-2 gap-3 w-full">
+                <button
+                  onClick={() => setShowCancelForm(false)}
+                  disabled={isLoading}
+                  className="bg-gray-200 text-gray-700 font-medium py-3 rounded-md hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={handleCancel}
+                  disabled={isLoading}
+                  className="bg-red-500 border-none text-white font-medium py-3 rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                >
+                  {isLoading ? (
+                    <FaSpinner className="animate-spin inline-block mr-2" />
+                  ) : (
+                    <FaCalendarTimes className="inline-block mr-2" />
+                  )}
+                  Confirm Cancellation
+                </button>
+              </div>
+            </div>
           )}
           
           {(booking.status === 'completed' || booking.status === 'rejected' || booking.status === 'cancelled' || !isHousekeeper) && (

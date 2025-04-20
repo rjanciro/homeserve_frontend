@@ -184,6 +184,13 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
     // Keep simplified pricing type handling
     if (name === 'pricingType') {
       setFormData({ ...formData, [name]: 'Fixed' });
+    } else if (name === 'price') {
+      // Handle price input specially to avoid NaN
+      const parsedValue = value === '' ? 0 : parseFloat(value);
+      setFormData({
+        ...formData,
+        [name]: isNaN(parsedValue) ? 0 : parsedValue
+      });
     } else {
       setFormData({
         ...formData,
@@ -517,7 +524,7 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
               <input
                 type="number"
                 name="price"
-                value={formData.price}
+                value={formData.price || 0}
                 onChange={handleFormChange}
                 min="0"
                 step="0.01"
