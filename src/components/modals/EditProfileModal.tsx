@@ -1,5 +1,5 @@
 import React, { useState, useEffect, KeyboardEvent } from 'react';
-import { FaTimes, FaSpinner, FaBriefcase, FaTools, FaPhone, FaEnvelope, FaTimes as FaClose } from 'react-icons/fa';
+import { FaTimes, FaSpinner, FaTools, FaPhone, FaEnvelope, FaTimes as FaClose } from 'react-icons/fa';
 
 export interface EditProfileModalProps {
   isOpen: boolean;
@@ -17,7 +17,6 @@ export interface EditProfileModalProps {
     zipCode: string;
     bio: string;
     // Make all type-specific fields optional
-    experience?: string;
     specialties?: string;
   };
   onSave: (data: EditProfileModalProps['formData']) => Promise<void>;
@@ -28,11 +27,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, fo
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Tags state
-  const [experienceTags, setExperienceTags] = useState<string[]>([]);
   const [specialtyTags, setSpecialtyTags] = useState<string[]>([]);
   
   // Tag input state
-  const [experienceInput, setExperienceInput] = useState('');
   const [specialtyInput, setSpecialtyInput] = useState('');
 
   // Update local form data when parent formData changes
@@ -61,13 +58,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, fo
       });
       
       // Initialize tags from string values if they exist
-      if (formData.experience) {
-        const expTags = formData.experience.split(',').map(tag => tag.trim()).filter(tag => tag);
-        setExperienceTags(expTags);
-      } else {
-        setExperienceTags([]);
-      }
-      
       if (formData.specialties) {
         const specTags = formData.specialties.split(',').map(tag => tag.trim()).filter(tag => tag);
         setSpecialtyTags(specTags);
@@ -81,10 +71,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, fo
   useEffect(() => {
     setEditFormData(prev => ({
       ...prev,
-      experience: experienceTags.join(', '),
       specialties: specialtyTags.join(', ')
     }));
-  }, [experienceTags, specialtyTags]);
+  }, [specialtyTags]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -141,19 +130,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, fo
   };
   
   // Tag handling functions
-  const handleExperienceInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setExperienceInput(e.target.value);
-  };
-  
   const handleSpecialtyInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSpecialtyInput(e.target.value);
-  };
-  
-  const addExperienceTag = () => {
-    if (experienceInput.trim() !== '') {
-      setExperienceTags([...experienceTags, experienceInput.trim()]);
-      setExperienceInput('');
-    }
   };
   
   const addSpecialtyTag = () => {
@@ -163,19 +141,8 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, fo
     }
   };
   
-  const removeExperienceTag = (index: number) => {
-    setExperienceTags(experienceTags.filter((_, i) => i !== index));
-  };
-  
   const removeSpecialtyTag = (index: number) => {
     setSpecialtyTags(specialtyTags.filter((_, i) => i !== index));
-  };
-  
-  const handleExperienceKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      addExperienceTag();
-    }
   };
   
   const handleSpecialtyKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -210,7 +177,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, fo
   if (!isOpen) return null;
 
   // Check what type of user form we're displaying based on properties
-  const isHousekeeper = 'experience' in formData || 'specialties' in formData;
+  const isHousekeeper = 'specialties' in formData;
 
   return (
     <div className="fixed inset-0 z-50">
@@ -295,44 +262,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onClose, fo
             {/* Conditional fields based on user type */}
             {isHousekeeper && (
               <>
-                <div className="text-left">
-                  <label htmlFor="experience" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                    <FaBriefcase className="mr-2 text-green-600" /> Experience
-                  </label>
-                  <div className="flex items-center">
-                    <input
-                      id="experience"
-                      type="text"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
-                      value={experienceInput}
-                      onChange={handleExperienceInputChange}
-                      onKeyDown={handleExperienceKeyDown}
-                      placeholder="Add experience and press Enter"
-                    />
-                    <button
-                      type="button"
-                      onClick={addExperienceTag}
-                      className="ml-2 px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-                    >
-                      Add
-                    </button>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {experienceTags.map((tag, index) => (
-                      <div key={index} className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full flex items-center">
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => removeExperienceTag(index)}
-                          className="ml-1 text-green-700 hover:text-green-900"
-                        >
-                          <FaClose size={12} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
                 <div className="text-left">
                   <label htmlFor="specialties" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
                     <FaTools className="mr-2 text-green-600" /> Specialties

@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
-import { FaTimes, FaMapMarkerAlt, FaClock, FaTag, FaMoneyBillWave, FaCalendarAlt, FaPhoneAlt, FaStar, FaInfoCircle } from 'react-icons/fa';
+import React, { useEffect, useState } from 'react';
+import { FaTimes, FaMapMarkerAlt, FaClock, FaTag, FaMoneyBillWave, FaCalendarAlt, FaPhoneAlt, FaStar, FaInfoCircle, FaCommentAlt, FaUserCircle } from 'react-icons/fa';
 import { Service } from '../services/service.service';
+import axios from 'axios';
 
 interface ServiceDetailsModalProps {
   isOpen: boolean;
@@ -18,6 +19,18 @@ interface ServiceDetailsModalProps {
   onBookService: () => void;
 }
 
+interface Review {
+  _id: string;
+  customerId: {
+    firstName: string;
+    lastName: string;
+    profileImage?: string;
+  };
+  rating: number;
+  review: string;
+  createdAt: string;
+}
+
 const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
   isOpen,
   onClose,
@@ -27,9 +40,18 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
   getServiceImageUrl,
   onBookService
 }) => {
-  if (!isOpen || !service || !housekeeper) return null;
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Add body scroll lock when modal is open
+  // Fetch reviews when the modal opens with a specific service
+  useEffect(() => {
+    if (isOpen && service) {
+      fetchReviews();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, service?._id]);
+
+  // Handle body scroll lock
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -38,6 +60,35 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
       document.body.style.overflow = 'auto';
     };
   }, [isOpen]);
+
+  const fetchReviews = async () => {
+    if (!service?._id) return;
+    
+    try {
+      setLoading(true);
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      const response = await axios.get(`${API_URL}/ratings/service/${service._id}`);
+      
+      if (response.data) {
+        setReviews(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching service reviews:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Format date for reviews
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  if (!isOpen || !service || !housekeeper) return null;
 
   // Get days of availability
   const availableDays = Object.entries(service.availability)
@@ -231,6 +282,70 @@ const ServiceDetailsModal: React.FC<ServiceDetailsModalProps> = ({
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Reviews Section */}
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800 flex items-center">
+                <FaCommentAlt className="mr-2 text-amber-500" />
+                Reviews & Ratings
+              </h3>
+              
+              {loading ? (
+                <div className="text-center py-6">
+                  <div className="inline-block animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-amber-500"></div>
+                  <p className="mt-2 text-gray-600">Loading reviews...</p>
+                </div>
+              ) : reviews.length === 0 ? (
+                <div className="bg-gray-50 rounded-lg p-4 text-center border border-gray-100">
+                  <p className="text-gray-600">No reviews yet for this service.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {reviews.map((review) => (
+                    <div key={review._id} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0 mr-3">
+                          {review.customerId.profileImage ? (
+                            <img 
+                              src={getProfileImageUrl(review.customerId.profileImage)} 
+                              alt={`${review.customerId.firstName} ${review.customerId.lastName}`}
+                              className="w-10 h-10 rounded-full object-cover"
+                              onError={(e) => { (e.target as HTMLImageElement).src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"; }}
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                              <FaUserCircle className="text-amber-500" size={20} />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className="font-medium text-gray-800">
+                              {review.customerId.firstName} {review.customerId.lastName}
+                            </h4>
+                            <span className="text-xs text-gray-500">
+                              {formatDate(review.createdAt)}
+                            </span>
+                          </div>
+                          <div className="flex mb-2">
+                            {[...Array(5)].map((_, i) => (
+                              <FaStar 
+                                key={i} 
+                                className={i < review.rating ? "text-amber-400" : "text-gray-200"} 
+                                size={14}
+                              />
+                            ))}
+                          </div>
+                          {review.review && (
+                            <p className="text-gray-700 text-sm">{review.review}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           

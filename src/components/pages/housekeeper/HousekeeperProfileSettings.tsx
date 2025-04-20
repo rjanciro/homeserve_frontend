@@ -220,7 +220,6 @@ const HousekeeperProfileSettings: React.FC = () => {
         cityMunicipality: updatedData.cityMunicipality || '',
         province: updatedData.province || '',
         zipCode: updatedData.zipCode || '',
-        experience: updatedData.experience || '',
         specialties: updatedData.specialties || ''
       };
       
@@ -451,22 +450,6 @@ const HousekeeperProfileSettings: React.FC = () => {
               <div>
                 <h3 className="font-medium mb-3 text-gray-700 text-left border-b border-gray-100 pb-2">Professional Information</h3>
                 <div className="space-y-4">
-                  <div className="text-left">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Experience</label>
-                    <div className="px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-white transition-colors flex flex-wrap gap-2">
-                      {formData.experience ? (
-                        formData.experience.split(',').map((exp, index) => (
-                          exp.trim() && (
-                            <span key={index} className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full inline-block">
-                              {exp.trim()}
-                            </span>
-                          )
-                        ))
-                      ) : (
-                        <span className="text-gray-500">Not provided</span>
-                      )}
-                    </div>
-                  </div>
                   
                   <div className="text-left">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Specialties</label>
@@ -578,41 +561,6 @@ const HousekeeperProfileSettings: React.FC = () => {
                 <FaLock className="mr-2" />
                 Change Password
               </button>
-            </div>
-          </div>
-          
-          {/* Availability Status */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow duration-300 mt-6">
-            <div className="flex items-center space-x-3 mb-6">
-              <div className="p-3 rounded-full bg-green-500/10">
-                <FaBriefcase className="text-green-600 text-xl" />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">Work Status</h2>
-                <p className="text-sm text-gray-600">Your current availability</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-between p-4 bg-green-100 rounded-lg mb-4">
-              <div className="flex items-center">
-                <div className={`h-3 w-3 ${isAvailable ? 'bg-green-500' : 'bg-gray-400'} rounded-full mr-2`}></div>
-                <span className="font-medium text-green-800">
-                  {isAvailable ? 'Available for work' : 'Not available for work'}
-                </span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="sr-only peer" 
-                  checked={isAvailable}
-                  onChange={handleAvailabilityChange}
-                />
-                <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-green-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
-              </label>
-            </div>
-            
-            <div className="text-sm text-gray-600">
-              <p>Toggle your availability to control whether homeowners can book your services.</p>
             </div>
           </div>
           

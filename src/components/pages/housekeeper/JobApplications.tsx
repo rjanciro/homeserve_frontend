@@ -304,6 +304,7 @@ const JobApplications: React.FC = () => {
   const [applicationRate, setApplicationRate] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [myApplications, setMyApplications] = useState<{[key: string]: JobApplicant}>({});
+  const [user, setUser] = useState<any>(null);
   
   // Advanced filters
   const [filters, setFilters] = useState<FilterState>({
@@ -313,6 +314,30 @@ const JobApplications: React.FC = () => {
     scheduleType: '',
     skills: ''
   });
+  
+  // Fetch user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('Authentication required');
+        }
+        
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/profile`,
+          { headers: { Authorization: `Bearer ${token}` }}
+        );
+        
+        setUser(response.data);
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+        toast.error('Failed to load user data');
+      }
+    };
+    
+    fetchUserData();
+  }, []);
   
   // Helper function to get the full profile image URL
   const getProfileImageUrl = (imagePath: string | undefined): string => {
@@ -557,6 +582,14 @@ const JobApplications: React.FC = () => {
   };
   
   const handleApplyToJob = (job: JobPost) => {
+    // Check if housekeeper is verified
+    const isVerified = user?.isVerified || user?.verificationStatus === 'approved' || user?.verificationStatus === 'verified';
+    
+    if (!isVerified) {
+      toast.error('Your account needs to be verified by an administrator before you can apply to jobs');
+      return;
+    }
+    
     setSelectedJob(job);
     setApplicationMessage('');
     setApplicationRate('');
@@ -711,6 +744,25 @@ const JobApplications: React.FC = () => {
           </button>
         )}
       </div>
+      
+      {/* Verification Status Banner */}
+      {user && !user.isVerified && user.verificationStatus !== 'approved' && user.verificationStatus !== 'verified' && (
+        <div className="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                Your account needs to be verified by an administrator before you can apply to jobs. 
+                Current status: <span className="font-medium capitalize">{user.verificationStatus}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Application status filter buttons */}
       <div className="mb-6 flex flex-wrap gap-3">
