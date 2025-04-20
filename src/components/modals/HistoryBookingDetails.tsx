@@ -58,6 +58,7 @@ interface HistoryBookingDetailsProps {
   serviceCategory?: string;
   housekeeper?: HousekeeperInfo;
   onMessageClick?: (housekeeper: HousekeeperInfo) => void;
+  onStatusUpdate?: () => Promise<void>;
 }
 
 const HistoryBookingDetails: React.FC<HistoryBookingDetailsProps> = ({

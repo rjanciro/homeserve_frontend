@@ -1,10 +1,11 @@
 import React, { useState, useEffect, Component, ErrorInfo, ReactNode } from 'react';
-import { FaCalendar, FaClock, FaMapMarkerAlt, FaSpinner, FaCheckCircle, FaTimesCircle, FaHourglassHalf, FaCheck, FaBan, FaFilter, FaEye, FaSearch, FaInfoCircle, FaComments, FaUser, FaPhone } from 'react-icons/fa';
+import { FaCalendar, FaClock, FaMapMarkerAlt, FaSpinner, FaCheckCircle, FaTimesCircle, FaHourglassHalf, FaCheck, FaBan, FaFilter, FaEye, FaSearch, FaInfoCircle, FaComments, FaUser, FaPhone, FaStar } from 'react-icons/fa';
 import useDocumentTitle from '../../../hooks/useDocumentTitle';
 import axios from 'axios';
 import { getAuthHeader } from '../../utils/auth';
 import toast from 'react-hot-toast';
 import HistoryBookingDetails from '../../modals/HistoryBookingDetails';
+import RatingModal from '../../modals/RatingModal';
 import { useNavigate } from 'react-router-dom';
 
 // Define booking interface
@@ -46,7 +47,13 @@ interface AppointmentCardProps {
   location: string;
   status: 'completed' | 'cancelled' | 'pending' | 'confirmed' | 'rejected';
   bookingId: string;
+  serviceId: string;
+  housekeeperId: string;
+  isRated?: boolean;
   onViewDetails: () => void;
+  onCompleteBooking?: () => void;
+  onRateService?: () => void;
+  isCompleting?: boolean;
 }
 
 const AppointmentCard: React.FC<AppointmentCardProps> = ({ 
@@ -58,7 +65,13 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
   location, 
   status,
   bookingId,
-  onViewDetails
+  serviceId,
+  housekeeperId,
+  isRated = false,
+  onViewDetails,
+  onCompleteBooking,
+  onRateService,
+  isCompleting = false
 }) => {
   // Status colors mapping
   const statusColors = {
@@ -115,6 +128,36 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
         
         {/* Action buttons */}
         <div className="flex flex-wrap gap-2 justify-end border-t border-gray-100 pt-4">
+          {status === 'confirmed' && onCompleteBooking && (
+            <button
+              onClick={onCompleteBooking}
+              disabled={isCompleting}
+              className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {isCompleting ? (
+                <>
+                  <FaSpinner className="animate-spin mr-2" />
+                  Completing...
+                </>
+              ) : (
+                <>
+                  <FaCheck className="mr-2" />
+                  Mark Complete
+                </>
+              )}
+            </button>
+          )}
+          
+          {status === 'completed' && !isRated && onRateService && (
+            <button
+              onClick={onRateService}
+              className="flex items-center px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+            >
+              <FaStar className="mr-2" />
+              Leave a Review
+            </button>
+          )}
+          
           <button
             onClick={onViewDetails}
             className="flex items-center px-4 py-2 bg-[#137D13] text-white rounded-lg hover:bg-[#0c5c0c] transition-colors"
@@ -186,6 +229,20 @@ const MyAppointmentsPage: React.FC = () => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   
+  // Add a loading state for the complete booking action
+  const [completingBookingId, setCompletingBookingId] = useState<string | null>(null);
+  
+  // Add state for rating modal
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [bookingToRate, setBookingToRate] = useState<{
+    bookingId: string;
+    serviceId: string;
+    housekeeperId: string;
+  } | null>(null);
+  
+  // State to track which bookings have been rated
+  const [ratedBookings, setRatedBookings] = useState<string[]>([]);
+  
   // Save filters to local storage when they change
   useEffect(() => {
     localStorage.setItem('homeowner_history_status_filter', statusFilter);
@@ -207,6 +264,7 @@ const MyAppointmentsPage: React.FC = () => {
   
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
   
+  // Fetch bookings and ratings data
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -223,33 +281,20 @@ const MyAppointmentsPage: React.FC = () => {
             if (response.data.length > 0) {
               console.log('First booking sample:', response.data[0]);
               
-              // Debug statusHistory data
-              if (response.data[0].statusHistory && response.data[0].statusHistory.length > 0) {
-                console.log('Status History Sample:', response.data[0].statusHistory);
+              // Fetch rated bookings information
+              try {
+                const ratedBookingsResponse = await axios.get(`${API_URL}/ratings/customer`, {
+                  headers: getAuthHeader()
+                });
                 
-                // Helper function to get note from history item (supports both 'note' and 'notes' fields)
-                const getNoteFromHistory = (historyItem: any): string | undefined => {
-                  return historyItem.note || historyItem.notes;
-                };
-                
-                // Check if there's any rejected status with notes
-                const rejectedStatus = response.data.find(booking => 
-                  booking.status === 'rejected' && 
-                  booking.statusHistory?.some((history: any) => 
-                    history.status === 'rejected' && 
-                    (history.note || history.notes)
-                  )
-                );
-                
-                if (rejectedStatus) {
-                  console.log('Found rejected booking with note:', rejectedStatus);
-                  const rejectionItem = rejectedStatus.statusHistory.find((h: any) => h.status === 'rejected');
-                  console.log('Rejection note:', getNoteFromHistory(rejectionItem));
-                } else {
-                  console.log('No rejected bookings with notes found');
+                if (ratedBookingsResponse.data && Array.isArray(ratedBookingsResponse.data)) {
+                  // Extract bookingIds that have been rated
+                  const ratedBookingIds = ratedBookingsResponse.data.map(rating => rating.bookingId);
+                  setRatedBookings(ratedBookingIds);
                 }
-              } else {
-                console.log('No status history found in the first booking');
+              } catch (ratingError) {
+                console.error('Error fetching rated bookings:', ratingError);
+                // Continue with the app even if ratings fetch fails
               }
             }
             setBookings(response.data);
@@ -320,7 +365,75 @@ const MyAppointmentsPage: React.FC = () => {
     }
   };
   
-  // Convert bookings to the format expected by AppointmentCard
+  // Function to handle booking completion directly from the card
+  const handleCompleteBooking = async (bookingId: string) => {
+    try {
+      setCompletingBookingId(bookingId);
+      const response = await axios.patch(
+        `${API_URL}/bookings/${bookingId}/complete`,
+        {},
+        { headers: getAuthHeader() }
+      );
+      
+      // Update local state to reflect the change
+      const updatedBookings = bookings.map(booking => {
+        if (booking._id === bookingId) {
+          return {
+            ...booking,
+            status: 'completed',
+            statusHistory: [
+              ...(booking.statusHistory || []),
+              {
+                status: 'completed',
+                date: new Date().toISOString(),
+                note: 'Service completed and confirmed by customer'
+              }
+            ]
+          };
+        }
+        return booking;
+      });
+      
+      setBookings(updatedBookings);
+      setFilteredBookings(
+        filteredBookings.map(booking => 
+          booking._id === bookingId 
+            ? {...booking, status: 'completed'} 
+            : booking
+        )
+      );
+      
+      toast.success('Booking marked as completed successfully!');
+    } catch (error) {
+      console.error('Error completing booking:', error);
+      toast.error('Failed to mark booking as completed. Please try again.');
+    } finally {
+      setCompletingBookingId(null);
+    }
+  };
+
+  // Handler for rating a service
+  const handleRateService = (bookingId: string, serviceId: string, housekeeperId: string) => {
+    setBookingToRate({
+      bookingId,
+      serviceId,
+      housekeeperId
+    });
+    setShowRatingModal(true);
+  };
+  
+  // Handler for when rating is successfully submitted
+  const handleRatingSubmitted = () => {
+    if (bookingToRate) {
+      // Add the rated booking ID to our local state of rated bookings
+      setRatedBookings(prev => [...prev, bookingToRate.bookingId]);
+      setBookingToRate(null);
+    }
+    // Refresh the bookings list to update any status changes
+    handleStatusUpdate();
+  };
+
+  // In the getAppointmentCards function, add the onRateService prop
   const getAppointmentCards = () => {
     return filteredBookings.map(booking => {
       // Add null checks to prevent errors if data is incomplete
@@ -333,6 +446,9 @@ const MyAppointmentsPage: React.FC = () => {
                      'Unknown Provider';
       }
       
+      // Check if this booking has been rated
+      const isRated = ratedBookings.includes(booking._id);
+      
       return {
         service: serviceName,
         provider: providerName,
@@ -342,10 +458,22 @@ const MyAppointmentsPage: React.FC = () => {
         location: booking.location || 'N/A',
         status: (booking.status as 'completed' | 'cancelled' | 'pending' | 'confirmed' | 'rejected') || 'pending',
         bookingId: booking._id,
+        serviceId: booking.service?._id || '',
+        housekeeperId: booking.housekeeper?._id || '',
+        isRated,
         onViewDetails: () => {
           setSelectedBooking(booking);
           setShowDetailsModal(true);
-        }
+        },
+        onCompleteBooking: 
+          booking.status === 'confirmed' 
+            ? () => handleCompleteBooking(booking._id)
+            : undefined,
+        onRateService:
+          booking.status === 'completed' && !isRated
+            ? () => handleRateService(booking._id, booking.service?._id || '', booking.housekeeper?._id || '')
+            : undefined,
+        isCompleting: completingBookingId === booking._id
       };
     });
   };
@@ -356,6 +484,26 @@ const MyAppointmentsPage: React.FC = () => {
     
     // Navigate to messages page with the provider ID as a query parameter
     navigate(`/messages?providerId=${housekeeper._id}`);
+  };
+
+  // Function to refresh bookings after status update
+  const handleStatusUpdate = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/bookings/customer`, {
+        headers: getAuthHeader()
+      });
+      
+      if (response.data && Array.isArray(response.data)) {
+        setBookings(response.data);
+        setFilteredBookings(response.data);
+      }
+    } catch (error) {
+      console.error('Error refreshing bookings:', error);
+      toast.error('Failed to refresh bookings');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -499,6 +647,19 @@ const MyAppointmentsPage: React.FC = () => {
             price={selectedBooking.service?.price}
             housekeeper={selectedBooking.housekeeper}
             onMessageClick={handleMessageHousekeeper}
+            onStatusUpdate={handleStatusUpdate}
+          />
+        )}
+        
+        {/* Rating Modal */}
+        {bookingToRate && (
+          <RatingModal
+            isOpen={showRatingModal}
+            onClose={() => setShowRatingModal(false)}
+            bookingId={bookingToRate.bookingId}
+            serviceId={bookingToRate.serviceId}
+            housekeeperId={bookingToRate.housekeeperId}
+            onRatingSubmitted={handleRatingSubmitted}
           />
         )}
       </div>
