@@ -13,6 +13,8 @@ export interface Message {
   };
   receiver: string;
   content: string;
+  imageUrl?: string;
+  messageType?: 'text' | 'image';
   read: boolean;
   createdAt: string;
 }
@@ -58,6 +60,7 @@ interface MessagingContextType {
   onlineUsers: Record<string, boolean>;
   setActiveConversation: (conversationId: string | null) => void;
   sendMessage: (content: string, receiverId: string) => void;
+  sendImageMessage: (imageUrl: string, receiverId: string) => void;
   markAsRead: (messageId: string) => void;
   getConversations: () => void;
   getConversationMessages: (otherUserId: string) => void;
@@ -464,6 +467,20 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
     });
   }, [send]);
 
+  // Send an image message
+  const sendImageMessage = useCallback((imageUrl: string, receiverId: string) => {
+    if (!imageUrl.trim()) return;
+    
+    send({
+      type: 'send_message',
+      receiverId,
+      content: 'Sent an image',
+      imageUrl,
+      messageType: 'image',
+      messageId: `temp-${Date.now()}`
+    });
+  }, [send]);
+
   // Mark message as read
   const markAsRead = useCallback((messageId: string) => {
     // Remove the prefix if we're sending a prefixed ID
@@ -593,6 +610,7 @@ export const MessagingProvider: React.FC<MessagingProviderProps> = ({ children }
     onlineUsers,
     setActiveConversation: handleSetActiveConversation,
     sendMessage,
+    sendImageMessage,
     markAsRead,
     getConversations,
     getConversationMessages,

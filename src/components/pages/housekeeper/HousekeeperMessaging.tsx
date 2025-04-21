@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FaSearch, FaUserCircle, FaPaperPlane, FaChevronLeft, FaPlus, FaTimes, FaCircle } from 'react-icons/fa';
+import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
+import { FaSearch, FaUserCircle, FaPaperPlane, FaChevronLeft, FaPlus, FaTimes, FaCircle, FaImage } from 'react-icons/fa';
 import useDocumentTitle from '../../../hooks/useDocumentTitle';
 import { useMessaging, Conversation, Message, User } from '../../../contexts/MessagingContext';
 import { useAuth } from '../../../hooks/useAuth';
 import { WebSocketStatus } from '../../../utils/websocket';
 import { profileService } from '../../services/profile.service';
 import { useLocation } from 'react-router-dom';
+import axios from 'axios';
 
 // Online Status Indicator component
 const OnlineStatusIndicator: React.FC<{ isOnline?: boolean, className?: string }> = ({ isOnline, className = "" }) => (
@@ -29,6 +30,7 @@ const ServiceProviderMessaging: React.FC = () => {
     wsStatus,
     setActiveConversation, 
     sendMessage, 
+    sendImageMessage,
     getConversations,
     getUsers,
     startNewConversation
@@ -39,8 +41,12 @@ const ServiceProviderMessaging: React.FC = () => {
   const [mobileView, setMobileView] = useState(false);
   const [showConversationList, setShowConversationList] = useState(true);
   const [showUsersList, setShowUsersList] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   
   const messageEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Get active conversation object
   const activeConversationObj = activeConversation 
@@ -138,12 +144,93 @@ const ServiceProviderMessaging: React.FC = () => {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!messageText.trim() || !activeConversation) return;
-    
     const otherUserId = getOtherUserId();
-    if (otherUserId) {
+    if (!otherUserId) return;
+    
+    if (imagePreview && uploadedImageUrl) {
+      // Send the uploaded image
+      sendImageMessage(uploadedImageUrl, otherUserId);
+      // Clear the image preview and uploaded image URL
+      setImagePreview(null);
+      setUploadedImageUrl(null);
+    } else if (messageText.trim()) {
       sendMessage(messageText, otherUserId);
       setMessageText('');
+    }
+  };
+  
+  // Handle file selection
+  const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      alert('Only image files are allowed');
+      return;
+    }
+    
+    // Check file size (10MB max)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size exceeds 10MB limit');
+      return;
+    }
+    
+    // Create a preview
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    
+    // Upload the image, but don't send it yet
+    await uploadImage(file);
+    
+    // Reset the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+  
+  // Upload image to server
+  const uploadImage = async (file: File) => {
+    try {
+      setIsUploading(true);
+      
+      const formData = new FormData();
+      formData.append('chatImage', file);
+      
+      const response = await axios.post(
+        'http://localhost:8080/api/profile/upload-chat-image',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+      
+      // Store the image URL, but don't send yet
+      if (response.data.imageUrl) {
+        setUploadedImageUrl(response.data.imageUrl);
+      }
+      
+      setIsUploading(false);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      setIsUploading(false);
+      alert('Failed to upload image');
+    }
+  };
+  
+  // Cancel image upload
+  const cancelImageUpload = () => {
+    setImagePreview(null);
+    setUploadedImageUrl(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
   
@@ -452,7 +539,22 @@ const ServiceProviderMessaging: React.FC = () => {
                               : 'bg-white text-gray-800 rounded-bl-none shadow-sm'
                           }`}
                         >
-                          <p>{message.content}</p>
+                          {message.messageType === 'image' && message.imageUrl ? (
+                            <div className="mb-1">
+                              <img 
+                                src={`http://localhost:8080${message.imageUrl}`}
+                                alt="Message attachment" 
+                                className="max-w-full rounded-lg cursor-pointer"
+                                onClick={() => window.open(`http://localhost:8080${message.imageUrl}`, '_blank')}
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.src = "https://via.placeholder.com/400x300?text=Image+Failed+to+Load";
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <p>{message.content}</p>
+                          )}
                           <div className={`text-xs mt-1 ${isCurrentUser ? 'text-green-100' : 'text-gray-500'}`}>
                             {formatMessageTime(message.createdAt)}
                           </div>
@@ -466,6 +568,21 @@ const ServiceProviderMessaging: React.FC = () => {
               
               {/* Message Input */}
               <div className="bg-white p-4 border-t border-gray-200 flex-shrink-0">
+                {imagePreview && (
+                  <div className="relative mb-2 inline-block">
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      className="h-32 rounded-lg border border-gray-200" 
+                    />
+                    <button
+                      onClick={cancelImageUpload}
+                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
+                    >
+                      <FaTimes size={12} />
+                    </button>
+                  </div>
+                )}
                 <form onSubmit={handleSendMessage} className="flex">
                   <input
                     type="text"
@@ -473,10 +590,30 @@ const ServiceProviderMessaging: React.FC = () => {
                     onChange={(e) => setMessageText(e.target.value)}
                     placeholder="Type a message..."
                     className="flex-1 px-4 py-2 border border-gray-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    disabled={!!imagePreview}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="bg-gray-100 text-gray-600 px-3 py-2 border-t border-b border-gray-200 hover:bg-gray-200 focus:outline-none"
+                    disabled={isUploading}
+                  >
+                    {isUploading ? (
+                      <span className="animate-pulse">...</span>
+                    ) : (
+                      <FaImage />
+                    )}
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    accept="image/*"
                   />
                   <button
                     type="submit"
-                    disabled={!messageText.trim()}
+                    disabled={(!messageText.trim() && !imagePreview) || isUploading}
                     className="bg-green-500 text-white px-4 py-2 rounded-r-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
                   >
                     <FaPaperPlane />
