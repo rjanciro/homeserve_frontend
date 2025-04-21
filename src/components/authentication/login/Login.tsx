@@ -91,21 +91,21 @@ const LoginPage: React.FC = () => {
   const isFormValid = email && password;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-md">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-6 sm:px-6">
+      <div className="w-full max-w-md mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-md">
         <div className="text-center mb-1">
           <img 
             src={logo} 
             alt="HomeServe" 
-            className="mx-auto w-40 mb-1" 
+            className="mx-auto w-28 sm:w-40 mb-1" 
           />
         </div>
 
         {/* User Type Toggle - Fixed Layout */}
-        <div className="relative bg-gray-100 rounded-full p-1 mb-8 h-12">
+        <div className="relative bg-gray-100 rounded-full p-1 mb-6 sm:mb-8 h-10 sm:h-12">
           {/* Sliding indicator */}
           <div 
-            className={`absolute top-1 h-10 rounded-full transition-all duration-300 ease-in-out ${
+            className={`absolute top-1 h-8 sm:h-10 rounded-full transition-all duration-300 ease-in-out ${
               userType === 'homeowner' 
                 ? 'w-[calc(50%-0.5rem)] left-1 bg-[#133E87]' 
                 : 'w-[calc(50%-0.5rem)] left-[calc(50%+0.5rem)] bg-[#137D13]'
@@ -115,7 +115,7 @@ const LoginPage: React.FC = () => {
           {/* Buttons container */}
           <div className="relative flex h-full w-full">
             <button
-              className={`flex-1 flex items-center justify-center z-10 rounded-full text-sm transition-colors ${
+              className={`flex-1 flex items-center justify-center z-10 rounded-full text-xs sm:text-sm transition-colors ${
                 userType === 'homeowner' ? 'text-white' : 'text-gray-500'
               }`}
               onClick={() => setUserType('homeowner')}
@@ -123,7 +123,7 @@ const LoginPage: React.FC = () => {
               Home Owner
             </button>
             <button
-              className={`flex-1 flex items-center justify-center z-10 rounded-full text-sm transition-colors ${
+              className={`flex-1 flex items-center justify-center z-10 rounded-full text-xs sm:text-sm transition-colors ${
                 userType === 'housekeeper' ? 'text-white' : 'text-gray-500'
               }`}
               onClick={() => setUserType('housekeeper')}
@@ -133,16 +133,16 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           <div>
-            <label className="block text-gray-600 mb-1">
+            <label className="block text-gray-600 text-sm mb-1">
               Email <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
               value={email}
               onChange={handleEmailChange}
-              className={`w-full px-4 py-3 border-b border-gray-300 focus:outline-none ${
+              className={`w-full px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-300 focus:outline-none ${
                 userType === 'homeowner' 
                   ? 'focus:border-[#133E87]' 
                   : 'focus:border-[#137D13]'
@@ -152,7 +152,7 @@ const LoginPage: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-gray-600 mb-1">
+            <label className="block text-gray-600 text-sm mb-1">
               Password <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -160,7 +160,7 @@ const LoginPage: React.FC = () => {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={handlePasswordChange}
-                className={`w-full px-4 py-3 border-b border-gray-300 focus:outline-none ${
+                className={`w-full px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-300 focus:outline-none ${
                   userType === 'homeowner' 
                     ? 'focus:border-[#133E87]' 
                     : 'focus:border-[#137D13]'
@@ -172,7 +172,7 @@ const LoginPage: React.FC = () => {
                 onClick={togglePasswordVisibility}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
-                {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
               </button>
             </div>
           </div>
@@ -184,7 +184,7 @@ const LoginPage: React.FC = () => {
                 userType === 'homeowner' 
                   ? 'text-[#1F5CD1]' 
                   : 'text-[#1FA91F]'
-              } text-sm`}
+              } text-xs sm:text-sm`}
             >
               Forgot Password?
             </Link>
@@ -193,7 +193,7 @@ const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={!isFormValid || isLoading}
-            className={`w-full py-3 px-4 rounded-full transition-colors
+            className={`w-full py-2.5 sm:py-3 px-4 rounded-full transition-colors text-sm sm:text-base
               ${isFormValid && !isLoading
                 ? userType === 'homeowner'
                   ? 'bg-[#133E87] text-white hover:bg-[#1F5CD1]'
@@ -204,7 +204,7 @@ const LoginPage: React.FC = () => {
           </button>
         </form>
 
-        <p className="mt-8 text-center text-gray-600">
+        <p className="mt-6 sm:mt-8 text-center text-xs sm:text-sm text-gray-600">
           Don't have an account?{' '}
           <Link 
             to={`/signup${userType === 'housekeeper' ? '?type=housekeeper' : ''}`} 
@@ -212,7 +212,7 @@ const LoginPage: React.FC = () => {
               userType === 'homeowner' 
                 ? 'text-[#133E87] hover:text-[#1F5CD1]' 
                 : 'text-[#137D13] hover:text-[#1FA91F]'
-            }`}
+            } font-medium`}
           >
             Sign up
           </Link>

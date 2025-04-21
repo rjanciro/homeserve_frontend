@@ -215,39 +215,39 @@ const HomeOwnerDashboard: React.FC = () => {
 
   // Dashboard stats cards
   const renderStatsCards = () => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <div className="bg-white rounded-lg shadow p-5 border-l-4 border-[#133E87]">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+      <div className="bg-white rounded-lg shadow p-3 sm:p-5 border-l-4 border-[#133E87]">
         <div className="flex items-center">
-          <div className="p-3 rounded-full bg-blue-100 text-[#133E87] mr-4">
-            <FaCalendarAlt className="w-6 h-6" />
+          <div className="p-2 sm:p-3 rounded-full bg-blue-100 text-[#133E87] mr-3 sm:mr-4">
+            <FaCalendarAlt className="w-4 h-4 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <p className="text-gray-500 text-sm">Active Bookings</p>
-            <p className="text-2xl font-semibold">{activeBookings.length}</p>
+            <p className="text-gray-500 text-xs sm:text-sm">Active Bookings</p>
+            <p className="text-xl sm:text-2xl font-semibold">{activeBookings.length}</p>
           </div>
         </div>
       </div>
       
-      <div className="bg-white rounded-lg shadow p-5 border-l-4 border-[#133E87]">
+      <div className="bg-white rounded-lg shadow p-3 sm:p-5 border-l-4 border-[#133E87]">
         <div className="flex items-center">
-          <div className="p-3 rounded-full bg-blue-100 text-[#133E87] mr-4">
-            <FaClipboardList className="w-6 h-6" />
+          <div className="p-2 sm:p-3 rounded-full bg-blue-100 text-[#133E87] mr-3 sm:mr-4">
+            <FaClipboardList className="w-4 h-4 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <p className="text-gray-500 text-sm">Job Posts</p>
-            <p className="text-2xl font-semibold">{recentPosts.length}</p>
+            <p className="text-gray-500 text-xs sm:text-sm">Job Posts</p>
+            <p className="text-xl sm:text-2xl font-semibold">{recentPosts.length}</p>
           </div>
         </div>
       </div>
       
-      <div className="bg-white rounded-lg shadow p-5 border-l-4 border-[#133E87]">
+      <div className="bg-white rounded-lg shadow p-3 sm:p-5 border-l-4 border-[#133E87] sm:col-span-2 md:col-span-1">
         <div className="flex items-center">
-          <div className="p-3 rounded-full bg-blue-100 text-[#133E87] mr-4">
-            <FaRegCalendarCheck className="w-6 h-6" />
+          <div className="p-2 sm:p-3 rounded-full bg-blue-100 text-[#133E87] mr-3 sm:mr-4">
+            <FaRegCalendarCheck className="w-4 h-4 sm:w-6 sm:h-6" />
           </div>
           <div>
-            <p className="text-gray-500 text-sm">Completed Services</p>
-            <p className="text-2xl font-semibold">{completedServices}</p>
+            <p className="text-gray-500 text-xs sm:text-sm">Completed Services</p>
+            <p className="text-xl sm:text-2xl font-semibold">{completedServices}</p>
           </div>
         </div>
       </div>
@@ -256,37 +256,37 @@ const HomeOwnerDashboard: React.FC = () => {
 
   // Quick actions section
   const renderQuickActions = () => (
-    <div className="bg-white rounded-lg shadow mb-6">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="font-semibold text-gray-800">Quick Actions</h3>
+    <div className="bg-white rounded-lg shadow mb-4 sm:mb-6">
+      <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+        <h3 className="font-semibold text-gray-800 text-sm sm:text-base">Quick Actions</h3>
       </div>
-      <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link to="/one-time-booking" className="flex flex-col items-center p-4 border rounded-lg hover:bg-blue-50 transition-colors">
-          <div className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 text-[#133E87] mb-2">
-            <FaCalendarAlt className="w-5 h-5" />
+      <div className="p-3 sm:p-6 grid grid-cols-2 gap-2 sm:gap-4">
+        <Link to="/one-time-booking" className="flex flex-col items-center p-2 sm:p-4 border rounded-lg hover:bg-blue-50 transition-colors">
+          <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-blue-100 text-[#133E87] mb-1 sm:mb-2">
+            <FaCalendarAlt className="w-3 h-3 sm:w-5 sm:h-5" />
           </div>
-          <span className="text-sm text-center font-medium text-gray-700">Book a Service</span>
+          <span className="text-xs sm:text-sm text-center font-medium text-gray-700">Book a Service</span>
         </Link>
         
-        <Link to="/job-posts" className="flex flex-col items-center p-4 border rounded-lg hover:bg-blue-50 transition-colors">
-          <div className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 text-[#133E87] mb-2">
-            <FaPlus className="w-5 h-5" />
+        <Link to="/job-posts" className="flex flex-col items-center p-2 sm:p-4 border rounded-lg hover:bg-blue-50 transition-colors">
+          <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-blue-100 text-[#133E87] mb-1 sm:mb-2">
+            <FaPlus className="w-3 h-3 sm:w-5 sm:h-5" />
           </div>
-          <span className="text-sm text-center font-medium text-gray-700">Create Job Post</span>
+          <span className="text-xs sm:text-sm text-center font-medium text-gray-700">Create Job Post</span>
         </Link>
         
-        <Link to="/messages" className="flex flex-col items-center p-4 border rounded-lg hover:bg-blue-50 transition-colors">
-          <div className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 text-[#133E87] mb-2">
-            <FaComments className="w-5 h-5" />
+        <Link to="/messages" className="flex flex-col items-center p-2 sm:p-4 border rounded-lg hover:bg-blue-50 transition-colors">
+          <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-blue-100 text-[#133E87] mb-1 sm:mb-2">
+            <FaComments className="w-3 h-3 sm:w-5 sm:h-5" />
           </div>
-          <span className="text-sm text-center font-medium text-gray-700">Messages</span>
+          <span className="text-xs sm:text-sm text-center font-medium text-gray-700">Messages</span>
         </Link>
         
-        <Link to="/history" className="flex flex-col items-center p-4 border rounded-lg hover:bg-blue-50 transition-colors">
-          <div className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 text-[#133E87] mb-2">
-            <FaHistory className="w-5 h-5" />
+        <Link to="/history" className="flex flex-col items-center p-2 sm:p-4 border rounded-lg hover:bg-blue-50 transition-colors">
+          <div className="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-blue-100 text-[#133E87] mb-1 sm:mb-2">
+            <FaHistory className="w-3 h-3 sm:w-5 sm:h-5" />
           </div>
-          <span className="text-sm text-center font-medium text-gray-700">View History</span>
+          <span className="text-xs sm:text-sm text-center font-medium text-gray-700">View History</span>
         </Link>
       </div>
     </div>
@@ -294,25 +294,25 @@ const HomeOwnerDashboard: React.FC = () => {
 
   // Active bookings section
   const renderActiveBookings = () => (
-    <div className="bg-white rounded-lg shadow mb-6">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="font-semibold text-gray-800">Active Bookings</h3>
+    <div className="bg-white rounded-lg shadow mb-4 sm:mb-6">
+      <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+        <h3 className="font-semibold text-gray-800 text-sm sm:text-base">Active Bookings</h3>
       </div>
-      <div className="p-6">
+      <div className="p-3 sm:p-6">
         {activeBookings.length === 0 ? (
-          <div className="text-center py-6">
-            <FaCalendarAlt className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-            <p className="text-gray-500">You don't have any active bookings.</p>
-            <Link to="/one-time-booking" className="mt-3 inline-block px-4 py-2 bg-[#133E87] text-white rounded-md hover:bg-blue-700 transition-colors">
+          <div className="text-center py-4 sm:py-6">
+            <FaCalendarAlt className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-gray-300 mb-2 sm:mb-3" />
+            <p className="text-gray-500 text-sm">You don't have any active bookings.</p>
+            <Link to="/one-time-booking" className="mt-3 inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-[#133E87] text-white text-xs sm:text-sm rounded-md hover:bg-blue-700 transition-colors">
               Book a Service
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {activeBookings.map((booking) => (
-              <div key={booking._id} className="border rounded-lg p-4 hover:bg-gray-50">
+              <div key={booking._id} className="border rounded-lg p-3 sm:p-4 hover:bg-gray-50">
                 <div className="flex items-start">
-                  <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 mr-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 mr-3 sm:mr-4">
                     {booking.housekeeper.profileImage ? (
                       <img 
                         src={getImageUrl(booking.housekeeper.profileImage)} 
@@ -327,8 +327,8 @@ const HomeOwnerDashboard: React.FC = () => {
                     )}
                   </div>
                   <div className="flex-grow">
-                    <h4 className="font-medium text-gray-800">{booking.service.name}</h4>
-                    <p className="text-sm text-gray-500">
+                    <h4 className="font-medium text-gray-800 text-sm sm:text-base">{booking.service.name}</h4>
+                    <p className="text-xs sm:text-sm text-gray-500">
                       {booking.housekeeper.businessName || 
                         `${booking.housekeeper.firstName} ${booking.housekeeper.lastName}`}
                     </p>
@@ -337,7 +337,7 @@ const HomeOwnerDashboard: React.FC = () => {
                         <FaCalendarAlt className="mr-1 w-3 h-3" />
                         {formatDate(booking.date)}
                       </span>
-                      <span className="inline-flex items-center text-xs text-gray-600 ml-3">
+                      <span className="inline-flex items-center text-xs text-gray-600 ml-2 sm:ml-3">
                         <FaClock className="mr-1 w-3 h-3" />
                         {booking.time}
                       </span>
@@ -345,7 +345,7 @@ const HomeOwnerDashboard: React.FC = () => {
                         booking.status === 'pending' ? 'text-yellow-600' : 
                         booking.status === 'accepted' ? 'text-green-600' : 
                         booking.status === 'rejected' ? 'text-red-600' : 'text-gray-600'
-                      } ml-3`}>
+                      } ml-2 sm:ml-3`}>
                         <span className={`w-2 h-2 rounded-full mr-1 ${
                           booking.status === 'pending' ? 'bg-yellow-400' : 
                           booking.status === 'accepted' ? 'bg-green-400' : 
@@ -359,7 +359,7 @@ const HomeOwnerDashboard: React.FC = () => {
               </div>
             ))}
             <div className="text-center pt-2">
-              <Link to="/history" className="text-[#133E87] text-sm hover:underline">
+              <Link to="/history" className="text-[#133E87] text-xs sm:text-sm hover:underline">
                 View all bookings
               </Link>
             </div>
@@ -372,37 +372,37 @@ const HomeOwnerDashboard: React.FC = () => {
   // Recent job posts section
   const renderRecentJobPosts = () => (
     <div className="bg-white rounded-lg shadow">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="font-semibold text-gray-800">Recent Job Posts</h3>
+      <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200">
+        <h3 className="font-semibold text-gray-800 text-sm sm:text-base">Recent Job Posts</h3>
       </div>
-      <div className="p-6">
+      <div className="p-3 sm:p-6">
         {recentPosts.length === 0 ? (
-          <div className="text-center py-6">
-            <FaClipboardList className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-            <p className="text-gray-500">You haven't created any job posts yet.</p>
-            <Link to="/job-posts" className="mt-3 inline-block px-4 py-2 bg-[#133E87] text-white rounded-md hover:bg-blue-700 transition-colors">
+          <div className="text-center py-4 sm:py-6">
+            <FaClipboardList className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-gray-300 mb-2 sm:mb-3" />
+            <p className="text-gray-500 text-sm">You haven't created any job posts yet.</p>
+            <Link to="/job-posts" className="mt-3 inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-[#133E87] text-white text-xs sm:text-sm rounded-md hover:bg-blue-700 transition-colors">
               Create a Job Post
             </Link>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {recentPosts.map((post) => (
-              <div key={post._id} className="border rounded-lg p-4 hover:bg-gray-50">
-                <h4 className="font-medium text-gray-800">{post.title}</h4>
-                <p className="text-sm text-gray-500 line-clamp-2 mt-1">{post.description}</p>
+              <div key={post._id} className="border rounded-lg p-3 sm:p-4 hover:bg-gray-50">
+                <h4 className="font-medium text-gray-800 text-sm sm:text-base">{post.title}</h4>
+                <p className="text-xs sm:text-sm text-gray-500 line-clamp-2 mt-1">{post.description}</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <span className="inline-flex items-center text-xs text-gray-600">
                     <FaBriefcase className="mr-1 w-3 h-3" />
                     {post.serviceType}
                   </span>
-                  <span className="inline-flex items-center text-xs text-gray-600 ml-3">
+                  <span className="inline-flex items-center text-xs text-gray-600 ml-2 sm:ml-3">
                     <span className="mr-1">₱</span>
                     {post.budget.toLocaleString()}
                   </span>
                   <span className={`inline-flex items-center text-xs ${
                     post.status === 'open' ? 'text-green-600' : 
                     post.status === 'closed' ? 'text-red-600' : 'text-gray-600'
-                  } ml-3`}>
+                  } ml-2 sm:ml-3`}>
                     <span className={`w-2 h-2 rounded-full mr-1 ${
                       post.status === 'open' ? 'bg-green-400' : 
                       post.status === 'closed' ? 'bg-red-400' : 'bg-gray-400'
@@ -413,7 +413,7 @@ const HomeOwnerDashboard: React.FC = () => {
               </div>
             ))}
             <div className="text-center pt-2">
-              <Link to="/job-posts" className="text-[#133E87] text-sm hover:underline">
+              <Link to="/job-posts" className="text-[#133E87] text-xs sm:text-sm hover:underline">
                 View all job posts
               </Link>
             </div>
@@ -433,15 +433,15 @@ const HomeOwnerDashboard: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">
         Welcome, {user?.firstName}!
       </h1>
       
       {renderStatsCards()}
       {renderQuickActions()}
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {renderActiveBookings()}
         {renderRecentJobPosts()}
       </div>

@@ -93,55 +93,55 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
 
   return (
     <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-200">
-      <div className="p-5">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3 sm:mb-4">
           {/* Status Badge */}
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${statusColors[status]}`}>
+          <span className={`inline-flex items-center px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm font-medium border ${statusColors[status]}`}>
             {statusIcons[status]}
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </span>
           
           {/* Date & Time */}
-          <div className="flex items-center text-gray-600 text-sm">
-            <FaCalendar className="text-[#137D13] mr-2" />
+          <div className="flex items-center text-gray-600 text-xs sm:text-sm">
+            <FaCalendar className="text-[#137D13] mr-1.5 sm:mr-2 text-xs sm:text-sm" />
             <span>{date}</span>
             <span className="mx-1">•</span>
-            <FaClock className="text-[#137D13] mr-1" />
+            <FaClock className="text-[#137D13] mr-1 text-xs sm:text-sm" />
             <span>{time}</span>
           </div>
         </div>
         
         {/* Service Info */}
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-1">{service}</h3>
+        <div className="mb-3 sm:mb-4">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-1">{service}</h3>
           <div className="flex items-center text-gray-600">
-            <FaUser className="mr-2 text-sm text-[#137D13]" />
-            <p className="text-sm">{provider}</p>
+            <FaUser className="mr-1.5 sm:mr-2 text-xs sm:text-sm text-[#137D13]" />
+            <p className="text-xs sm:text-sm">{provider}</p>
           </div>
         </div>
         
         {/* Location */}
-        <div className="mb-5 flex items-start">
-          <FaMapMarkerAlt className="text-[#137D13] mr-2 mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-gray-700">{location}</p>
+        <div className="mb-4 sm:mb-5 flex items-start">
+          <FaMapMarkerAlt className="text-[#137D13] mr-1.5 sm:mr-2 mt-0.5 flex-shrink-0 text-xs sm:text-sm" />
+          <p className="text-xs sm:text-sm text-gray-700">{location}</p>
         </div>
         
         {/* Action buttons */}
-        <div className="flex flex-wrap gap-2 justify-end border-t border-gray-100 pt-4">
+        <div className="flex flex-wrap gap-2 justify-end border-t border-gray-100 pt-3 sm:pt-4">
           {status === 'confirmed' && onCompleteBooking && (
             <button
               onClick={onCompleteBooking}
               disabled={isCompleting}
-              className="flex items-center px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
+              className="flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-70 disabled:cursor-not-allowed text-xs sm:text-sm"
             >
               {isCompleting ? (
                 <>
-                  <FaSpinner className="animate-spin mr-2" />
+                  <FaSpinner className="animate-spin mr-1.5 sm:mr-2" />
                   Completing...
                 </>
               ) : (
                 <>
-                  <FaCheck className="mr-2" />
+                  <FaCheck className="mr-1.5 sm:mr-2" />
                   Mark Complete
                 </>
               )}
@@ -151,18 +151,18 @@ const AppointmentCard: React.FC<AppointmentCardProps> = ({
           {status === 'completed' && !isRated && onRateService && (
             <button
               onClick={onRateService}
-              className="flex items-center px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+              className="flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors text-xs sm:text-sm"
             >
-              <FaStar className="mr-2" />
+              <FaStar className="mr-1.5 sm:mr-2" />
               Leave a Review
             </button>
           )}
           
           <button
             onClick={onViewDetails}
-            className="flex items-center px-4 py-2 bg-[#137D13] text-white rounded-lg hover:bg-[#0c5c0c] transition-colors"
+            className="flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-[#137D13] text-white rounded-lg hover:bg-[#0c5c0c] transition-colors text-xs sm:text-sm"
           >
-            <FaEye className="mr-2" />
+            <FaEye className="mr-1.5 sm:mr-2" />
             View Details
           </button>
         </div>
@@ -508,32 +508,32 @@ const MyAppointmentsPage: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Booking History</h1>
-          <p className="text-gray-600">View your past and upcoming service appointments</p>
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-6xl">
+        <div className="mb-5 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">Booking History</h1>
+          <p className="text-sm sm:text-base text-gray-600">View your past and upcoming service appointments</p>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-8">
-          <div className="flex flex-col lg:flex-row items-start gap-4">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 sm:p-5 mb-5 sm:mb-8">
+          <div className="flex flex-col space-y-3 sm:space-y-4 md:space-y-0 md:flex-row md:items-start md:gap-3 lg:gap-4">
             {/* Search input */}
-            <div className="relative flex-grow w-full lg:w-1/3">
+            <div className="relative flex-grow w-full md:w-1/3">
               <input
                 type="text"
                 placeholder="Search by service, provider, location..."
-                className="w-full px-4 py-3 pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#137D13] focus:border-transparent"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 pr-8 sm:pr-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#137D13] focus:border-transparent text-sm sm:text-base"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <FaSearch className="absolute right-3 top-3.5 text-gray-400" />
+              <FaSearch className="absolute right-3 top-3 text-gray-400" />
             </div>
             
             {/* Status filter */}
-            <div className="relative w-full lg:w-1/3">
+            <div className="relative w-full md:w-1/3">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="appearance-none w-full px-4 py-3 pl-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#137D13] focus:border-transparent"
+                className="appearance-none w-full px-3 sm:px-4 py-2.5 sm:py-3 pl-8 sm:pl-10 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#137D13] focus:border-transparent text-sm sm:text-base"
               >
                 <option value="all">All Bookings</option>
                 <option value="pending">Pending</option>
@@ -542,14 +542,14 @@ const MyAppointmentsPage: React.FC = () => {
                 <option value="rejected">Rejected</option>
                 <option value="cancelled">Cancelled</option>
               </select>
-              <FaFilter className="absolute left-3 top-3.5 text-gray-400" />
+              <FaFilter className="absolute left-3 top-3 text-gray-400" />
             </div>
             
             {/* Clear filters button - only show if filters are applied */}
             {(statusFilter !== 'all' || searchTerm) && (
               <button
                 onClick={clearFilters}
-                className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center font-medium"
+                className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center font-medium text-sm sm:text-base w-full md:w-auto"
               >
                 Clear Filters
               </button>
@@ -559,17 +559,17 @@ const MyAppointmentsPage: React.FC = () => {
 
         {loading ? (
           <div className="flex justify-center items-center h-64">
-            <div className="p-6 bg-white rounded-lg shadow-md">
-              <FaSpinner className="animate-spin text-4xl text-[#137D13]" />
+            <div className="p-4 sm:p-6 bg-white rounded-lg shadow-md">
+              <FaSpinner className="animate-spin text-3xl sm:text-4xl text-[#137D13]" />
             </div>
           </div>
         ) : error ? (
-          <div className="bg-red-50 rounded-lg p-4 mb-6">
+          <div className="bg-red-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
             <div className="flex items-center">
-              <FaTimesCircle className="text-red-500 mr-3" />
-              <span>{error}</span>
+              <FaTimesCircle className="text-red-500 mr-2 sm:mr-3 flex-shrink-0" />
+              <span className="text-sm sm:text-base">{error}</span>
               <button 
-                className="ml-auto px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200"
+                className="ml-auto px-2 sm:px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-xs sm:text-sm"
                 onClick={() => window.location.reload()}
               >
                 Retry
@@ -577,10 +577,10 @@ const MyAppointmentsPage: React.FC = () => {
             </div>
           </div>
         ) : filteredBookings.length === 0 ? (
-          <div className="bg-yellow-50 rounded-lg p-6 text-center border border-yellow-100">
-            <FaInfoCircle className="text-yellow-500 text-2xl mx-auto mb-2" />
-            <h3 className="text-lg font-medium text-gray-700 mb-1">No bookings found</h3>
-            <p className="text-gray-600 mb-4">
+          <div className="bg-yellow-50 rounded-lg p-4 sm:p-6 text-center border border-yellow-100">
+            <FaInfoCircle className="text-yellow-500 text-xl sm:text-2xl mx-auto mb-2" />
+            <h3 className="text-base sm:text-lg font-medium text-gray-700 mb-1">No bookings found</h3>
+            <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4">
               {statusFilter === 'all' && !searchTerm
                 ? "You don't have any bookings yet." 
                 : "No bookings match your current filters."}
@@ -588,7 +588,7 @@ const MyAppointmentsPage: React.FC = () => {
             {(statusFilter !== 'all' || searchTerm) && (
               <button 
                 onClick={clearFilters}
-                className="px-4 py-2 bg-yellow-100 text-yellow-700 font-medium rounded-lg hover:bg-yellow-200 transition-colors"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-yellow-100 text-yellow-700 font-medium rounded-lg hover:bg-yellow-200 transition-colors text-xs sm:text-sm"
               >
                 Clear filters
               </button>
@@ -598,8 +598,8 @@ const MyAppointmentsPage: React.FC = () => {
           <>
             {/* Filter info - show when filters are applied */}
             {(statusFilter !== 'all' || searchTerm) && (
-              <div className="mb-6 p-4 bg-[#e8f5e8] rounded-lg text-[#137D13] flex justify-between items-center border border-[#c8e6c8]">
-                <div>
+              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-[#e8f5e8] rounded-lg text-[#137D13] flex flex-col sm:flex-row justify-between items-start sm:items-center border border-[#c8e6c8] gap-2 sm:gap-0">
+                <div className="text-xs sm:text-sm">
                   <span className="font-medium">Filtered results:</span> Showing {filteredBookings.length} of {bookings.length} bookings
                   {statusFilter !== 'all' && (
                     <span className="ml-2">• Status: <span className="font-medium capitalize">{statusFilter}</span></span>
@@ -610,14 +610,14 @@ const MyAppointmentsPage: React.FC = () => {
                 </div>
                 <button
                   onClick={clearFilters}
-                  className="text-[#137D13] hover:text-[#0c5c0c] font-medium text-sm bg-white px-3 py-1 rounded-md shadow-sm"
+                  className="text-[#137D13] hover:text-[#0c5c0c] font-medium text-xs sm:text-sm bg-white px-2 sm:px-3 py-1 rounded-md shadow-sm w-full sm:w-auto text-center"
                 >
                   Clear
                 </button>
               </div>
             )}
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
               {getAppointmentCards().map((appointment, index) => (
                 <AppointmentCard key={filteredBookings[index]._id} {...appointment} />
               ))}

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaBroom, FaHandshake, FaStar, FaLightbulb, FaCheckCircle, FaCode, FaArrowRight, FaArrowLeft } from 'react-icons/fa';
+import { FaBroom, FaHandshake, FaStar, FaLightbulb, FaCheckCircle, FaCode, FaArrowRight, FaArrowLeft, FaBars, FaTimes } from 'react-icons/fa';
 import useDocumentTitle from '../../hooks/useDocumentTitle';
 import RenzProfilePic from '../../assets/images/Anciro_Renz_Joshua_3C.png';
 
@@ -9,36 +9,13 @@ const AboutUsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      <nav className="fixed w-full bg-white z-50 shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold text-[#133E87] flex items-center">
-            <Link to="/" className="flex items-center">
-              <span className="text-3xl mr-2">HomeServe</span>
-            </Link>
-          </div>
-          <div className="hidden md:flex items-center space-x-8">
-            <a href="/#services" className="text-gray-600 hover:text-gray-900 transition-colors">Services</a>
-            <a href="/#how-it-works" className="text-gray-600 hover:text-gray-900 transition-colors">How It Works</a>
-            <Link to="/about" className="text-gray-600 hover:text-gray-900 transition-colors">About Us</Link>
-            <a href="/login" className="bg-[#133E87] text-white px-6 py-2 rounded-full hover:bg-[#3A80D2] transition-colors font-medium">
-              Login
-            </a>
-          </div>
-          <button className="md:hidden text-gray-600">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-      </nav>
-
-      
+      <Navbar />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-white to-[#F2F2F2]">
         {/* Back to Home Button */}
       <div className="container mx-auto px-[5%] pt-28">
-        <Link to="/" className="inline-flex items-center text-[#133E87] hover:text-[#3A80D2] transition-colors">
+        <Link to="/" className="hidden sm:inline-flex items-center text-[#133E87] hover:text-[#3A80D2] transition-colors">
           <FaArrowLeft className="mr-2" />
           <span>Back to Home</span>
         </Link>
@@ -228,40 +205,122 @@ const AboutUsPage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white pt-16 pb-8">
-        <div className="container mx-auto px-[5%]">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-40 mb-7">
+      <footer className="bg-gray-900 text-white pt-12 sm:pt-16 pb-6 sm:pb-8">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sm:gap-12 md:gap-16 lg:gap-20 mb-6 sm:mb-8">
             <div>
-              <div className="text-2xl font-bold mb-6 flex items-center">
+              <div className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center">
                 HomeServe
               </div>
-              <p className="text-gray-400 mb-6">Connecting homeowners with trusted housekeepers for a cleaner home.</p>
+              <p className="text-gray-400 mb-4 sm:mb-6 text-sm sm:text-base">Connecting homeowners with trusted housekeepers for a cleaner home.</p>
             </div>
             
             <div>
-              <h3 className="text-lg font-semibold mb-3">Services</h3>
-              <ul className="space-y-3">
-                <li><a href="/#services" className="text-gray-400 hover:text-white transition-colors">General Cleaning</a></li>
-                <li><a href="/#services" className="text-gray-400 hover:text-white transition-colors">Deep Cleaning</a></li>
-                <li><a href="/#services" className="text-gray-400 hover:text-white transition-colors">Laundry</a></li>
-                <li><a href="/#services" className="text-gray-400 hover:text-white transition-colors">Cooking</a></li>
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Services</h3>
+              <ul className="space-y-2 sm:space-y-3">
+                <li><a href="/#services" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">General Cleaning</a></li>
+                <li><a href="/#services" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Deep Cleaning</a></li>
+                <li><a href="/#services" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Laundry</a></li>
+                <li><a href="/#services" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">Cooking</a></li>
               </ul>
             </div>
             
             <div>
-              <h3 className="text-lg font-semibold mb-6">Company</h3>
-              <ul className="space-y-3">
-                <li><a href="/about" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Company</h3>
+              <ul className="space-y-2 sm:space-y-3">
+                <li><a href="/about" className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">About Us</a></li>
               </ul>
             </div>
           </div>
           
-          <div className="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
+          <div className="border-t border-gray-800 pt-6 text-center text-gray-500 text-xs sm:text-sm">
             <p>&copy; {new Date().getFullYear()} HomeServe. All rights reserved.</p>
           </div>
         </div>
       </footer>
     </div>
+  );
+};
+
+const Navbar: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-md' : 'bg-white/90 backdrop-blur-sm'} py-4`}>
+      <div className="container mx-auto px-4 sm:px-6 flex justify-between items-center">
+        <div className="text-2xl font-bold text-[#133E87] flex items-center">
+          <Link to="/" className="flex items-center">
+            <span className="text-3xl mr-2">HomeServe</span>
+          </Link>
+        </div>
+        
+        {/* Desktop Menu */}
+        <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
+          <a href="/#services" className="text-gray-600 hover:text-[#133E87] transition-colors text-sm lg:text-base font-medium">Services</a>
+          <a href="/#how-it-works" className="text-gray-600 hover:text-[#133E87] transition-colors text-sm lg:text-base font-medium">How It Works</a>
+          <Link to="/about" className="text-gray-600 hover:text-[#133E87] transition-colors text-sm lg:text-base font-medium">About Us</Link>
+          <a href="/login" className="bg-[#133E87] text-white px-5 py-2 rounded-full hover:bg-[#1F5CD1] transition-colors font-medium text-sm lg:text-base">
+            Sign In
+          </a>
+        </div>
+        
+        {/* Mobile Menu Button */}
+        <button 
+          className="md:hidden text-gray-600 hover:text-[#133E87] transition-colors focus:outline-none"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+        </button>
+      </div>
+      
+      {/* Mobile Menu */}
+      <div className={`md:hidden absolute w-full bg-white shadow-lg transition-all duration-300 overflow-hidden ${isMenuOpen ? 'max-h-screen' : 'max-h-0'}`}>
+        <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
+          <a 
+            href="/#services" 
+            className="text-gray-600 hover:text-[#133E87] transition-colors py-2 border-b border-gray-100 font-medium"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Services
+          </a>
+          <a 
+            href="/#how-it-works" 
+            className="text-gray-600 hover:text-[#133E87] transition-colors py-2 border-b border-gray-100 font-medium"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            How It Works
+          </a>
+          <Link 
+            to="/about" 
+            className="text-gray-600 hover:text-[#133E87] transition-colors py-2 border-b border-gray-100 font-medium"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            About Us
+          </Link>
+          <a 
+            href="/login" 
+            className="bg-[#133E87] text-white px-5 py-2 rounded-full hover:bg-[#1F5CD1] transition-colors font-medium text-center mt-2"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Sign In
+          </a>
+        </div>
+      </div>
+    </nav>
   );
 };
 

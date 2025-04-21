@@ -277,14 +277,14 @@ const CreateJobPostModal: React.FC<CreateJobPostModalProps> = ({ isOpen, onClose
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/30">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm bg-black/30">
       <div 
-        className="bg-white/95 rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-gray-200/50 transition-all duration-300"
+        className="bg-white/95 rounded-xl shadow-2xl w-full max-w-3xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto border border-gray-200/50 transition-all duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-gray-200/70 sticky top-0 bg-white/95 backdrop-blur-sm z-10">
+        <div className="p-4 sm:p-6 border-b border-gray-200/70 sticky top-0 bg-white/95 backdrop-blur-sm z-10">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-800 flex items-center">
               {isEditMode ? (
                 <><FaEdit className="mr-2 text-[#133E87]" /> Edit Job Post</>
               ) : (
@@ -302,14 +302,14 @@ const CreateJobPostModal: React.FC<CreateJobPostModalProps> = ({ isOpen, onClose
         </div>
         
         {fetchingJob ? (
-          <div className="p-8 flex justify-center items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#133E87]"></div>
+          <div className="p-6 sm:p-8 flex justify-center items-center">
+            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-[#133E87]"></div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="p-6">
+          <form onSubmit={handleSubmit} className="p-4 sm:p-6">
             {/* Job Title */}
-            <div className="mb-6">
-              <label htmlFor="title" className="block text-gray-700 font-medium mb-2">Job Title <span className="text-red-500">*</span></label>
+            <div className="mb-5 sm:mb-6">
+              <label htmlFor="title" className="block text-gray-700 font-medium mb-1.5 sm:mb-2 text-sm sm:text-base">Job Title <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 id="title"
@@ -317,29 +317,29 @@ const CreateJobPostModal: React.FC<CreateJobPostModalProps> = ({ isOpen, onClose
                 value={formData.title}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all text-sm sm:text-base"
                 placeholder="e.g., Full-Time Live-in Cook"
               />
             </div>
             
             {/* Job Description */}
-            <div className="mb-6">
-              <label htmlFor="description" className="block text-gray-700 font-medium mb-2">Job Description <span className="text-red-500">*</span></label>
+            <div className="mb-5 sm:mb-6">
+              <label htmlFor="description" className="block text-gray-700 font-medium mb-1.5 sm:mb-2 text-sm sm:text-base">Job Description <span className="text-red-500">*</span></label>
               <textarea
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
                 required
-                rows={5}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all resize-none"
+                rows={4}
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all resize-none text-sm sm:text-base"
                 placeholder="Describe the job duties, requirements, and any other relevant information..."
               ></textarea>
             </div>
             
             {/* Location */}
-            <div className="mb-6">
-              <label htmlFor="location" className="block text-gray-700 font-medium mb-2">Area/District <span className="text-red-500">*</span></label>
+            <div className="mb-5 sm:mb-6">
+              <label htmlFor="location" className="block text-gray-700 font-medium mb-1.5 sm:mb-2 text-sm sm:text-base">Area/District <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 id="location"
@@ -347,20 +347,20 @@ const CreateJobPostModal: React.FC<CreateJobPostModalProps> = ({ isOpen, onClose
                 value={formData.location}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all text-sm sm:text-base"
                 placeholder="e.g., Makati City, Bonifacio Global City Area"
               />
               <p className="mt-1 text-xs text-gray-500">For privacy and safety reasons, please specify general area rather than exact address.</p>
             </div>
             
             {/* Schedule */}
-            <div className="mb-6">
-              <label className="block text-gray-700 font-medium mb-2">Schedule <span className="text-red-500">*</span></label>
+            <div className="mb-5 sm:mb-6">
+              <label className="block text-gray-700 font-medium mb-1.5 sm:mb-2 text-sm sm:text-base">Schedule <span className="text-red-500">*</span></label>
               
-              <div className="space-y-4 p-4 bg-gray-50/70 rounded-lg">
+              <div className="space-y-3 sm:space-y-4 p-3 sm:p-4 bg-gray-50/70 rounded-lg">
                 <div>
-                  <label className="block text-gray-700 text-sm mb-2">Days of Week <span className="text-red-500">*</span></label>
-                  <div className="flex flex-wrap gap-2">
+                  <label className="block text-gray-700 text-xs sm:text-sm mb-1.5 sm:mb-2">Days of Week <span className="text-red-500">*</span></label>
+                  <div className="flex flex-wrap gap-1 sm:gap-2">
                     {daysOfWeek.map(day => (
                       <button
                         key={day}
