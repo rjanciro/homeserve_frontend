@@ -325,21 +325,13 @@ const HomeOwnerMessaging: React.FC = () => {
               />
               <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
             </div>
-            {showUsersList ? (
+            {showUsersList && (
               <button 
                 onClick={() => setShowUsersList(false)}
                 className="ml-2 text-gray-500 hover:text-gray-700 p-1"
                 title="Back to Conversations"
               >
                 <FaTimes />
-              </button>
-            ) : (
-              <button 
-                onClick={() => setShowUsersList(true)}
-                className="ml-2 bg-green-500 text-white p-1.5 rounded-full hover:bg-green-600"
-                title="New Conversation"
-              >
-                <FaPlus className="text-sm" />
               </button>
             )}
           </div>
