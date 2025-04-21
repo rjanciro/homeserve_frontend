@@ -637,18 +637,10 @@ const ServiceProviderMessaging: React.FC = () => {
                   </div>
                 )}
                 <form onSubmit={handleSendMessage} className="flex">
-                  <input
-                    type="text"
-                    value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)}
-                    placeholder="Type a message..."
-                    className="flex-1 px-4 py-2 border border-gray-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                    disabled={!!imagePreview}
-                  />
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-gray-100 text-gray-600 px-3 py-2 border-t border-b border-gray-200 hover:bg-gray-200 focus:outline-none"
+                    className="bg-gray-100 text-gray-600 px-3 py-2 border border-gray-200 rounded-l-lg hover:bg-gray-200 focus:outline-none"
                     disabled={isUploading}
                   >
                     {isUploading ? (
@@ -657,6 +649,14 @@ const ServiceProviderMessaging: React.FC = () => {
                       <FaImage />
                     )}
                   </button>
+                  <input
+                    type="text"
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                    placeholder="Type a message..."
+                    className="flex-1 px-4 py-2 border-t border-b border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    disabled={!!imagePreview}
+                  />
                   <input
                     type="file"
                     ref={fileInputRef}
