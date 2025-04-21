@@ -8,6 +8,38 @@ import { WebSocketStatus } from '../../../utils/websocket';
 import { profileService } from '../../services/profile.service';
 import axios from 'axios';
 
+// Image Modal Component
+const ImageModal: React.FC<{ 
+  imageUrl: string | null; 
+  isOpen: boolean; 
+  onClose: () => void;
+}> = ({ imageUrl, isOpen, onClose }) => {
+  if (!isOpen || !imageUrl) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" onClick={onClose}>
+      <div className="relative max-w-[90%] max-h-[90%]">
+        <button 
+          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 z-10"
+          onClick={onClose}
+        >
+          <FaTimes />
+        </button>
+        <img 
+          src={imageUrl} 
+          alt="Full-size" 
+          className="max-w-full max-h-[90vh] rounded-lg object-contain bg-white bg-opacity-20 shadow-xl"
+          onClick={(e) => e.stopPropagation()}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = "https://via.placeholder.com/400x300?text=Image+Failed+to+Load";
+          }}
+        />
+      </div>
+    </div>
+  );
+};
+
 // Add Online Status Indicator component
 const OnlineStatusIndicator: React.FC<{ isOnline?: boolean, className?: string }> = ({ isOnline, className = "" }) => (
   <FaCircle 
@@ -44,6 +76,8 @@ const HomeOwnerMessaging: React.FC = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const [modalImage, setModalImage] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
   const messageEndRef = useRef<HTMLDivElement>(null);
   // Add a reference to track if we've already fetched data for this WebSocket connection
@@ -386,8 +420,26 @@ const HomeOwnerMessaging: React.FC = () => {
     }
   }, [conversations]);
   
+  // Handle opening the image modal
+  const openImageModal = (imageUrl: string) => {
+    setModalImage(imageUrl);
+    setIsModalOpen(true);
+  };
+  
+  // Handle closing the image modal
+  const closeImageModal = () => {
+    setIsModalOpen(false);
+    setModalImage(null);
+  };
+  
   return (
     <div className="h-[calc(90vh-80px)] flex flex-col overflow-hidden">
+      {/* Image Modal */}
+      <ImageModal 
+        imageUrl={modalImage}
+        isOpen={isModalOpen}
+        onClose={closeImageModal}
+      />
       {renderConnectionStatus()}
       {error && (
         <div className="bg-red-100 text-red-800 p-1 text-center text-sm">
@@ -640,7 +692,7 @@ const HomeOwnerMessaging: React.FC = () => {
                                 src={`http://localhost:8080${message.imageUrl}`}
                                 alt="Message attachment" 
                                 className="max-w-full rounded-lg cursor-pointer"
-                                onClick={() => window.open(`http://localhost:8080${message.imageUrl}`, '_blank')}
+                                onClick={() => openImageModal(`http://localhost:8080${message.imageUrl}`)}
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
                                   target.src = "https://via.placeholder.com/400x300?text=Image+Failed+to+Load";
