@@ -17,18 +17,21 @@ const ImageModal: React.FC<{
   if (!isOpen || !imageUrl) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" onClick={onClose}>
-      <div className="relative max-w-[90%] max-h-[90%]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm p-2 sm:p-0" onClick={onClose}>
+      <div className="relative max-w-[95%] sm:max-w-[90%] max-h-[90%]">
         <button 
-          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 z-10"
-          onClick={onClose}
+          className="absolute top-1 sm:top-2 right-1 sm:right-2 bg-red-500 text-white rounded-full p-1.5 sm:p-2 z-10"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
         >
-          <FaTimes />
+          <FaTimes className="text-xs sm:text-sm" />
         </button>
         <img 
           src={imageUrl} 
           alt="Full-size" 
-          className="max-w-full max-h-[90vh] rounded-lg object-contain bg-white bg-opacity-20 shadow-xl"
+          className="max-w-full max-h-[85vh] sm:max-h-[90vh] rounded-lg object-contain bg-white bg-opacity-20 shadow-xl"
           onClick={(e) => e.stopPropagation()}
           onError={(e) => {
             const target = e.target as HTMLImageElement;
@@ -318,7 +321,7 @@ const ServiceProviderMessaging: React.FC = () => {
   };
   
   return (
-    <div className="flex flex-col h-[calc(93vh-73px)] overflow-hidden">
+    <div className="flex flex-col h-[calc(93vh-73px)] sm:h-[calc(92vh-73px)] overflow-hidden">
       {/* Image Modal */}
       <ImageModal 
         imageUrl={modalImage}
@@ -328,7 +331,7 @@ const ServiceProviderMessaging: React.FC = () => {
       
       {renderConnectionStatus()}
       {error && (
-        <div className="bg-red-100 text-red-800 p-2 text-center">
+        <div className="bg-red-100 text-red-800 p-2 text-center text-sm sm:text-base">
           {error}
         </div>
       )}
@@ -340,32 +343,32 @@ const ServiceProviderMessaging: React.FC = () => {
           } w-full md:w-80 border-r border-gray-200 bg-white h-full overflow-hidden flex flex-col`}
         >
           {/* Search Bar with New Chat Button */}
-          <div className="p-4 border-b border-gray-200 flex items-center">
+          <div className="p-3 sm:p-4 border-b border-gray-200 flex items-center">
             <div className="relative flex-1">
               <input
                 type="text"
                 placeholder={showUsersList ? "Search users..." : "Search conversations..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full pl-8 sm:pl-10 pr-2 sm:pr-4 py-1.5 sm:py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               />
-              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <FaSearch className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm" />
             </div>
             {showUsersList ? (
               <button 
                 onClick={() => setShowUsersList(false)}
-                className="ml-2 text-gray-500 hover:text-gray-700 p-2"
+                className="ml-2 text-gray-500 hover:text-gray-700 p-1.5 sm:p-2"
                 title="Back to Conversations"
               >
-                <FaTimes />
+                <FaTimes className="text-sm sm:text-base" />
               </button>
             ) : (
               <button 
                 onClick={() => setShowUsersList(true)}
-                className="ml-2 bg-green-500 text-white p-2 rounded-full hover:bg-green-600"
+                className="ml-2 bg-green-500 text-white p-1.5 sm:p-2 rounded-full hover:bg-green-600"
                 title="New Conversation"
               >
-                <FaPlus />
+                <FaPlus className="text-xs sm:text-sm" />
               </button>
             )}
           </div>
@@ -373,26 +376,26 @@ const ServiceProviderMessaging: React.FC = () => {
           {/* List Content - Either Conversations or Users */}
           <div className="overflow-y-auto flex-1">
             {loading && (conversations.length === 0 || users.length === 0) ? (
-              <div className="p-4 text-center text-gray-500">
+              <div className="p-4 text-center text-gray-500 text-sm sm:text-base">
                 Loading {showUsersList ? 'users' : 'conversations'}...
               </div>
             ) : showUsersList ? (
               /* Users List */
               filteredUsers.length === 0 ? (
-                <div className="p-4 text-center text-gray-500">No users found</div>
+                <div className="p-4 text-center text-gray-500 text-sm sm:text-base">No users found</div>
               ) : (
                 filteredUsers.map(user => (
                   <div
                     key={user._id}
                     onClick={() => handleSelectUser(user._id)}
-                    className="p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer flex items-center"
+                    className="p-3 sm:p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer flex items-center"
                   >
-                    <div className="flex-shrink-0 mr-3 relative">
+                    <div className="flex-shrink-0 mr-2 sm:mr-3 relative">
                       {user.profileImage ? (
                         <img 
                           src={profileService.getFullImageUrl(user.profileImage)} 
                           alt={user.firstName} 
-                          className="w-12 h-12 rounded-full object-cover"
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.src = "https://via.placeholder.com/40"; // Fallback image
@@ -400,20 +403,20 @@ const ServiceProviderMessaging: React.FC = () => {
                           }}
                         />
                       ) : (
-                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                          <FaUserCircle className="text-gray-500 w-12 h-12" />
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                          <FaUserCircle className="text-gray-500 w-10 h-10 sm:w-12 sm:h-12" />
                         </div>
                       )}
                       <OnlineStatusIndicator isOnline={user.isOnline} className="absolute bottom-0 right-0" />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center">
-                        <h3 className="font-medium text-gray-900">
+                        <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">
                           {`${user.firstName} ${user.lastName}`}
                         </h3>
-                        <OnlineStatusIndicator isOnline={user.isOnline} className="ml-1.5" />
+                        <OnlineStatusIndicator isOnline={user.isOnline} className="ml-1.5 flex-shrink-0" />
                       </div>
-                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800 inline-block max-w-full truncate">
                         {user.userType === 'housekeeper' ? 'Housekeeper' : 'Homeowner'}
                       </span>
                     </div>
@@ -423,7 +426,7 @@ const ServiceProviderMessaging: React.FC = () => {
             ) : (
               /* Conversations List */
               filteredConversations.length === 0 ? (
-                <div className="p-4 text-center text-gray-500">No conversations found</div>
+                <div className="p-4 text-center text-gray-500 text-sm sm:text-base">No conversations found</div>
               ) : (
                 filteredConversations.map(conversation => {
                   const otherUser = conversation.participants.find(p => p._id !== user?._id);
@@ -433,17 +436,17 @@ const ServiceProviderMessaging: React.FC = () => {
                     <div
                       key={conversation._id}
                       onClick={() => handleSelectConversation(conversation._id)}
-                      className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer flex items-center ${
+                      className={`p-3 sm:p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer flex items-center ${
                         activeConversation === conversation._id ? 'bg-green-50' : ''
                       }`}
                     >
                       {/* User Avatar */}
-                      <div className="flex-shrink-0 mr-3 relative">
+                      <div className="flex-shrink-0 mr-2 sm:mr-3 relative">
                         {otherUser.profileImage ? (
                           <img 
                             src={profileService.getFullImageUrl(otherUser.profileImage)} 
                             alt={otherUser.firstName} 
-                            className="w-12 h-12 rounded-full object-cover"
+                            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.src = "https://via.placeholder.com/40"; // Fallback image
@@ -451,8 +454,8 @@ const ServiceProviderMessaging: React.FC = () => {
                             }}
                           />
                         ) : (
-                          <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                            <FaUserCircle className="text-gray-500 w-12 h-12" />
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                            <FaUserCircle className="text-gray-500 w-10 h-10 sm:w-12 sm:h-12" />
                           </div>
                         )}
                         <OnlineStatusIndicator isOnline={otherUser.isOnline} className="absolute bottom-0 right-0" />
@@ -461,27 +464,22 @@ const ServiceProviderMessaging: React.FC = () => {
                       {/* Conversation Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between">
-                          <div>
+                          <div className="flex-1 min-w-0">
                             <div className="flex items-center">
-                              <h3 className="font-medium text-gray-900 truncate">
+                              <h3 className="font-medium text-gray-900 truncate text-sm sm:text-base">
                                 {`${otherUser.firstName} ${otherUser.lastName}`}
                               </h3>
-                              <OnlineStatusIndicator isOnline={otherUser.isOnline} className="ml-1.5" />
+                              <OnlineStatusIndicator isOnline={otherUser.isOnline} className="ml-1.5 flex-shrink-0" />
                             </div>
-                            {/* {otherUser.userType && (
-                              <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
-                                {otherUser.userType === 'provider' ? 'Service Provider' : 'Homeowner'}
-                              </span>
-                            )} */}
                           </div>
                           {conversation.lastMessage && (
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-gray-500 ml-1 flex-shrink-0">
                               {formatMessageTime(conversation.lastMessage.createdAt)}
                             </span>
                           )}
                         </div>
                         {conversation.lastMessage && (
-                          <p className="text-sm text-gray-600 truncate mt-1">
+                          <p className="text-xs sm:text-sm text-gray-600 truncate mt-0.5 sm:mt-1">
                             {conversation.lastMessage.content}
                           </p>
                         )}
@@ -489,7 +487,7 @@ const ServiceProviderMessaging: React.FC = () => {
                       
                       {/* Unread Badge */}
                       {typeof conversation.unreadCount === 'number' && conversation.unreadCount > 0 && (
-                        <div className="ml-2 bg-green-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        <div className="ml-1 sm:ml-2 bg-green-500 text-white text-xs rounded-full h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center flex-shrink-0">
                           {conversation.unreadCount}
                         </div>
                       )}
@@ -509,21 +507,21 @@ const ServiceProviderMessaging: React.FC = () => {
         >
           {!activeConversationObj ? (
             // No conversation selected
-            <div className="flex-1 flex flex-col items-center justify-center text-gray-500">
-              <FaUserCircle className="text-gray-300 text-5xl mb-4" />
-              <p>Select a conversation to start chatting</p>
-              <p className="text-sm mt-2">Or start a new conversation by clicking the + button</p>
+            <div className="flex-1 flex flex-col items-center justify-center text-gray-500 px-4 text-center">
+              <FaUserCircle className="text-gray-300 text-4xl sm:text-5xl mb-3 sm:mb-4" />
+              <p className="text-sm sm:text-base">Select a conversation to start chatting</p>
+              <p className="text-xs sm:text-sm mt-1 sm:mt-2">Or start a new conversation by clicking the + button</p>
             </div>
           ) : (
             <>
               {/* Chat Header */}
-              <div className="bg-white p-4 border-b border-gray-200 flex items-center flex-shrink-0">
+              <div className="bg-white p-3 sm:p-4 border-b border-gray-200 flex items-center flex-shrink-0">
                 {mobileView && (
                   <button 
                     onClick={() => setShowConversationList(true)}
-                    className="mr-3 text-gray-600"
+                    className="mr-2 sm:mr-3 text-gray-600 p-1"
                   >
-                    <FaChevronLeft />
+                    <FaChevronLeft className="text-sm sm:text-base" />
                   </button>
                 )}
                 
@@ -533,12 +531,12 @@ const ServiceProviderMessaging: React.FC = () => {
                   
                   return (
                     <>
-                      <div className="flex-shrink-0 mr-3 relative">
+                      <div className="flex-shrink-0 mr-2 sm:mr-3 relative">
                         {otherUser.profileImage ? (
                           <img 
                             src={profileService.getFullImageUrl(otherUser.profileImage)} 
                             alt={otherUser.firstName} 
-                            className="w-10 h-10 rounded-full object-cover"
+                            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.src = "https://via.placeholder.com/40"; // Fallback image
@@ -546,21 +544,21 @@ const ServiceProviderMessaging: React.FC = () => {
                             }}
                           />
                         ) : (
-                          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                            <FaUserCircle className="text-gray-500 w-10 h-10" />
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                            <FaUserCircle className="text-gray-500 w-8 h-8 sm:w-10 sm:h-10" />
                           </div>
                         )}
                         <OnlineStatusIndicator isOnline={otherUser.isOnline} className="absolute bottom-0 right-0" />
                       </div>
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <div className="flex items-center">
-                          <h2 className="font-medium text-gray-900">
+                          <h2 className="font-medium text-gray-900 text-sm sm:text-base truncate">
                             {`${otherUser.firstName} ${otherUser.lastName}`}
                           </h2>
-                          <OnlineStatusIndicator isOnline={otherUser.isOnline} className="ml-1.5" />
+                          <OnlineStatusIndicator isOnline={otherUser.isOnline} className="ml-1.5 flex-shrink-0" />
                         </div>
                         {otherUser.userType && (
-                          <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                          <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-800 inline-block">
                             {otherUser.userType === 'provider' ? 'Service Provider' : 'Homeowner'}
                           </span>
                         )}
@@ -571,11 +569,11 @@ const ServiceProviderMessaging: React.FC = () => {
               </div>
               
               {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2 sm:space-y-3">
                 {loading && messages.length === 0 ? (
-                  <div className="text-center text-gray-500 py-4">Loading messages...</div>
+                  <div className="text-center text-gray-500 py-4 text-sm sm:text-base">Loading messages...</div>
                 ) : messages.length === 0 ? (
-                  <div className="text-center text-gray-500 py-4">No messages yet. Start the conversation!</div>
+                  <div className="text-center text-gray-500 py-4 text-sm sm:text-base">No messages yet. Start the conversation!</div>
                 ) : (
                   messages.map(message => {
                     const isCurrentUser = message.sender._id === user?._id;
@@ -586,7 +584,7 @@ const ServiceProviderMessaging: React.FC = () => {
                         className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
                       >
                         <div 
-                          className={`max-w-[75%] rounded-lg p-3 ${
+                          className={`max-w-[80%] sm:max-w-[75%] rounded-lg p-2 sm:p-3 ${
                             isCurrentUser 
                               ? 'bg-green-500 text-white rounded-br-none' 
                               : 'bg-white text-gray-800 rounded-bl-none shadow-sm'
@@ -606,7 +604,7 @@ const ServiceProviderMessaging: React.FC = () => {
                               />
                             </div>
                           ) : (
-                            <p>{message.content}</p>
+                            <p className="text-sm sm:text-base break-words">{message.content}</p>
                           )}
                           <div className={`text-xs mt-1 ${isCurrentUser ? 'text-green-100' : 'text-gray-500'}`}>
                             {formatMessageTime(message.createdAt)}
@@ -620,19 +618,20 @@ const ServiceProviderMessaging: React.FC = () => {
               </div>
               
               {/* Message Input */}
-              <div className="bg-white p-4 border-t border-gray-200 flex-shrink-0">
+              <div className="bg-white p-2 sm:p-4 border-t border-gray-200 flex-shrink-0">
                 {imagePreview && (
                   <div className="relative mb-2 inline-block">
                     <img 
                       src={imagePreview} 
                       alt="Preview" 
-                      className="h-32 rounded-lg border border-gray-200" 
+                      className="h-24 sm:h-32 rounded-lg border border-gray-200" 
                     />
                     <button
                       onClick={cancelImageUpload}
                       className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full"
                     >
-                      <FaTimes size={12} />
+                      <FaTimes size={10} className="sm:hidden" />
+                      <FaTimes size={12} className="hidden sm:block" />
                     </button>
                   </div>
                 )}
@@ -640,13 +639,13 @@ const ServiceProviderMessaging: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="bg-gray-100 text-gray-600 px-3 py-2 border border-gray-200 rounded-l-lg hover:bg-gray-200 focus:outline-none"
+                    className="bg-gray-100 text-gray-600 px-2 sm:px-3 py-2 border border-gray-200 rounded-l-lg hover:bg-gray-200 focus:outline-none"
                     disabled={isUploading}
                   >
                     {isUploading ? (
                       <span className="animate-pulse">...</span>
                     ) : (
-                      <FaImage />
+                      <FaImage className="text-sm sm:text-base" />
                     )}
                   </button>
                   <input
@@ -654,7 +653,7 @@ const ServiceProviderMessaging: React.FC = () => {
                     value={messageText}
                     onChange={(e) => setMessageText(e.target.value)}
                     placeholder="Type a message..."
-                    className="flex-1 px-4 py-2 border-t border-b border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="flex-1 px-2 sm:px-4 py-2 text-sm border-t border-b border-r border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
                     disabled={!!imagePreview}
                   />
                   <input
@@ -667,9 +666,9 @@ const ServiceProviderMessaging: React.FC = () => {
                   <button
                     type="submit"
                     disabled={(!messageText.trim() && !imagePreview) || isUploading}
-                    className="bg-green-500 text-white px-4 py-2 rounded-r-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+                    className="bg-green-500 text-white px-3 sm:px-4 py-2 rounded-r-lg hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
                   >
-                    <FaPaperPlane />
+                    <FaPaperPlane className="text-sm sm:text-base" />
                   </button>
                 </form>
               </div>

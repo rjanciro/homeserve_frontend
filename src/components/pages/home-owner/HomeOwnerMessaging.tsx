@@ -433,7 +433,7 @@ const HomeOwnerMessaging: React.FC = () => {
   };
   
   return (
-    <div className="h-[calc(90vh-80px)] flex flex-col overflow-hidden">
+    <div className="h-[calc(92vh-80px)] flex flex-col overflow-hidden">
       {/* Image Modal */}
       <ImageModal 
         imageUrl={modalImage}
