@@ -284,38 +284,38 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
         onClick={() => !submitting && onClose()} // Prevent closing while submitting
       ></div>
       {/* Modal Content */}
-      <div className="flex items-center justify-center min-h-screen p-4">
+      <div className="flex items-center justify-center min-h-screen p-2 sm:p-4">
         <div 
-          className="relative bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 mx-auto max-h-[90vh] overflow-y-auto" // Added max-height and overflow
+          className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto" // Added max-height and overflow
           onClick={e => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex justify-between items-center mb-6 border-b pb-3">
-            <h2 className="text-xl font-semibold text-gray-900">
+          <div className="flex justify-between items-center px-3 sm:px-6 py-3 sm:py-4 border-b">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
               {currentService ? 'Edit Service' : 'Add New Service'}
             </h2>
             <button 
               onClick={onClose} 
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-600 transition-colors p-1"
               disabled={submitting}
               aria-label="Close modal"
             >
-              <FaTimes size={20} />
+              <FaTimes size={18} />
             </button>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="px-3 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4">
             {/* Service Name (Title) */}
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">Service Title*</label>
+              <label className="block text-gray-700 text-xs sm:text-sm font-medium mb-1">Service Title*</label>
               <input
                 type="text"
                 name="name"
                 placeholder="e.g., Post-Construction Cleaning, Dog Walking"
                 value={formData.name}
                 onChange={handleFormChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
                 disabled={submitting}
               />
@@ -323,12 +323,12 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
 
             {/* Category Selection */}
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">Category*</label>
+              <label className="block text-gray-700 text-xs sm:text-sm font-medium mb-1">Category*</label>
               <select
                 name="category"
                 value={formData.category}
                 onChange={handleFormChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
                 disabled={submitting}
               >
@@ -343,28 +343,28 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
             
             {/* Tags/Keywords */}
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">Tags/Keywords (Optional)</label>
+              <label className="block text-gray-700 text-xs sm:text-sm font-medium mb-1">Tags/Keywords (Optional)</label>
               <input
                 type="text"
                 name="tags"
                 placeholder="e.g., pets, gardening, deep clean, residential"
                 value={formData.tags}
                 onChange={handleFormChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={submitting}
               />
-              <p className="mt-1 text-xs text-gray-500">Separate tags with commas.</p>
+              <p className="mt-1 text-[10px] sm:text-xs text-gray-500">Separate tags with commas.</p>
             </div>
 
             {/* Description */}
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">Description*</label>
+              <label className="block text-gray-700 text-xs sm:text-sm font-medium mb-1">Description*</label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleFormChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                rows={4}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={3}
                 required
                 disabled={submitting}
               ></textarea>
@@ -372,14 +372,14 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
             
             {/* Service Location */}
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">Service Location*</label>
+              <label className="block text-gray-700 text-xs sm:text-sm font-medium mb-1">Service Location*</label>
               <input
                 type="text"
                 name="serviceLocation"
                 value={formData.serviceLocation}
                 onChange={handleFormChange}
-                placeholder="City name or service radius (e.g., Manila or 10km from Makati)"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="City name or service radius"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
                 disabled={submitting}
               />
@@ -387,39 +387,39 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
             
             {/* Availability Section */}
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">Availability*</label>
+              <label className="block text-gray-700 text-xs sm:text-sm font-medium mb-1">Availability*</label>
               
               {/* Days of Week */}
-              <div className="mb-3">
-                <label className="block text-gray-700 text-sm mb-2">Days of Week *</label>
-                <div className="flex flex-wrap gap-2">
+              <div className="mb-2 sm:mb-3">
+                <label className="block text-gray-700 text-xs sm:text-sm mb-1 sm:mb-2">Days of Week *</label>
+                <div className="flex flex-wrap gap-1 sm:gap-2">
                   {daysOfWeek.map(day => (
                     <button
                       key={day}
                       type="button"
                       onClick={() => handleAvailabilityChange(day)}
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
+                      className={`px-2 sm:px-3 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-all ${
                         formData.availability[day.toLowerCase() as keyof typeof formData.availability]
                           ? 'bg-blue-500 text-white shadow-md'
                           : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
                       }`}
                       disabled={submitting}
                     >
-                      {day}
+                      {day.slice(0, 3)}
                     </button>
                   ))}
                 </div>
               </div>
               
               {/* Time Selection */}
-              <div className="grid grid-cols-2 gap-4 mb-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 mb-2 sm:mb-3">
                 <div>
-                  <label className="block text-gray-700 text-sm mb-2">Start Time</label>
+                  <label className="block text-gray-700 text-xs sm:text-sm mb-1 sm:mb-2">Start Time</label>
                   <div className="flex border border-gray-300 rounded-lg overflow-hidden">
                     <select
                       value={formData.availability.startHour}
                       onChange={(e) => handleTimeChange('startHour', e.target.value)}
-                      className="w-1/3 py-2 px-3 bg-white text-center appearance-none border-r border-gray-300 focus:outline-none"
+                      className="w-1/3 py-1.5 sm:py-2 px-1 sm:px-3 bg-white text-center appearance-none border-r border-gray-300 focus:outline-none text-xs sm:text-sm"
                       disabled={submitting}
                     >
                       {hours.map(hour => (
@@ -429,7 +429,7 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                     <select
                       value={formData.availability.startMinute}
                       onChange={(e) => handleTimeChange('startMinute', e.target.value)}
-                      className="w-1/3 py-2 px-3 bg-white text-center appearance-none border-r border-gray-300 focus:outline-none"
+                      className="w-1/3 py-1.5 sm:py-2 px-1 sm:px-3 bg-white text-center appearance-none border-r border-gray-300 focus:outline-none text-xs sm:text-sm"
                       disabled={submitting}
                     >
                       {minutes.map(minute => (
@@ -439,7 +439,7 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                     <select
                       value={formData.availability.startPeriod}
                       onChange={(e) => handleTimeChange('startPeriod', e.target.value)}
-                      className="w-1/3 py-2 px-3 bg-white text-center appearance-none focus:outline-none"
+                      className="w-1/3 py-1.5 sm:py-2 px-1 sm:px-3 bg-white text-center appearance-none focus:outline-none text-xs sm:text-sm"
                       disabled={submitting}
                     >
                       {periods.map(period => (
@@ -449,12 +449,12 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                   </div>
                 </div>
                 <div>
-                  <label className="block text-gray-700 text-sm mb-2">End Time</label>
+                  <label className="block text-gray-700 text-xs sm:text-sm mb-1 sm:mb-2">End Time</label>
                   <div className="flex border border-gray-300 rounded-lg overflow-hidden">
                     <select
                       value={formData.availability.endHour}
                       onChange={(e) => handleTimeChange('endHour', e.target.value)}
-                      className="w-1/3 py-2 px-3 bg-white text-center appearance-none border-r border-gray-300 focus:outline-none"
+                      className="w-1/3 py-1.5 sm:py-2 px-1 sm:px-3 bg-white text-center appearance-none border-r border-gray-300 focus:outline-none text-xs sm:text-sm"
                       disabled={submitting}
                     >
                       {hours.map(hour => (
@@ -464,7 +464,7 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                     <select
                       value={formData.availability.endMinute}
                       onChange={(e) => handleTimeChange('endMinute', e.target.value)}
-                      className="w-1/3 py-2 px-3 bg-white text-center appearance-none border-r border-gray-300 focus:outline-none"
+                      className="w-1/3 py-1.5 sm:py-2 px-1 sm:px-3 bg-white text-center appearance-none border-r border-gray-300 focus:outline-none text-xs sm:text-sm"
                       disabled={submitting}
                     >
                       {minutes.map(minute => (
@@ -474,7 +474,7 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                     <select
                       value={formData.availability.endPeriod}
                       onChange={(e) => handleTimeChange('endPeriod', e.target.value)}
-                      className="w-1/3 py-2 px-3 bg-white text-center appearance-none focus:outline-none"
+                      className="w-1/3 py-1.5 sm:py-2 px-1 sm:px-3 bg-white text-center appearance-none focus:outline-none text-xs sm:text-sm"
                       disabled={submitting}
                     >
                       {periods.map(period => (
@@ -488,14 +488,14 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
             
             {/* Estimated Completion Time */}
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">Estimated Completion Time*</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-2">
+              <label className="block text-gray-700 text-xs sm:text-sm font-medium mb-1">Estimated Completion Time*</label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 sm:gap-2 mb-2">
                 {['1-2 hours', '2-4 hours', 'Half day', 'Full day', '1-2 days', '3-5 days'].map((option) => (
                   <button
                     key={option}
                     type="button"
                     onClick={() => setFormData({...formData, estimatedCompletionTime: option})}
-                    className={`py-2 px-3 border rounded-lg text-sm transition-colors ${
+                    className={`py-1 sm:py-2 px-2 sm:px-3 border rounded-lg text-xs sm:text-sm transition-colors ${
                       formData.estimatedCompletionTime === option
                         ? 'bg-blue-500 text-white border-blue-500'
                         : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
@@ -511,8 +511,8 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                 name="estimatedCompletionTime"
                 value={formData.estimatedCompletionTime}
                 onChange={handleFormChange}
-                placeholder="Or enter custom time estimate (e.g., 2-3 weeks)"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Or enter custom time estimate"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
                 disabled={submitting}
               />
@@ -520,7 +520,7 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
             
             {/* Price */}
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">Price (₱)* (Fixed)</label>
+              <label className="block text-gray-700 text-xs sm:text-sm font-medium mb-1">Price (₱)* (Fixed)</label>
               <input
                 type="number"
                 name="price"
@@ -528,7 +528,7 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                 onChange={handleFormChange}
                 min="0"
                 step="0.01"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
                 disabled={submitting}
               />
@@ -536,10 +536,10 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
             
             {/* Contact Number */}
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">Contact Number (Philippines)*</label>
+              <label className="block text-gray-700 text-xs sm:text-sm font-medium mb-1">Contact Number (Philippines)*</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <span className="text-gray-500 text-sm">+63</span>
+                  <span className="text-gray-500 text-xs sm:text-sm">+63</span>
                 </div>
                 <input
                   type="tel" // Use type="tel" for phone numbers
@@ -554,7 +554,7 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                       contactNumber: `+63${formattedNumber}`
                     });
                   }}
-                  className="w-full pl-12 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-10 sm:pl-12 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="9xx xxx xxxx"
                   // Use pattern to guide input, but validation happens in onChange
                   pattern="\d{10}" 
@@ -563,16 +563,16 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                   disabled={submitting}
                 />
               </div>
-              <p className="mt-1 text-xs text-gray-500">Enter 10 digits (e.g., 9171234567).</p>
+              <p className="mt-1 text-[10px] sm:text-xs text-gray-500">Enter 10 digits (e.g., 9171234567).</p>
             </div>
             
             {/* Service Image Upload */}
             <div>
-              <label className="block text-gray-700 text-sm font-medium mb-1">Service Image</label>
+              <label className="block text-gray-700 text-xs sm:text-sm font-medium mb-1">Service Image</label>
               {/* Image Preview */}
               {imagePreview && (
                 <div className="mb-2">
-                  <div className="w-full h-48 rounded-lg overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center">
+                  <div className="w-full h-32 sm:h-48 rounded-lg overflow-hidden border border-gray-300 bg-gray-100 flex items-center justify-center">
                     <img 
                       src={imagePreview} 
                       alt="Service preview" 
@@ -605,16 +605,16 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                     setImagePreview(null);
                   }
                 }}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="block w-full text-xs sm:text-sm text-gray-500 file:mr-2 sm:file:mr-4 file:py-1.5 sm:file:py-2 file:px-3 sm:file:px-4 file:rounded-lg file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={submitting}
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-[10px] sm:text-xs text-gray-500">
                 Optional. Max 5MB (JPG, PNG, GIF, WebP).
               </p>
             </div>
             
             {/* Available for Booking Checkbox */}
-            <div className="pt-2">
+            <div className="pt-1 sm:pt-2">
               <label className="flex items-center cursor-pointer">
                 <input
                   type="checkbox"
@@ -624,23 +624,23 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   disabled={submitting}
                 />
-                <span className="ml-2 text-sm text-gray-700">Available for booking</span>
+                <span className="ml-2 text-xs sm:text-sm text-gray-700">Available for booking</span>
               </label>
             </div>
             
             {/* Action Buttons */}
-            <div className="flex space-x-3 pt-4 border-t mt-6">
+            <div className="flex space-x-2 sm:space-x-3 pt-3 sm:pt-4 border-t mt-3 sm:mt-6">
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg transition-colors font-medium"
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-3 sm:px-4 rounded-lg transition-colors font-medium text-xs sm:text-sm"
                 disabled={submitting}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className={`flex-1 py-2 px-4 rounded-lg transition-colors flex justify-center items-center font-medium ${
+                className={`flex-1 py-2 px-3 sm:px-4 rounded-lg transition-colors flex justify-center items-center font-medium text-xs sm:text-sm ${
                   submitting 
                   ? 'bg-blue-300 text-white cursor-not-allowed' 
                   : 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -649,7 +649,7 @@ const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
               >
                 {submitting ? (
                   <>
-                    <FaSpinner className="animate-spin -ml-1 mr-2 h-5 w-5" />
+                    <FaSpinner className="animate-spin -ml-1 mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                     Saving...
                   </>
                 ) : (

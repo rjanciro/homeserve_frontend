@@ -293,28 +293,28 @@ const JobPosts: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3">
         <h1 className="text-2xl font-bold text-gray-800">Your Job Posts</h1>
         <button 
           onClick={handleCreateJobPost}
-          className="bg-[#133E87] hover:bg-[#0f2f66] text-white px-5 py-2.5 rounded-lg flex items-center shadow-md transition-all duration-200 font-medium"
+          className="bg-[#133E87] hover:bg-[#0f2f66] text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg flex items-center shadow-md transition-all duration-200 font-medium text-sm sm:text-base w-full sm:w-auto justify-center"
         >
-          <FaPlus className="mr-2" /> Create Job Post
+          <FaPlus className="mr-1.5" /> Create Job Post
         </button>
       </div>
 
       {/* Filters and Sorting */}
-      <div className="flex flex-col md:flex-row justify-between mb-8 space-y-4 md:space-y-0 bg-white/70 p-4 rounded-xl shadow-sm border border-gray-100">
-        <div className="flex flex-col space-y-2">
-          <div className="flex items-center text-gray-600 mb-1 text-sm font-medium">
-            <FaFilter className="mr-1.5" /> Filter by status
+      <div className="flex flex-col mb-6 space-y-3 bg-white/70 p-3 rounded-xl shadow-sm border border-gray-100">
+        <div className="flex flex-col space-y-1">
+          <div className="flex items-center text-gray-600 text-xs sm:text-sm font-medium">
+            <FaFilter className="mr-1" /> Filter by status
           </div>
-          <div className="flex space-x-2 bg-gray-50 p-1 rounded-lg shadow-inner">
+          <div className="flex flex-wrap gap-1 bg-gray-50 p-1 rounded-lg shadow-inner">
             {(['active', 'paused', 'hired', 'archived'] as JobStatus[]).map((status) => (
               <button
                 key={status}
                 onClick={() => setActiveFilter(status)}
-                className={`px-4 py-2 rounded-md capitalize text-sm transition-all duration-200 ${
+                className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-md capitalize text-xs transition-all duration-200 ${
                   activeFilter === status 
                     ? 'bg-white shadow-md text-[#133E87] font-medium' 
                     : 'hover:bg-gray-100 text-gray-600'
@@ -326,14 +326,14 @@ const JobPosts: React.FC = () => {
           </div>
         </div>
         
-        <div className="flex flex-col space-y-2">
-          <div className="flex items-center text-gray-600 mb-1 text-sm font-medium">
-            <FaSort className="mr-1.5" /> Sort by
+        <div className="flex flex-col space-y-1">
+          <div className="flex items-center text-gray-600 text-xs sm:text-sm font-medium">
+            <FaSort className="mr-1" /> Sort by
           </div>
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="bg-white border border-gray-200 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#133E87] text-gray-700 appearance-none shadow-sm"
+            className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#133E87] text-gray-700 appearance-none shadow-sm text-sm"
           >
             <option value="newest">Newest First</option>
             <option value="mostApplicants">Most Applicants</option>

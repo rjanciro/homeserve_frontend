@@ -94,31 +94,36 @@ const MyServicesPage: React.FC = () => {
     switch (verificationStatus) {
       case 'pending':
         return (
-          <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+          <span className="bg-yellow-100 text-yellow-800 px-2.5 py-1 rounded-full text-xs sm:text-sm font-medium inline-flex items-center">
+            <FaUserClock className="mr-1.5" size={12} />
             Pending Verification
           </span>
         );
       case 'approved':
         return (
-          <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+          <span className="bg-green-100 text-green-800 px-2.5 py-1 rounded-full text-xs sm:text-sm font-medium inline-flex items-center">
+            <FaCheckCircle className="mr-1.5" size={12} />
             Verified
           </span>
         );
       case 'rejected':
         return (
-          <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+          <span className="bg-red-100 text-red-800 px-2.5 py-1 rounded-full text-xs sm:text-sm font-medium inline-flex items-center">
+            <FaExclamationTriangle className="mr-1.5" size={12} />
             Verification Rejected
           </span>
         );
       case 'not submitted':
         return (
-          <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
+          <span className="bg-gray-100 text-gray-800 px-2.5 py-1 rounded-full text-xs sm:text-sm font-medium inline-flex items-center">
+            <FaIdBadge className="mr-1.5" size={12} />
             Not Submitted
           </span>
         );
       default:
         return (
-          <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
+          <span className="bg-gray-100 text-gray-800 px-2.5 py-1 rounded-full text-xs sm:text-sm font-medium inline-flex items-center">
+            <FaIdBadge className="mr-1.5" size={12} />
             Not Verified
           </span>
         );
@@ -298,19 +303,19 @@ const MyServicesPage: React.FC = () => {
     // If user is disabled
     if (!isVerified && user?.isActive === false) {
       return (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-lg shadow-sm">
+        <div className="bg-red-50 border-l-4 border-red-500 p-3 sm:p-4 mb-4 sm:mb-6 rounded-lg shadow-sm">
           <div className="flex items-start">
-            <div className="flex-shrink-0 mr-3">
-              <FaLock className="h-6 w-6 text-red-500" />
+            <div className="flex-shrink-0 mr-2 sm:mr-3">
+              <FaLock className="h-5 w-5 sm:h-6 sm:w-6 text-red-500" />
             </div>
             <div>
-              <h3 className="text-lg font-medium text-red-800">Account Disabled</h3>
-              <p className="text-red-700 mt-1">
+              <h3 className="text-base sm:text-lg font-medium text-red-800">Account Disabled</h3>
+              <p className="text-red-700 mt-1 text-sm sm:text-base">
                 Your account has been disabled by an administrator. You cannot add or manage services at this time.
               </p>
               {verificationNotes && (
                 <div className="mt-2 p-2 bg-white rounded border border-red-200">
-                  <p className="text-sm text-gray-700"><strong>Reason:</strong> {verificationNotes}</p>
+                  <p className="text-xs sm:text-sm text-gray-700"><strong>Reason:</strong> {verificationNotes}</p>
                 </div>
               )}
             </div>
@@ -322,14 +327,14 @@ const MyServicesPage: React.FC = () => {
     // If not verified and not disabled, show verification needed message
     if (!isVerified) {
       return (
-        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-lg shadow-sm">
+        <div className="bg-blue-50 border-l-4 border-blue-500 p-3 sm:p-4 mb-4 sm:mb-6 rounded-lg shadow-sm">
           <div className="flex items-start">
-            <div className="flex-shrink-0 mr-3">
-              <FaIdCard className="h-6 w-6 text-blue-500" />
+            <div className="flex-shrink-0 mr-2 sm:mr-3">
+              <FaIdCard className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
             </div>
             <div>
-              <h3 className="text-lg font-medium text-blue-800">Verification Required</h3>
-              <p className="text-blue-700 mt-1">
+              <h3 className="text-base sm:text-lg font-medium text-blue-800">Verification Required</h3>
+              <p className="text-blue-700 mt-1 text-sm sm:text-base">
                 {verificationStatus === 'pending' 
                   ? 'Your documents are under review. You will be able to add services once verified.' 
                   : 'You need to submit verification documents to add services.'}
@@ -338,9 +343,9 @@ const MyServicesPage: React.FC = () => {
                 <div className="mt-3">
                   <Link 
                     to="/housekeeper/verification-documents" 
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    className="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   >
-                    <FaIdCard className="mr-2" /> Submit Documents Now
+                    <FaIdCard className="mr-1.5 sm:mr-2" /> Submit Documents Now
                   </Link>
                 </div>
               )}
@@ -353,14 +358,14 @@ const MyServicesPage: React.FC = () => {
     // If verified, show success message
     if (isVerified) {
       return (
-        <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-lg shadow-sm">
+        <div className="bg-green-50 border-l-4 border-green-500 p-3 sm:p-4 mb-4 sm:mb-6 rounded-lg shadow-sm">
           <div className="flex items-start">
-            <div className="flex-shrink-0 mr-3">
-              <FaCheckCircle className="h-6 w-6 text-green-500" />
+            <div className="flex-shrink-0 mr-2 sm:mr-3">
+              <FaCheckCircle className="h-5 w-5 sm:h-6 sm:w-6 text-green-500" />
             </div>
             <div>
-              <h3 className="text-lg font-medium text-green-800">Account Verified!</h3>
-              <p className="text-green-700 mt-1">
+              <h3 className="text-base sm:text-lg font-medium text-green-800">Account Verified!</h3>
+              <p className="text-green-700 mt-1 text-sm sm:text-base">
                 Your account is verified. You can now add and manage your services.
               </p>
             </div>
@@ -373,154 +378,145 @@ const MyServicesPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
       {/* Display verification status message */}
       {renderVerificationStatus()}
       
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-2 sm:gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">My Services</h1>
-          <p className="text-gray-600 mt-1">Manage your service offerings</p>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">My Services</h1>
+          <p className="text-gray-600 mt-0.5 sm:mt-1 text-xs sm:text-sm">Manage your service offerings</p>
         </div>
         
-        <div className="flex items-center">
+        <div className="flex items-center flex-wrap gap-2 w-full sm:w-auto mt-2 sm:mt-0">
           {/* Verification Status Badge */}
           {verificationStatus !== 'approved' && verificationStatus !== 'verified' && (
-            <div className="mr-4">
+            <div className="mr-0 sm:mr-2 md:mr-4">
               {getStatusBadge()}
-              {(verificationStatus === 'not submitted' || 
-                verificationStatus === '' || 
-                !verificationStatus || 
-                (verificationStatus !== 'pending' && verificationStatus !== 'rejected')) && (
-                <div className="mt-2">
-                </div>
-              )}
             </div>
           )}
           
           <button
             onClick={() => handleAddService()}
-            className={`flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors ${
+            className={`flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500 text-white text-xs sm:text-sm rounded-lg hover:bg-blue-600 transition-colors w-full sm:w-auto justify-center ${
               !isVerified ? 'opacity-50 cursor-not-allowed' : ''
             }`}
             disabled={!isVerified}
           >
-            <FaPlus className="mr-2" /> Add New Service
+            <FaPlus className="mr-1.5" /> Add New Service
           </button>
         </div>
       </div>
       
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <FaSpinner className="animate-spin text-blue-500 text-4xl" />
+        <div className="flex justify-center items-center h-48 sm:h-64">
+          <FaSpinner className="animate-spin text-blue-500 text-3xl sm:text-4xl" />
         </div>
       ) : services.length === 0 ? (
-        <div className="bg-white p-8 rounded-lg border border-gray-200 text-center">
-          <h3 className="text-xl font-medium text-gray-800 mb-2">No services yet</h3>
-          <p className="text-gray-600 mb-6">Get started by adding your first service.</p>
+        <div className="bg-white p-4 sm:p-6 md:p-8 rounded-lg border border-gray-200 text-center">
+          <h3 className="text-lg sm:text-xl font-medium text-gray-800 mb-2">No services yet</h3>
+          <p className="text-gray-600 mb-4 sm:mb-6 text-xs sm:text-sm">Get started by adding your first service.</p>
           <div className="flex justify-center">
             <button
               onClick={() => handleAddService()}
-              className={`flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors ${
+              className={`flex items-center px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-500 text-white text-xs sm:text-sm rounded-lg hover:bg-blue-600 transition-colors ${
                 !isVerified ? 'opacity-50 cursor-not-allowed' : ''
               }`}
               disabled={!isVerified}
             >
-              <FaPlus className="mr-2" /> Add Service
+              <FaPlus className="mr-1.5" /> Add Service
             </button>
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
           {services.map((service) => {
             // Get the full image URL for this service
             const imageUrl = getServiceImageUrl(service.image); 
             
             return (
-              <div key={service.id || service._id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm transition-all hover:shadow-md flex flex-col">
+              <div key={service.id || service._id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm transition-all hover:shadow-md flex flex-col h-full">
                 {/* Service Image Display */}
                 {imageUrl ? (
-                  <div className="w-full h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+                  <div className="w-full h-32 sm:h-40 md:h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
                     <img 
                       src={imageUrl} 
                       alt={`Image for ${service.name}`} 
                       className="w-full h-full object-cover" // Use object-cover to fill the container
                       onError={(e) => {
                         console.error(`Failed to load image: ${imageUrl}`);
-                        // Optional: You could hide the image container or show a placeholder icon on error
                         (e.target as HTMLImageElement).style.display = 'none'; 
-                        // Or replace src with a placeholder:
-                        // (e.target as HTMLImageElement).src = '/path/to/placeholder.png'; 
                       }}
                     />
                   </div>
                 ) : (
                   // Optional: Placeholder if no image exists
-                  <div className="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400">
-                    <FaTools size={40} /> {/* Example placeholder icon */}
+                  <div className="w-full h-32 sm:h-40 md:h-48 bg-gray-100 flex items-center justify-center text-gray-400">
+                    <FaTools size={24} className="sm:text-3xl md:text-4xl" />
                   </div>
                 )}
 
                 {/* Service card content */}
-                <div className="p-5 flex flex-col flex-grow"> {/* Added flex-grow */}
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                <div className="p-3 sm:p-4 md:p-5 flex flex-col flex-grow">
+                  <div className="flex justify-between items-start mb-1.5 sm:mb-2 md:mb-3">
+                    <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 flex items-center">
                       {service.name}
                     </h3>
                     <div className="flex space-x-1">
                       <button 
                         onClick={() => handleToggleAvailability(service.id || service._id, service.isAvailable)}
-                        className={`p-2 rounded-lg transition-colors ${
+                        className={`p-1 sm:p-1.5 md:p-2 rounded-lg transition-colors ${
                           service.isAvailable 
                             ? 'text-green-600 hover:bg-green-50' 
                             : 'text-gray-400 hover:bg-gray-50'
                         }`}
                         title={service.isAvailable ? 'Set as Unavailable' : 'Set as Available'}
+                        aria-label={service.isAvailable ? 'Set as Unavailable' : 'Set as Available'}
                       >
-                        {service.isAvailable ? <FaToggleOn size={24} /> : <FaToggleOff size={24} />}
+                        {service.isAvailable ? <FaToggleOn size={16} className="sm:text-lg md:text-xl" /> : <FaToggleOff size={16} className="sm:text-lg md:text-xl" />}
                       </button>
                     </div>
                   </div>
                   
-                  <div className="mb-3">
-                    <span className="inline-block bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full mr-2">
+                  <div className="mb-1.5 sm:mb-2 md:mb-3 flex flex-wrap gap-1">
+                    <span className="inline-block bg-gray-100 text-gray-800 text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 rounded-full">
                       {service.category}
                     </span>
-                    <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                    <span className="inline-block bg-blue-100 text-blue-800 text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 rounded-full">
                       {service.pricingType}
                     </span>
                   </div>
                   
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-grow">{service.description}</p> {/* Added flex-grow */}
+                  <p className="text-gray-600 text-[11px] sm:text-xs md:text-sm mb-1.5 sm:mb-2 md:mb-3 line-clamp-2 flex-grow">{service.description}</p>
                   
-                  <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
+                  <div className="grid grid-cols-2 gap-1 sm:gap-2 mb-1.5 sm:mb-2 md:mb-3 text-[10px] sm:text-xs">
                     <div className="flex items-center text-gray-700">
-                      <FaMoneyBillWave className="mr-2 text-green-500" />
+                      <FaMoneyBillWave className="mr-1 sm:mr-1.5 md:mr-2 text-green-500" size={12} />
                       <span>₱{service.price} {service.pricingType === 'Hourly' ? '/hr' : ''}</span>
                     </div>
                     <div className="flex items-center text-gray-700">
-                      <FaTools className="mr-2 text-blue-500" />
+                      <FaTools className="mr-1 sm:mr-1.5 md:mr-2 text-blue-500" size={12} />
                       <span>{service.estimatedCompletionTime}</span>
                     </div>
                   </div>
                   
-                  <div className="text-sm text-gray-600 mb-3">
+                  <div className="text-[10px] sm:text-xs text-gray-600 mb-1.5 sm:mb-2 md:mb-3">
                     <strong>Location:</strong> {service.serviceLocation}
                   </div>
 
                   {/* Buttons should be at the bottom */}
-                  <div className="flex space-x-2 pt-3 border-t border-gray-100 mt-auto"> {/* Added mt-auto */}
+                  <div className="flex space-x-2 pt-1.5 sm:pt-2 md:pt-3 border-t border-gray-100 mt-auto">
                     <button
                       onClick={() => handleEditService(service)}
-                      className="text-blue-500 hover:bg-blue-50 px-3 py-1 rounded-md transition-colors flex items-center"
+                      className="text-blue-500 hover:bg-blue-50 px-2 sm:px-2.5 md:px-3 py-1 rounded-md transition-colors flex items-center text-[10px] sm:text-xs"
                     >
-                      <FaEdit className="mr-1" /> Edit
+                      <FaEdit className="mr-1" size={12} /> Edit
                     </button>
                     <button
                       onClick={() => handleDeleteService(service.id || service._id)}
-                      className="text-red-500 hover:bg-red-50 px-3 py-1 rounded-md transition-colors flex items-center"
+                      className="text-red-500 hover:bg-red-50 px-2 sm:px-2.5 md:px-3 py-1 rounded-md transition-colors flex items-center text-[10px] sm:text-xs"
                     >
-                      <FaTrash className="mr-1" /> Delete
+                      <FaTrash className="mr-1" size={12} /> Delete
                     </button>
                   </div>
                 </div>

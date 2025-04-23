@@ -268,16 +268,18 @@ const HomeOwnerSidebar: React.FC = () => {
             <Link
               key={path}
               to={path}
-              className={`flex flex-col items-center justify-center py-2 transition-colors duration-150 ${
+              className={`flex flex-col items-center justify-center py-1 transition-colors duration-150 ${
                 location.pathname === path 
                   ? 'text-[#133E87]'
                   : 'text-gray-500 hover:text-[#133E87]'
               }`}
             >
-              <div className={`p-1.5 rounded-full ${location.pathname === path ? 'bg-[#E6EBF4]' : ''}`}>
-                <Icon className={`w-5 h-5 ${location.pathname === path ? 'text-[#133E87]' : 'text-gray-500'}`} />
+              <div className={`p-1 rounded-full ${location.pathname === path ? 'bg-[#E6EBF4]' : ''}`}>
+                <Icon className={`w-4 h-4 ${location.pathname === path ? 'text-[#133E87]' : 'text-gray-500'}`} />
               </div>
-              <span className="text-xs mt-1 font-medium">{label.split(' ')[0]}</span>
+              <span className="text-[8px] mt-0.5 font-medium text-center leading-none px-0.5 max-w-full whitespace-normal break-words">
+                {label}
+              </span>
             </Link>
           ))}
         </div>

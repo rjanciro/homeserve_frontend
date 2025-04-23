@@ -7,6 +7,7 @@ import AboutUsPage from './components/pages/AboutUsPage';
 import Register from './components/authentication/register/Register';
 import Login from './components/authentication/login/Login';
 import PrivateRoute from './components/guards/PrivateRoute';
+import NotFound from './components/pages/NotFound';
 
 // Home Owner Components
 import HomeOwnerSidebar from './components/layout/HomeOwnerSidebar';
@@ -123,7 +124,7 @@ const App: React.FC = () => {
             <Route path="/verification-pending" element={<VerificationPending />} />
 
             {/* Catch all route */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </MessagingProvider>

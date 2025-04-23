@@ -92,27 +92,27 @@ const JobPostDetailsModal: React.FC<JobPostDetailsModalProps> = ({
   };
   
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
       <div 
-        className="bg-white rounded-xl shadow-xl w-full max-w-3xl animate-fadeIn"
+        className="bg-white rounded-xl shadow-xl w-full max-w-3xl animate-fadeIn max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-6 border-b border-gray-100">
+        <div className="p-3 sm:p-4 md:p-6 border-b border-gray-100">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-800">
+            <h2 className="text-base sm:text-xl md:text-2xl font-bold text-gray-800 pr-2">
               {job.title}
             </h2>
             <button 
               onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all duration-150"
+              className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all duration-150"
             >
               ✕
             </button>
           </div>
-          <div className="flex items-center mt-3">
+          <div className="flex items-center mt-2 sm:mt-3">
             {job.homeownerImage ? (
-              <div className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden mr-3 border border-[#133E87]">
+              <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden mr-2 sm:mr-3 border border-[#133E87]">
                 <img 
                   src={getProfileImageUrl(job.homeownerImage)} 
                   alt={job.homeownerName || 'Homeowner'} 
@@ -121,7 +121,7 @@ const JobPostDetailsModal: React.FC<JobPostDetailsModalProps> = ({
                     (e.target as HTMLImageElement).style.display = 'none';
                     (e.target as HTMLImageElement).parentElement!.innerHTML = `
                       <div class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-600">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <svg class="w-3 h-3 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                           <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                         </svg>
                       </div>
@@ -130,28 +130,28 @@ const JobPostDetailsModal: React.FC<JobPostDetailsModalProps> = ({
                 />
               </div>
             ) : (
-              <div className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden mr-3 flex items-center justify-center text-gray-600">
-                <FaUser className="text-lg" />
+              <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden mr-2 sm:mr-3 flex items-center justify-center text-gray-600">
+                <FaUser className="text-sm sm:text-lg" />
               </div>
             )}
             <div>
-              <span className="text-gray-500 text-sm">Posted by</span>
-              <p className="font-medium text-gray-800">{job.homeownerName || 'Homeowner'}</p>
+              <span className="text-gray-500 text-[10px] xs:text-xs sm:text-sm">Posted by</span>
+              <p className="font-medium text-gray-800 text-xs sm:text-base">{job.homeownerName || 'Homeowner'}</p>
             </div>
           </div>
         </div>
         
         {/* Modal Content */}
-        <div className="p-6">
+        <div className="p-3 sm:p-4 md:p-6">
           {/* Top row - Budget, Location, Posted date */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-gray-50 p-4 rounded-lg flex items-start">
-              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3 flex-shrink-0">
-                <FaMoneyBillWave className="text-green-600" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-6">
+            <div className="bg-gray-50 p-2 sm:p-4 rounded-lg flex items-start">
+              <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-green-100 flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
+                <FaMoneyBillWave className="text-green-600 text-xs sm:text-base" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Budget</p>
-                <p className="font-semibold text-gray-800">{job.budget ? 
+                <p className="text-[10px] xs:text-xs sm:text-sm text-gray-500">Budget</p>
+                <p className="font-semibold text-gray-800 text-xs sm:text-base">{job.budget ? 
                   (job.budget.type === 'fixed' && job.budget.amount ? 
                     new Intl.NumberFormat('en-PH', {
                       style: 'currency', 
@@ -163,57 +163,57 @@ const JobPostDetailsModal: React.FC<JobPostDetailsModalProps> = ({
               </div>
             </div>
             
-            <div className="bg-gray-50 p-4 rounded-lg flex items-start">
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3 flex-shrink-0">
-                <FaMapMarkerAlt className="text-blue-600" />
+            <div className="bg-gray-50 p-2 sm:p-4 rounded-lg flex items-start">
+              <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
+                <FaMapMarkerAlt className="text-blue-600 text-xs sm:text-base" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Location</p>
-                <p className="font-semibold text-gray-800">{job.location || 'Not specified'}</p>
+                <p className="text-[10px] xs:text-xs sm:text-sm text-gray-500">Location</p>
+                <p className="font-semibold text-gray-800 text-xs sm:text-base">{job.location || 'Not specified'}</p>
               </div>
             </div>
             
-            <div className="bg-gray-50 p-4 rounded-lg flex items-start">
-              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3 flex-shrink-0">
-                <FaCalendar className="text-purple-600" />
+            <div className="bg-gray-50 p-2 sm:p-4 rounded-lg flex items-start">
+              <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full bg-purple-100 flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0">
+                <FaCalendar className="text-purple-600 text-xs sm:text-base" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Posted On</p>
-                <p className="font-semibold text-gray-800">{formatDate(job.createdAt || '')}</p>
+                <p className="text-[10px] xs:text-xs sm:text-sm text-gray-500">Posted On</p>
+                <p className="font-semibold text-gray-800 text-xs sm:text-base">{formatDate(job.createdAt || '')}</p>
               </div>
             </div>
           </div>
           
           {/* Description */}
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-              <FaInfoCircle className="mr-2 text-[#133E87]" size={16} />
+          <div className="mb-3 sm:mb-6">
+            <h3 className="text-sm sm:text-lg font-semibold text-gray-800 mb-1.5 sm:mb-3 flex items-center">
+              <FaInfoCircle className="mr-1.5 sm:mr-2 text-[#133E87]" size={14} />
               Job Description
             </h3>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-700 whitespace-pre-line">
+            <div className="bg-gray-50 p-2 sm:p-4 rounded-lg">
+              <p className="text-gray-700 whitespace-pre-line text-xs sm:text-sm">
                 {job.description || 'No description provided.'}
               </p>
             </div>
           </div>
           
           {/* Two column layout for Schedule and Skills */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 mb-3 sm:mb-6">
             {/* Schedule */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                <FaClock className="mr-2 text-[#133E87]" size={16} />
+              <h3 className="text-sm sm:text-lg font-semibold text-gray-800 mb-1.5 sm:mb-3 flex items-center">
+                <FaClock className="mr-1.5 sm:mr-2 text-[#133E87]" size={14} />
                 Schedule
               </h3>
-              <div className="bg-gray-50 p-4 rounded-lg h-full">
+              <div className="bg-gray-50 p-2 sm:p-4 rounded-lg h-full">
                 {job.schedule?.type === 'one-time' ? (
-                  <div>
+                  <div className="text-xs sm:text-sm">
                     <p className="font-medium text-gray-700">One-time job</p>
                     <p className="text-gray-600 mt-1">Date: {formatDate(job.schedule?.startDate || '')}</p>
                     {job.schedule?.time && <p className="text-gray-600">Time: {job.schedule.time}</p>}
                   </div>
                 ) : (
-                  <div>
+                  <div className="text-xs sm:text-sm">
                     <p className="font-medium text-gray-700">Recurring {job.schedule?.frequency || 'weekly'} job</p>
                     {job.schedule?.days && job.schedule.days.length > 0 && (
                       <p className="text-gray-600 mt-1">Days: {job.schedule.days.join(', ')}</p>
@@ -227,25 +227,25 @@ const JobPostDetailsModal: React.FC<JobPostDetailsModalProps> = ({
             
             {/* Skills */}
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                <FaTag className="mr-2 text-[#133E87]" size={16} />
+              <h3 className="text-sm sm:text-lg font-semibold text-gray-800 mb-1.5 sm:mb-3 flex items-center">
+                <FaTag className="mr-1.5 sm:mr-2 text-[#133E87]" size={14} />
                 Required Skills
               </h3>
-              <div className="bg-gray-50 p-4 rounded-lg min-h-[100px] h-full">
+              <div className="bg-gray-50 p-2 sm:p-4 rounded-lg min-h-[80px] sm:min-h-[100px] h-full">
                 {job.skills && job.skills.length > 0 ? (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {job.skills.map((skill, index) => (
                       <span 
                         key={index}
-                        className="bg-white text-gray-700 px-3 py-1.5 rounded-full flex items-center"
+                        className="bg-white text-gray-700 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full flex items-center text-[10px] xs:text-xs sm:text-sm"
                       >
-                        <FaTag className="mr-1.5 text-gray-500" size={12} />
+                        <FaTag className="mr-1 sm:mr-1.5 text-gray-500" size={9} />
                         {skill}
                       </span>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500">No specific skills required</p>
+                  <p className="text-gray-500 text-xs sm:text-sm">No specific skills required</p>
                 )}
               </div>
             </div>
@@ -253,31 +253,31 @@ const JobPostDetailsModal: React.FC<JobPostDetailsModalProps> = ({
         </div>
         
         {/* Modal Footer */}
-        <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end space-x-4 rounded-b-xl">
+        <div className="p-3 sm:p-4 md:p-6 border-t border-gray-100 bg-gray-50 flex justify-end space-x-2 sm:space-x-4 rounded-b-xl">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-all duration-150 font-medium"
+            className="px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-all duration-150 font-medium text-xs sm:text-sm"
           >
             Close
           </button>
           
           {hasApplied(job.id) ? (
-            <div className={`px-6 py-2.5 rounded-lg text-sm font-medium ${
+            <div className={`px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-2.5 rounded-lg text-xs sm:text-sm font-medium ${
               getApplicationStatus(job.id) === 'accepted'
                 ? 'bg-green-100 text-green-800'
                 : getApplicationStatus(job.id) === 'rejected'
                   ? 'bg-red-100 text-red-800'
                   : 'bg-blue-100 text-blue-800'
             }`}>
-              {getApplicationStatus(job.id) === 'accepted' && <FaCheck className="mr-2 inline-block" />}
-              {getApplicationStatus(job.id) === 'rejected' && <FaTimes className="mr-2 inline-block" />}
-              {getApplicationStatus(job.id) === 'pending' && <FaHourglassHalf className="mr-2 inline-block" />}
+              {getApplicationStatus(job.id) === 'accepted' && <FaCheck className="mr-1.5 sm:mr-2 inline-block" />}
+              {getApplicationStatus(job.id) === 'rejected' && <FaTimes className="mr-1.5 sm:mr-2 inline-block" />}
+              {getApplicationStatus(job.id) === 'pending' && <FaHourglassHalf className="mr-1.5 sm:mr-2 inline-block" />}
               Application {getApplicationStatus(job.id)}
             </div>
           ) : (
             <button
               onClick={() => onApply(job)}
-              className="px-6 py-2.5 bg-[#133E87] text-white rounded-lg hover:bg-[#0f2f66] transition-all duration-150 shadow-sm hover:shadow-md font-medium"
+              className="px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-2.5 bg-[#133E87] text-white rounded-lg hover:bg-[#0f2f66] transition-all duration-150 shadow-sm hover:shadow-md font-medium text-xs sm:text-sm"
             >
               Apply Now
             </button>
@@ -727,18 +727,18 @@ const JobApplications: React.FC = () => {
   };
   
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex justify-between items-center">
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <div className="mb-4 sm:mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Job Applications</h1>
-          <p className="text-gray-600">Find and apply to jobs posted by homeowners</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1 sm:mb-2">Job Applications</h1>
+          <p className="text-xs sm:text-sm text-gray-600">Find and apply to jobs posted by homeowners</p>
         </div>
         
         {/* Debug button - only visible in development */}
         {import.meta.env.DEV && (
           <button 
             onClick={debugCheckApi}
-            className="px-3 py-1 bg-gray-100 text-gray-600 rounded-md text-sm hover:bg-gray-200"
+            className="px-2 sm:px-3 py-1 bg-gray-100 text-gray-600 rounded-md text-xs sm:text-sm hover:bg-gray-200"
           >
             Check API
           </button>
@@ -747,15 +747,15 @@ const JobApplications: React.FC = () => {
       
       {/* Verification Status Banner */}
       {user && !user.isVerified && user.verificationStatus !== 'approved' && user.verificationStatus !== 'verified' && (
-        <div className="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+        <div className="mb-4 sm:mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-3 sm:p-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
             </div>
-            <div className="ml-3">
-              <p className="text-sm text-yellow-700">
+            <div className="ml-2 sm:ml-3">
+              <p className="text-xs sm:text-sm text-yellow-700">
                 Your account needs to be verified by an administrator before you can apply to jobs. 
                 Current status: <span className="font-medium capitalize">{user.verificationStatus}</span>
               </p>
@@ -765,10 +765,10 @@ const JobApplications: React.FC = () => {
       )}
       
       {/* Application status filter buttons */}
-      <div className="mb-6 flex flex-wrap gap-3">
+      <div className="mb-4 sm:mb-6 flex flex-wrap gap-2">
         <button
           onClick={() => setActiveFilter('all')}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-150 ${
+          className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-150 ${
             activeFilter === 'all' 
               ? 'bg-[#133E87] text-white shadow-md' 
               : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
@@ -778,7 +778,7 @@ const JobApplications: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveFilter('applied')}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-150 ${
+          className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-150 ${
             activeFilter === 'applied' 
               ? 'bg-[#133E87] text-white shadow-md' 
               : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
@@ -788,7 +788,7 @@ const JobApplications: React.FC = () => {
         </button>
         <button
           onClick={() => setActiveFilter('not-applied')}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-150 ${
+          className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-150 ${
             activeFilter === 'not-applied' 
               ? 'bg-[#133E87] text-white shadow-md' 
               : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
@@ -799,35 +799,35 @@ const JobApplications: React.FC = () => {
       </div>
       
       {/* Layout with main content and sidebar */}
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
         {/* Main content - job listings */}
         <div className="lg:w-3/4 order-2 lg:order-1">
           {/* Loading state */}
           {loading && (
-            <div className="flex flex-col items-center justify-center py-20 bg-white/90 rounded-xl shadow-sm">
-              <div className="w-16 h-16 relative">
+            <div className="flex flex-col items-center justify-center py-12 sm:py-20 bg-white/90 rounded-xl shadow-sm">
+              <div className="w-12 sm:w-16 h-12 sm:h-16 relative">
                 <div className="absolute inset-0 rounded-full border-4 border-t-[#133E87] border-r-[#133E87]/30 border-b-[#133E87]/10 border-l-[#133E87]/50 animate-spin"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <FaSpinner className="text-[#133E87] text-2xl animate-pulse" />
+                  <FaSpinner className="text-[#133E87] text-xl sm:text-2xl animate-pulse" />
                 </div>
               </div>
-              <p className="text-gray-600 mt-4 font-medium">Loading available jobs...</p>
-              <p className="text-gray-500 text-sm">This may take a moment</p>
+              <p className="text-gray-600 mt-4 font-medium text-sm sm:text-base">Loading available jobs...</p>
+              <p className="text-gray-500 text-xs sm:text-sm mt-1">This may take a moment</p>
             </div>
           )}
           
           {/* No jobs found */}
           {!loading && filteredJobs.length === 0 && (
-            <div className="bg-white/95 rounded-xl shadow-md p-10 text-center backdrop-blur-sm">
-              <div className="w-20 h-20 mx-auto mb-6 flex items-center justify-center rounded-full bg-gray-100/80">
-                <FaInfoCircle className="text-3xl text-gray-400" />
+            <div className="bg-white/95 rounded-xl shadow-md p-6 sm:p-10 text-center backdrop-blur-sm">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 flex items-center justify-center rounded-full bg-gray-100/80">
+                <FaInfoCircle className="text-2xl sm:text-3xl text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
                 {jobs.length === 0 
                   ? "No job posts available" 
                   : "No matches found"}
               </h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 max-w-md mx-auto">
                 {jobs.length === 0 
                   ? "There are currently no job posts available. Please check back later for new opportunities." 
                   : "We couldn't find any job posts matching your current filters. Try adjusting your search criteria."}
@@ -835,9 +835,9 @@ const JobApplications: React.FC = () => {
               {jobs.length > 0 && (
                 <button
                   onClick={resetFilters}
-                  className="bg-[#133E87] text-white px-6 py-3 rounded-lg hover:bg-[#0f2f66] transition-all duration-150 shadow-sm hover:shadow flex items-center justify-center mx-auto"
+                  className="bg-[#133E87] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-[#0f2f66] transition-all duration-150 shadow-sm hover:shadow flex items-center justify-center mx-auto text-xs sm:text-sm"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clipRule="evenodd" />
                   </svg>
                   Reset All Filters
@@ -848,40 +848,40 @@ const JobApplications: React.FC = () => {
           
           {/* Job listings - two cards per row */}
           {!loading && filteredJobs.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
               {filteredJobs.map(job => (
                 <div 
                   key={job.id} 
                   className="bg-white/95 backdrop-blur-sm rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300 hover:translate-y-[-2px] group"
                 >
-                  <div className="p-6">
+                  <div className="p-3 sm:p-4 md:p-6">
                     {/* Top Section: Title, Budget, Location */}
                     <div className="flex flex-col gap-2">
                       {/* Budget Tag */}
-                      <div className="flex justify-between items-start mb-1">
-                        <h2 className="text-xl font-semibold text-gray-800 group-hover:text-[#133E87] transition-colors">{job.title || 'Untitled Job'}</h2>
-                        <div className="inline-flex items-center px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm font-medium">
-                          <FaMoneyBillWave className="mr-2" size={14} /> 
+                      <div className="flex justify-between items-start mb-1 flex-wrap gap-1 sm:gap-2">
+                        <h2 className="text-base sm:text-lg md:text-xl font-semibold text-gray-800 group-hover:text-[#133E87] transition-colors">{job.title || 'Untitled Job'}</h2>
+                        <div className="inline-flex items-center px-1.5 sm:px-2 py-0.5 sm:py-1 bg-green-50 text-green-700 rounded-full text-[10px] xs:text-xs sm:text-sm font-medium">
+                          <FaMoneyBillWave className="mr-1 sm:mr-2" size={12} /> 
                           <span>{renderBudget(job.budget)}</span>
                         </div>
                       </div>
                       
                       {/* Location and Posted Date */}
-                      <div className="flex justify-between items-center text-sm text-gray-500">
+                      <div className="flex flex-col xs:flex-row xs:justify-between xs:items-center text-[10px] xs:text-xs sm:text-sm text-gray-500 gap-0.5 xs:gap-0">
                         <div className="flex items-center">
-                          <FaMapMarkerAlt className="mr-1.5 text-[#133E87]" size={14} /> 
+                          <FaMapMarkerAlt className="mr-1 sm:mr-1.5 text-[#133E87]" size={10} /> 
                           <span>{job.location || 'Location not specified'}</span>
                         </div>
                         <div className="flex items-center">
-                          <FaCalendar className="mr-1.5" size={12} /> 
+                          <FaCalendar className="mr-1 sm:mr-1.5" size={9} /> 
                           <span>Posted {formatDate(job.createdAt || '')}</span>
                         </div>
                       </div>
                       
                       {/* Posted by */}
-                      <div className="flex items-center mt-2 pb-3 border-b border-gray-100">
+                      <div className="flex items-center mt-1 sm:mt-2 pb-2 sm:pb-3 border-b border-gray-100">
                         {job.homeownerImage ? (
-                          <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden mr-2 border border-[#133E87]">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden mr-1.5 sm:mr-2 border border-[#133E87]">
                             <img 
                               src={getProfileImageUrl(job.homeownerImage)} 
                               alt={job.homeownerName || 'Homeowner'}
@@ -891,7 +891,7 @@ const JobApplications: React.FC = () => {
                                 (e.target as HTMLImageElement).style.display = 'none';
                                 (e.target as HTMLImageElement).parentElement!.innerHTML = `
                                   <div class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-600">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <svg class="w-3 h-3 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                       <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                                     </svg>
                                   </div>
@@ -900,11 +900,11 @@ const JobApplications: React.FC = () => {
                             />
                           </div>
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden mr-2 flex items-center justify-center text-gray-600">
-                            <FaUser className="text-sm" />
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden mr-1.5 sm:mr-2 flex items-center justify-center text-gray-600">
+                            <FaUser className="text-xs sm:text-sm" />
                           </div>
                         )}
-                        <div className="text-sm">
+                        <div className="text-xs sm:text-sm">
                           <span className="text-gray-500">Posted by </span>
                           <span className="font-medium text-gray-700">{job.homeownerName || 'Homeowner'}</span>
                         </div>
@@ -912,78 +912,78 @@ const JobApplications: React.FC = () => {
                     </div>
                     
                     {/* Mid Section: Description and Skills */}
-                    <div className="mt-3 mb-4">
-                      <p className="text-gray-600 mb-3 line-clamp-2 text-sm">{job.description || 'No description provided'}</p>
+                    <div className="mt-2 sm:mt-3 mb-2 sm:mb-4">
+                      <p className="text-gray-600 mb-1.5 sm:mb-2 line-clamp-2 text-xs sm:text-sm">{job.description || 'No description provided'}</p>
                       
                       {/* Skills */}
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-1">
                         {job.skills && job.skills.length > 0 ? (
                           job.skills.map((skill, index) => (
                             <span 
                               key={index}
-                              className="bg-gray-50 text-gray-700 text-xs px-2 py-0.5 rounded-full flex items-center"
+                              className="bg-gray-50 text-gray-700 text-[10px] xs:text-xs px-1 sm:px-1.5 py-0.5 rounded-full flex items-center"
                             >
-                              <FaTag className="mr-1 text-gray-500" size={10} />
+                              <FaTag className="mr-0.5 text-gray-500" size={7} />
                               {skill}
                             </span>
                           ))
                         ) : (
-                          <span className="text-gray-400 text-xs">No specific skills required</span>
+                          <span className="text-gray-400 text-[10px] xs:text-xs">No specific skills required</span>
                         )}
                       </div>
                     </div>
                     
                     {/* Schedule Section */}
-                    <div className="mb-5 bg-gray-50 rounded-lg p-3">
-                      <h3 className="font-medium text-gray-800 mb-1.5 text-sm flex items-center">
-                        <FaClock className="mr-1.5 text-[#133E87]" size={14} />
+                    <div className="mb-3 sm:mb-5 bg-gray-50 rounded-lg p-1.5 sm:p-2 md:p-3">
+                      <h3 className="font-medium text-gray-800 mb-0.5 sm:mb-1 text-[10px] xs:text-xs sm:text-sm flex items-center">
+                        <FaClock className="mr-1 sm:mr-1.5 text-[#133E87]" size={10} />
                         Schedule
                       </h3>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-[10px] xs:text-xs text-gray-600">
                         {renderSchedule(job.schedule)}
                       </div>
                     </div>
                     
                     {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-2 mt-2 sm:mt-4">
                       {hasApplied(job.id) ? (
-                        <div className={`flex-grow text-center px-4 py-2.5 rounded-lg text-sm font-medium shadow-sm ${
+                        <div className={`col-span-full text-center px-2 py-1.5 sm:py-2 rounded-lg text-[10px] xs:text-xs sm:text-sm font-medium shadow-sm ${
                           getApplicationStatus(job.id) === 'accepted'
                             ? 'bg-green-100 text-green-800'
                             : getApplicationStatus(job.id) === 'rejected'
                               ? 'bg-red-100 text-red-800'
                               : 'bg-blue-100 text-blue-800'
                         }`}>
-                          {getApplicationStatus(job.id) === 'accepted' && <FaCheck className="mr-2 inline-block" />}
-                          {getApplicationStatus(job.id) === 'rejected' && <FaTimes className="mr-2 inline-block" />}
-                          {getApplicationStatus(job.id) === 'pending' && <FaHourglassHalf className="mr-2 inline-block" />}
+                          {getApplicationStatus(job.id) === 'accepted' && <FaCheck className="mr-1 sm:mr-2 inline-block" />}
+                          {getApplicationStatus(job.id) === 'rejected' && <FaTimes className="mr-1 sm:mr-2 inline-block" />}
+                          {getApplicationStatus(job.id) === 'pending' && <FaHourglassHalf className="mr-1 sm:mr-2 inline-block" />}
                           Application {getApplicationStatus(job.id)}
                         </div>
                       ) : (
                         <>
                           <button
                             onClick={() => handleApplyToJob(job)}
-                            className="flex-grow bg-[#133E87] hover:bg-[#0f2f66] text-white px-4 py-2.5 rounded-lg transition-all duration-150 shadow-sm hover:shadow font-medium flex items-center justify-center"
+                            className="bg-[#133E87] hover:bg-[#0f2f66] text-white px-1.5 sm:px-2 md:px-4 py-1.5 sm:py-2 rounded-lg transition-all duration-150 shadow-sm hover:shadow text-[10px] xs:text-xs sm:text-sm font-medium flex items-center justify-center"
                           >
                             Apply Now
                           </button>
                           
                           <button
-                            className="px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition-all duration-150 flex items-center justify-center"
+                            className="px-1.5 sm:px-2 md:px-4 py-1.5 sm:py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg text-[10px] xs:text-xs sm:text-sm font-medium transition-all duration-150 flex items-center justify-center"
                             onClick={() => {
                               setSelectedJob(job);
                               setShowJobDetailsModal(true);
                             }}
                           >
-                            <FaInfoCircle className="mr-2" size={14} />
+                            <FaInfoCircle className="mr-1 sm:mr-2" size={10} />
                             Details
                           </button>
                           
                           <button
-                            className="px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-all duration-150 flex items-center justify-center"
+                            className="px-1.5 sm:px-2 md:px-4 py-1.5 sm:py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-[10px] xs:text-xs sm:text-sm font-medium transition-all duration-150 flex items-center justify-center"
                             onClick={() => handleMessage(job.homeownerName, job.homeownerId)}
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-4 h-4 mr-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-2 h-2 xs:w-3 xs:h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2">
                               <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
                             </svg>
                             Message
@@ -999,29 +999,29 @@ const JobApplications: React.FC = () => {
         </div>
         
         {/* Right sidebar - Filters */}
-        <div className="lg:w-1/4 order-1 lg:order-2">
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-md p-5 border border-gray-100 sticky top-4">
-            <div className="flex items-center justify-between mb-5">
+        <div className="lg:w-1/4 order-1 lg:order-2 mb-4 sm:mb-6 lg:mb-0">
+          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-md p-3 sm:p-4 border border-gray-100 sticky top-4">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
               <div className="flex items-center">
-                <FaFilter className="text-[#133E87] mr-2" />
-                <h2 className="text-lg font-semibold text-gray-800">Filters</h2>
+                <FaFilter className="text-[#133E87] mr-1.5 sm:mr-2" size={12} />
+                <h2 className="text-sm sm:text-base font-semibold text-gray-800">Filters</h2>
               </div>
               
               <button 
                 onClick={resetFilters}
-                className="text-sm text-[#133E87] hover:underline font-medium"
+                className="text-xs sm:text-sm text-[#133E87] hover:underline font-medium"
               >
                 Reset
               </button>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-2 sm:space-y-3">
               {/* Search Term */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Search</label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <FaSearch className="text-gray-400" size={14} />
+                  <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 flex items-center pointer-events-none">
+                    <FaSearch className="text-gray-400" size={10} />
                   </div>
                   <input
                     type="text"
@@ -1029,32 +1029,32 @@ const JobApplications: React.FC = () => {
                     value={filters.searchTerm}
                     onChange={handleFilterChange}
                     placeholder="Job title or description"
-                    className="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all duration-150 bg-white/80"
+                    className="block w-full pl-7 sm:pl-8 pr-2 sm:pr-3 py-1 sm:py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all duration-150 bg-white/80 text-xs"
                   />
                 </div>
               </div>
               
               {/* Location filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Location</label>
                 <input
                   type="text"
                   name="location"
                   value={filters.location}
                   onChange={handleFilterChange}
                   placeholder="e.g., Makati, Quezon City"
-                  className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all duration-150 bg-white/80"
+                  className="block w-full px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all duration-150 bg-white/80 text-xs"
                 />
               </div>
               
               {/* Schedule type filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Schedule Type</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Schedule Type</label>
                 <select
                   name="scheduleType"
                   value={filters.scheduleType}
                   onChange={handleFilterChange}
-                  className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all duration-150 bg-white/80"
+                  className="block w-full px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all duration-150 bg-white/80 text-xs"
                 >
                   <option value="">All Types</option>
                   <option value="one-time">One-time</option>
@@ -1064,20 +1064,20 @@ const JobApplications: React.FC = () => {
               
               {/* Skills filter */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Skills</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Skills</label>
                 <input
                   type="text"
                   name="skills"
                   value={filters.skills}
                   onChange={handleFilterChange}
                   placeholder="e.g., Cleaning, Cooking"
-                  className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all duration-150 bg-white/80"
+                  className="block w-full px-2 sm:px-3 py-1 sm:py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all duration-150 bg-white/80 text-xs"
                 />
               </div>
               
               {/* Budget range slider */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Max Budget (₱{filters.budgetMax.toLocaleString()})</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Max Budget (₱{filters.budgetMax.toLocaleString()})</label>
                 <input
                   type="range"
                   name="budgetMax"
@@ -1088,7 +1088,7 @@ const JobApplications: React.FC = () => {
                   onChange={handleFilterChange}
                   className="w-full accent-[#133E87]"
                 />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <div className="flex justify-between text-[10px] xs:text-xs text-gray-500 mt-1">
                   <span>₱1,000</span>
                   <span>₱20,000</span>
                 </div>
@@ -1100,35 +1100,35 @@ const JobApplications: React.FC = () => {
       
       {/* Apply Modal */}
       {showApplyModal && selectedJob && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-xl animate-fadeIn">
-            <div className="p-6 border-b border-gray-100">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-3 md:p-4 z-50 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-xl animate-fadeIn max-h-[90vh] overflow-y-auto">
+            <div className="p-3 sm:p-4 md:p-6 border-b border-gray-100">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-800">
+                <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 pr-2 sm:pr-4">
                   Apply for {selectedJob.title}
                 </h2>
                 <button 
                   onClick={() => setShowApplyModal(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all duration-150"
+                  className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all duration-150"
                 >
                   ✕
                 </button>
               </div>
-              <div className="flex items-center mt-3">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                  <FaMoneyBillWave className="text-blue-600" />
+              <div className="flex items-center mt-2 sm:mt-3">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full bg-blue-100 flex items-center justify-center mr-2 sm:mr-3">
+                  <FaMoneyBillWave className="text-blue-600" size={12} />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Budget</p>
-                  <p className="font-semibold text-gray-800">{renderBudget(selectedJob.budget)}</p>
+                  <p className="text-[10px] xs:text-xs sm:text-sm text-gray-500">Budget</p>
+                  <p className="font-semibold text-gray-800 text-xs sm:text-sm md:text-base">{renderBudget(selectedJob.budget)}</p>
                 </div>
               </div>
             </div>
             
-            <div className="p-6">
-              <div className="mb-6">
-                <label htmlFor="rate" className="block text-gray-700 font-medium mb-2 flex items-center">
-                  <FaMoneyBillWave className="mr-2 text-green-600" size={16} />
+            <div className="p-3 sm:p-4 md:p-6">
+              <div className="mb-3 sm:mb-5">
+                <label htmlFor="rate" className="block text-gray-700 font-medium mb-1 sm:mb-2 flex items-center text-xs sm:text-sm">
+                  <FaMoneyBillWave className="mr-1.5 sm:mr-2 text-green-600" size={12} />
                   Your Rate (₱) <span className="text-red-500 ml-1">*</span>
                 </label>
                 <input
@@ -1136,15 +1136,15 @@ const JobApplications: React.FC = () => {
                   id="rate"
                   value={applicationRate}
                   onChange={(e) => setApplicationRate(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all duration-150"
+                  className="w-full px-2 sm:px-3 py-1.5 sm:py-2 md:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all duration-150 text-xs sm:text-sm"
                   placeholder="Enter your proposed rate"
                   min="0"
                 />
               </div>
               
-              <div className="mb-6">
-                <label htmlFor="message" className="block text-gray-700 font-medium mb-2 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5 mr-2 text-[#133E87]">
+              <div className="mb-3 sm:mb-5">
+                <label htmlFor="message" className="block text-gray-700 font-medium mb-1 sm:mb-2 flex items-center text-xs sm:text-sm">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1.5 sm:mr-2 text-[#133E87]">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                   </svg>
                   Message to Homeowner <span className="text-red-500 ml-1">*</span>
@@ -1154,30 +1154,30 @@ const JobApplications: React.FC = () => {
                   value={applicationMessage}
                   onChange={(e) => setApplicationMessage(e.target.value)}
                   rows={5}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all duration-150 resize-none"
+                  className="w-full px-2 sm:px-3 py-1.5 sm:py-2 md:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all duration-150 resize-none text-xs sm:text-sm"
                   placeholder="Introduce yourself and explain why you're a good fit for this job..."
                 ></textarea>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-[10px] xs:text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">
                   Let the homeowner know about your experience, availability, and why you're interested in this job.
                 </p>
               </div>
             </div>
             
-            <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end space-x-4 rounded-b-xl">
+            <div className="p-3 sm:p-4 md:p-6 border-t border-gray-100 bg-gray-50 flex justify-end space-x-2 sm:space-x-3 rounded-b-xl">
                 <button
                   onClick={() => setShowApplyModal(false)}
-                  className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-all duration-150 font-medium"
+                  className="px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-all duration-150 font-medium text-xs sm:text-sm"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={submitApplication}
                   disabled={submitting}
-                  className="px-6 py-3 bg-[#133E87] text-white rounded-lg hover:bg-[#0f2f66] transition-all duration-150 shadow-md hover:shadow-lg disabled:opacity-70 font-medium"
+                  className="px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-2.5 bg-[#133E87] text-white rounded-lg hover:bg-[#0f2f66] transition-all duration-150 shadow-md hover:shadow-lg disabled:opacity-70 font-medium text-xs sm:text-sm"
                 >
                   {submitting ? (
                   <div className="flex items-center justify-center">
-                    <FaSpinner className="animate-spin mr-2" /> Submitting...
+                    <FaSpinner className="animate-spin mr-1.5 sm:mr-2" /> Submitting...
                   </div>
                   ) : (
                     'Submit Application'

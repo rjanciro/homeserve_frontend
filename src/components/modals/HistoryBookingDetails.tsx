@@ -150,11 +150,11 @@ const HistoryBookingDetails: React.FC<HistoryBookingDetailsProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center p-4 z-50 transition-all duration-300">
-      <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden transform transition-all duration-300 scale-100 border border-white/40">
-        <div className="p-6 border-b border-gray-100/80">
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 transition-all duration-300">
+      <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl w-full max-w-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden transform transition-all duration-300 scale-100 border border-white/40">
+        <div className="p-3 sm:p-6 border-b border-gray-100/80">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-gray-800">Booking Details</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-gray-800">Booking Details</h2>
             <button 
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700 hover:bg-gray-100/60 rounded-full p-2 transition-colors"
@@ -164,15 +164,15 @@ const HistoryBookingDetails: React.FC<HistoryBookingDetailsProps> = ({
           </div>
         </div>
 
-        <div className="p-6 overflow-y-auto max-h-[calc(90vh-10rem)]">
+        <div className="p-3 sm:p-6 overflow-y-auto max-h-[calc(95vh-8rem)] sm:max-h-[calc(90vh-10rem)]">
           {/* Rejection Notice (if applicable) */}
           {status === 'rejected' && (
-            <div className="mb-6 bg-red-50 p-4 rounded-lg border border-red-200">
+            <div className="mb-4 sm:mb-6 bg-red-50 p-3 sm:p-4 rounded-lg border border-red-200">
               <div className="flex items-start">
-                <FaExclamationTriangle className="text-red-500 mt-0.5 mr-3 flex-shrink-0" />
+                <FaExclamationTriangle className="text-red-500 mt-0.5 mr-2 sm:mr-3 flex-shrink-0" />
                 <div>
                   <h4 className="font-medium text-red-800 mb-1">Booking Rejected</h4>
-                  <p className="text-red-700">
+                  <p className="text-red-700 text-sm sm:text-base">
                     {rejectionReason 
                       ? `Reason: ${rejectionReason}` 
                       : "The housekeeper has rejected this booking."}
@@ -183,9 +183,9 @@ const HistoryBookingDetails: React.FC<HistoryBookingDetailsProps> = ({
           )}
 
           {/* Service Provider Section */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div className="flex items-center">
-              <div className="w-14 h-14 rounded-full bg-gray-200 mr-4 flex-shrink-0 overflow-hidden shadow-md border-2 border-white">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gray-200 mr-3 sm:mr-4 flex-shrink-0 overflow-hidden shadow-md border-2 border-white">
                 {providerImage ? (
                   <img 
                     src={formatImageUrl(providerImage)} 
@@ -200,9 +200,9 @@ const HistoryBookingDetails: React.FC<HistoryBookingDetailsProps> = ({
                 )}
               </div>
               <div>
-                <h3 className="text-xl font-semibold text-gray-800">{provider}</h3>
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-800">{provider}</h3>
                 <div className="flex mt-1">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColorClass(status)}`}>
+                  <span className={`inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full text-xs font-medium ${getStatusColorClass(status)}`}>
                     {statusIcons[status as keyof typeof statusIcons]}
                     {status.charAt(0).toUpperCase() + status.slice(1)}
                   </span>
@@ -213,9 +213,9 @@ const HistoryBookingDetails: React.FC<HistoryBookingDetailsProps> = ({
 
           {/* Status History */}
           {statusHistory.length > 0 && (
-            <div className="mb-6">
-              <h4 className="text-lg font-semibold mb-3 text-gray-800">Status History</h4>
-              <div className="space-y-4 pl-2">
+            <div className="mb-4 sm:mb-6">
+              <h4 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 text-gray-800">Status History</h4>
+              <div className="space-y-3 sm:space-y-4 pl-1 sm:pl-2">
                 {statusHistory.map((history, index) => {
                   const historyNote = getNoteFromHistory(history);
                   return (
@@ -223,28 +223,28 @@ const HistoryBookingDetails: React.FC<HistoryBookingDetailsProps> = ({
                       key={index} 
                       className="flex items-start"
                     >
-                      <div className="mr-3 mt-0.5">
-                        <div className={`w-5 h-5 rounded-full ${history.status === 'rejected' ? 'bg-red-500' : 'bg-[#137D13]'} flex items-center justify-center text-white text-xs shadow-md`}>
+                      <div className="mr-2 sm:mr-3 mt-0.5">
+                        <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full ${history.status === 'rejected' ? 'bg-red-500' : 'bg-[#137D13]'} flex items-center justify-center text-white text-xs shadow-md`}>
                           {index + 1}
                         </div>
                         {index < statusHistory.length - 1 && (
-                          <div className="w-0.5 bg-gray-200 h-10 ml-[10px] -mb-1"></div>
+                          <div className="w-0.5 bg-gray-200 h-8 sm:h-10 ml-[8px] sm:ml-[10px] -mb-1"></div>
                         )}
                       </div>
-                      <div className={`flex-1 backdrop-blur-sm p-3 rounded-md shadow-sm border ${
+                      <div className={`flex-1 backdrop-blur-sm p-2 sm:p-3 rounded-md shadow-sm border ${
                         history.status === 'rejected' 
                           ? 'bg-red-50/80 border-red-100/60' 
                           : 'bg-white/80 border-gray-100/60'
                       }`}>
-                        <p className={`font-medium ${history.status === 'rejected' ? 'text-red-800' : 'text-gray-800'}`}>
+                        <p className={`font-medium text-sm sm:text-base ${history.status === 'rejected' ? 'text-red-800' : 'text-gray-800'}`}>
                           {history.status.charAt(0).toUpperCase() + history.status.slice(1)}
                         </p>
                         {historyNote && (
-                          <p className={`${history.status === 'rejected' ? 'text-red-700 font-medium' : 'text-gray-500'} ${history.status === 'rejected' ? 'mt-1' : ''}`}>
+                          <p className={`text-xs sm:text-sm ${history.status === 'rejected' ? 'text-red-700 font-medium' : 'text-gray-500'} ${history.status === 'rejected' ? 'mt-1' : ''}`}>
                             {history.status === 'rejected' ? 'Reason: ' : ''}{historyNote}
                           </p>
                         )}
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
                           {formatDateTime(history.date)}
                         </p>
                       </div>
@@ -256,57 +256,57 @@ const HistoryBookingDetails: React.FC<HistoryBookingDetailsProps> = ({
           )}
 
           {/* Service Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4 mb-6 bg-gray-50/70 backdrop-blur-sm p-4 rounded-lg border border-gray-100/60">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 sm:gap-y-6 sm:gap-x-4 mb-4 sm:mb-6 bg-gray-50/70 backdrop-blur-sm p-3 sm:p-4 rounded-lg border border-gray-100/60">
             <div className="flex items-start">
-              <FaUser className="w-4 h-4 mt-1 mr-3 text-[#137D13]" />
+              <FaUser className="w-4 h-4 mt-1 mr-2 sm:mr-3 text-[#137D13]" />
               <div>
-                <p className="text-sm font-medium text-gray-500">Service</p>
-                <p className="text-base font-medium">{service}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Service</p>
+                <p className="text-sm sm:text-base font-medium">{service}</p>
               </div>
             </div>
 
             {housekeeper?.phone && (
               <div className="flex items-start">
-                <FaPhone className="w-4 h-4 mt-1 mr-3 text-[#137D13]" />
+                <FaPhone className="w-4 h-4 mt-1 mr-2 sm:mr-3 text-[#137D13]" />
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Contact Number</p>
-                  <p className="text-base font-medium">{housekeeper.phone}</p>
+                  <p className="text-xs sm:text-sm font-medium text-gray-500">Contact Number</p>
+                  <p className="text-sm sm:text-base font-medium">{housekeeper.phone}</p>
                 </div>
               </div>
             )}
 
             <div className="flex items-start">
-              <FaCalendarCheck className="w-4 h-4 mt-1 mr-3 text-[#137D13]" />
+              <FaCalendarCheck className="w-4 h-4 mt-1 mr-2 sm:mr-3 text-[#137D13]" />
               <div>
-                <p className="text-sm font-medium text-gray-500">Date & Time</p>
-                <p className="text-base font-medium">{date} at {time}</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Date & Time</p>
+                <p className="text-sm sm:text-base font-medium">{date} at {time}</p>
               </div>
             </div>
 
-            <div className="flex items-start md:col-span-2">
-              <FaMapMarkerAlt className="w-4 h-4 mt-1 mr-3 text-[#137D13]" />
-              <div>
-                <p className="text-sm font-medium text-gray-500">Location</p>
-                <p className="text-base font-medium">{location}</p>
+            <div className="flex items-start sm:col-span-2">
+              <FaMapMarkerAlt className="w-4 h-4 mt-1 mr-2 sm:mr-3 text-[#137D13]" />
+              <div className="flex-1 overflow-hidden">
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Location</p>
+                <p className="text-sm sm:text-base font-medium break-words">{location}</p>
               </div>
             </div>
 
             {notes && (
-              <div className="flex items-start md:col-span-2 bg-white/80 backdrop-blur-sm p-3 rounded-md border border-gray-100/60">
-                <FaCommentAlt className="w-4 h-4 mt-1 mr-3 text-[#137D13]" />
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Notes</p>
-                  <p className="text-base">{notes}</p>
+              <div className="flex items-start sm:col-span-2 bg-white/80 backdrop-blur-sm p-2 sm:p-3 rounded-md border border-gray-100/60">
+                <FaCommentAlt className="w-4 h-4 mt-1 mr-2 sm:mr-3 text-[#137D13]" />
+                <div className="flex-1 overflow-hidden">
+                  <p className="text-xs sm:text-sm font-medium text-gray-500">Notes</p>
+                  <p className="text-sm sm:text-base break-words">{notes}</p>
                 </div>
               </div>
             )}
 
             {price > 0 && (
-              <div className="flex items-start md:col-span-2 mt-2 bg-[#f0f7f0]/80 backdrop-blur-sm p-4 rounded-md border border-[#dceadc]/70">
-                <FaInfoCircle className="w-4 h-4 mt-1 mr-3 text-[#137D13]" />
+              <div className="flex items-start sm:col-span-2 mt-2 bg-[#f0f7f0]/80 backdrop-blur-sm p-3 sm:p-4 rounded-md border border-[#dceadc]/70">
+                <FaInfoCircle className="w-4 h-4 mt-1 mr-2 sm:mr-3 text-[#137D13]" />
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Payment</p>
-                  <p className="text-xl font-bold text-[#137D13]">₱{price}</p>
+                  <p className="text-xs sm:text-sm font-medium text-gray-500">Payment</p>
+                  <p className="text-lg sm:text-xl font-bold text-[#137D13]">₱{price}</p>
                   <p className="text-xs text-gray-500">
                     To be paid after service completion
                   </p>
@@ -316,19 +316,13 @@ const HistoryBookingDetails: React.FC<HistoryBookingDetailsProps> = ({
           </div>
         </div>
 
-        <div className="p-4 border-t border-gray-100 bg-white flex flex-col sm:flex-row gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 bg-gray-200 text-gray-700 font-medium py-3 rounded-lg hover:bg-gray-300 transition-colors flex items-center justify-center"
-          >
-            Close
-          </button>
+        <div className="p-3 sm:p-4 border-t border-gray-100 bg-white flex flex-col sm:flex-row gap-2 sm:gap-3">
           
           {/* Add messaging option in footer too */}
           {housekeeper && housekeeper._id && (
             <button
               onClick={startConversation}
-              className="flex-1 bg-blue-500 text-white font-medium py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center"
+              className="flex-1 bg-blue-500 text-white font-medium py-2 sm:py-3 text-sm sm:text-base rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center"
             >
               <FaComments className="mr-2" />
               Message
