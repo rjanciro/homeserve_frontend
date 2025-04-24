@@ -18,7 +18,7 @@ interface Applicant {
   message: string;
   hasId: boolean;
   hasCertifications: boolean;
-  profileImage?: string;
+  userImage?: string;
   userId: string;
   rate: number;
   status: 'pending' | 'accepted' | 'rejected';
@@ -273,88 +273,144 @@ const JobPosts: React.FC = () => {
     fetchJobPosts();
   };
 
+  // Helper function to get status colors
+  const getStatusColors = (status: JobStatus) => {
+    switch(status) {
+      case 'active':
+        return {
+          bg: 'bg-emerald-100',
+          text: 'text-emerald-700',
+          icon: '🟢'
+        };
+      case 'paused':
+        return {
+          bg: 'bg-amber-100',
+          text: 'text-amber-700',
+          icon: '🟠'
+        };
+      case 'hired':
+        return {
+          bg: 'bg-blue-100',
+          text: 'text-blue-700',
+          icon: '🔵'
+        };
+      case 'archived':
+        return {
+          bg: 'bg-gray-100',
+          text: 'text-gray-700',
+          icon: '⚪'
+        };
+      default:
+        return {
+          bg: 'bg-gray-100',
+          text: 'text-gray-700',
+          icon: '⚪'
+        };
+    }
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3">
-        <h1 className="text-2xl font-bold text-gray-800">Your Job Posts</h1>
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+        <h1 className="text-3xl font-bold text-gray-800">Your Job Posts</h1>
         <button 
           onClick={handleCreateJobPost}
-          className="bg-[#133E87] hover:bg-[#0f2f66] text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-lg flex items-center shadow-md transition-all duration-200 font-medium text-sm sm:text-base w-full sm:w-auto justify-center"
+          className="bg-[#133E87] text-white px-5 py-2.5 rounded-full flex items-center shadow-md transition-all duration-200 font-medium text-sm sm:text-base w-full sm:w-auto justify-center"
         >
-          <FaPlus className="mr-1.5" /> Create Job Post
+          <FaPlus className="mr-2 text-white" />
+          Create Job Post
         </button>
       </div>
 
       {/* Filters and Sorting */}
-      <div className="flex flex-col mb-6 space-y-3 bg-white/70 p-3 rounded-xl shadow-sm border border-gray-100">
-        <div className="flex flex-col space-y-1">
-          <div className="flex items-center text-gray-600 text-xs sm:text-sm font-medium">
-            <FaFilter className="mr-1" /> Filter by status
+      <div className="flex flex-col sm:flex-row gap-4 mb-8 p-5 rounded-2xl bg-white shadow-md border border-gray-100">
+        <div className="flex-1">
+          <div className="flex items-center text-gray-700 text-sm font-medium mb-2">
+            <FaFilter className="mr-2 text-[#133E87]" /> Filter by status
           </div>
-          <div className="flex flex-wrap gap-1 bg-gray-50 p-1 rounded-lg shadow-inner">
-            {(['active', 'paused', 'hired', 'archived'] as JobStatus[]).map((status) => (
-              <button
-                key={status}
-                onClick={() => setActiveFilter(status)}
-                className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-md capitalize text-xs transition-all duration-200 ${
-                  activeFilter === status 
-                    ? 'bg-white shadow-md text-[#133E87] font-medium' 
-                    : 'hover:bg-gray-100 text-gray-600'
-                }`}
-              >
-                {status}
-              </button>
-            ))}
+          <div className="flex flex-wrap gap-2 p-1.5 rounded-xl bg-gray-50">
+            {(['active', 'paused', 'hired', 'archived'] as JobStatus[]).map((status) => {
+              const colors = getStatusColors(status);
+              return (
+                <button
+                  key={status}
+                  onClick={() => setActiveFilter(status)}
+                  className={`px-4 py-2 rounded-lg capitalize text-sm transition-all duration-200 flex items-center ${
+                    activeFilter === status 
+                      ? `${colors.bg} ${colors.text} shadow-sm font-medium transform scale-105` 
+                      : 'hover:bg-gray-100 text-gray-600 hover:scale-102'
+                  }`}
+                >
+                  <span className="mr-1.5">{colors.icon}</span>
+                  {status}
+                </button>
+              );
+            })}
           </div>
         </div>
         
-        <div className="flex flex-col space-y-1">
-          <div className="flex items-center text-gray-600 text-xs sm:text-sm font-medium">
-            <FaSort className="mr-1" /> Sort by
+        <div className="sm:w-64">
+          <div className="flex items-center text-gray-700 text-sm font-medium mb-2">
+            <FaSort className="mr-2 text-[#133E87]" /> Sort by
           </div>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortOption)}
-            className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#133E87] text-gray-700 appearance-none shadow-sm text-sm"
-          >
-            <option value="newest">Newest First</option>
-            <option value="mostApplicants">Most Applicants</option>
-            <option value="soonestStartDate">Soonest Start Date</option>
-          </select>
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className="bg-white w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#133E87] text-gray-700 appearance-none shadow-sm text-sm font-medium"
+            >
+              <option value="newest">Newest First</option>
+              <option value="mostApplicants">Most Applicants</option>
+              <option value="soonestStartDate">Soonest Start Date</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-400">
+              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Loading state */}
       {loading && (
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-14 w-14 border-t-3 border-b-3 border-[#133E87]"></div>
+        <div className="flex flex-col justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#133E87]/20 border-t-4 border-t-[#133E87]"></div>
+          <p className="text-gray-500 mt-4 font-medium">Loading job posts...</p>
         </div>
       )}
 
       {/* Error state */}
       {error && !loading && (
-        <div className="bg-red-50 text-red-700 p-6 rounded-lg mb-8 shadow-sm border border-red-100">
-          <p className="font-medium">{error}</p>
-          <p className="mt-2 text-sm text-red-600">Please try refreshing the page or contact support if the problem persists.</p>
+        <div className="bg-red-50 text-red-700 p-6 rounded-xl mb-8 shadow-md border border-red-200">
+          <div className="flex items-start">
+            <div className="p-2 bg-red-100 rounded-full mr-3">
+              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-semibold text-lg">{error}</p>
+              <p className="mt-1 text-sm text-red-600">Please try refreshing the page or contact support if the problem persists.</p>
+            </div>
+          </div>
         </div>
       )}
 
       {/* Job Posts List */}
       {!loading && !error && filteredAndSortedPosts.length === 0 ? (
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl p-10 text-center shadow-sm border border-gray-100">
-          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <FaPlus className="text-3xl text-gray-400" />
+        <div className="bg-white rounded-2xl p-12 text-center shadow-lg border border-gray-100">
+          <div className="w-24 h-24 bg-[#E6EBF4] rounded-full flex items-center justify-center mx-auto mb-6">
+            <FaPlus className="text-4xl text-[#133E87]" />
           </div>
-          <p className="text-gray-600 text-lg font-medium">
-            No {activeFilter} job posts found.
-          </p>
-          <p className="text-gray-500 mt-3">
+          <h3 className="text-2xl font-bold text-gray-800 mb-2">No {activeFilter} job posts found</h3>
+          <p className="text-gray-600 text-lg mb-8 max-w-lg mx-auto">
             Click on "Create Job Post" to post a new job for housekeepers to apply.
           </p>
           {activeFilter !== 'active' && (
             <button
               onClick={() => setActiveFilter('active')}
-              className="mt-6 text-[#133E87] hover:text-[#0f2f66] font-medium bg-[#E6EBF4] hover:bg-[#d9e1f1] px-4 py-2 rounded-lg transition-colors"
+              className="mt-4 text-white font-medium bg-[#133E87] px-6 py-3 rounded-full transition-colors shadow-md hover:shadow-lg"
             >
               View active job posts
             </button>
@@ -362,130 +418,157 @@ const JobPosts: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAndSortedPosts.map(post => (
-            <div 
-              key={post.id} 
-              className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1"
-            >
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-3">{post.title}</h3>
-                <div className="space-y-3 mb-5">
-                  <div className="flex items-start">
-                    <span className="text-gray-500 mr-2 flex-shrink-0 mt-0.5">📍</span>
-                    <p className="text-gray-700">{post.location}</p>
+          {filteredAndSortedPosts.map(post => {
+            const statusColors = getStatusColors(post.status);
+            
+            return (
+              <div 
+                key={post.id} 
+                className="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              >
+                <div className="p-6">
+                  <div className={`${statusColors.bg} ${statusColors.text} text-xs font-bold uppercase px-3 py-1 rounded-full inline-flex items-center mb-4`}>
+                    <span className="mr-1">{statusColors.icon}</span>
+                    {post.status}
                   </div>
                   
-                  {post.status !== 'hired' && post.startDate && (
-                    <div className="flex items-start">
-                      <span className="text-gray-500 mr-2 flex-shrink-0 mt-0.5">🗓️</span>
-                      <p className="text-gray-700">Start Date: {post.startDate}</p>
-                    </div>
-                  )}
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">{post.title}</h3>
                   
-                  {post.salary && (
+                  <div className="space-y-3 mb-5">
                     <div className="flex items-start">
-                      <span className="text-gray-500 mr-2 flex-shrink-0 mt-0.5">💸</span>
-                      <p className="text-gray-700">Salary: {post.salary}</p>
+                      <div className="p-1.5 bg-gray-100 rounded-full mr-3 flex items-center justify-center">
+                        <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </div>
+                      <p className="text-gray-700">{post.location}</p>
                     </div>
-                  )}
-                  
-                  <div className="flex items-center">
-                    <span className="text-gray-500 mr-2">📌</span>
-                    <span className={`font-medium capitalize px-3 py-1 rounded-full text-sm ${
-                      post.status === 'active' ? 'bg-green-100 text-green-700' :
-                      post.status === 'paused' ? 'bg-amber-100 text-amber-700' :
-                      post.status === 'hired' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
-                    }`}>
-                      {post.status}
-                    </span>
+                    
+                    {post.status !== 'hired' && post.startDate && (
+                      <div className="flex items-start">
+                        <div className="p-1.5 bg-gray-100 rounded-full mr-3 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <p className="text-gray-700">Start Date: {post.startDate}</p>
+                      </div>
+                    )}
+                    
+                    {post.salary && (
+                      <div className="flex items-start">
+                        <div className="p-1.5 bg-gray-100 rounded-full mr-3 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                        <p className="text-gray-700 font-medium">{post.salary}</p>
+                      </div>
+                    )}
+                    
+                    {post.status !== 'hired' && post.status !== 'archived' && (
+                      <div className="flex items-start">
+                        <div className="p-1.5 bg-gray-100 rounded-full mr-3 flex items-center justify-center">
+                          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                          </svg>
+                        </div>
+                        <div className="flex items-center">
+                          <p className="text-gray-700">
+                            {post.applicants.length} {post.applicants.length === 1 ? 'Applicant' : 'Applicants'}
+                          </p>
+                          {post.applicants.length > 0 && (
+                            <span className="w-2 h-2 bg-blue-500 rounded-full ml-2 animate-pulse"></span>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   
-                  {post.status !== 'hired' && post.status !== 'archived' && (
-                    <div className="flex items-start">
-                      <span className="text-gray-500 mr-2 flex-shrink-0 mt-0.5">👥</span>
-                      <p className="text-gray-700">
-                        {post.applicants.length} {post.applicants.length === 1 ? 'Applicant' : 'Applicants'}
+                  {post.status === 'hired' && post.hiredPerson && (
+                    <div className="mb-5 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                      <p className="font-medium text-blue-700 flex items-center mb-2">
+                        <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        {post.hiredPerson.name}
+                      </p>
+                      <p className="text-blue-600 flex items-center text-sm">
+                        <svg className="w-4 h-4 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Started: {post.hiredPerson.startDate}
                       </p>
                     </div>
                   )}
-                </div>
-                
-                {post.status === 'hired' && post.hiredPerson && (
-                  <div className="mb-5 p-4 bg-[#E6EBF4] rounded-lg">
-                    <p className="font-medium text-[#133E87] flex items-center">
-                      <span className="mr-2">👩‍💼</span> Hired: {post.hiredPerson.name}
-                    </p>
-                    <p className="text-[#133E87] mt-1 flex items-center">
-                      <span className="mr-2">📅</span> Started: {post.hiredPerson.startDate}
-                    </p>
-                  </div>
-                )}
-                
-                <div className="flex flex-wrap gap-2 mt-5 pt-4 border-t border-gray-100">
-                  {post.status === 'active' || post.status === 'paused' ? (
-                    <>
-                      {post.applicants.length > 0 && (
+                  
+                  <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t border-gray-100">
+                    {post.status === 'active' || post.status === 'paused' ? (
+                      <>
+                        {post.applicants.length > 0 && (
+                          <button 
+                            onClick={() => handleViewApplicants(post)}
+                            className="bg-[#E6EBF4] text-[#133E87] px-4 py-2.5 rounded-xl text-sm flex items-center hover:bg-[#d9e1f1] transition-all shadow-sm"
+                          >
+                            <FaEye className="mr-2" /> View Applicants
+                          </button>
+                        )}
                         <button 
-                          onClick={() => handleViewApplicants(post)}
-                          className="bg-[#E6EBF4] text-[#133E87] px-3 py-2 rounded-md text-sm flex items-center hover:bg-[#d9e1f1] transition-colors"
+                          onClick={() => handleEditPost(post.id)}
+                          className="bg-gray-100 text-gray-700 px-4 py-2.5 rounded-xl text-sm flex items-center hover:bg-gray-200 transition-all shadow-sm"
                         >
-                          <FaEye className="mr-1.5" /> View Applicants
+                          <FaEdit className="mr-2" /> Edit
                         </button>
-                      )}
+                        <button 
+                          onClick={() => handlePauseResumePost(post.id, post.status)}
+                          className={`px-4 py-2.5 rounded-xl text-sm flex items-center transition-all shadow-sm ${
+                            post.status === 'active' 
+                              ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' 
+                              : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                          }`}
+                        >
+                          {post.status === 'active' 
+                            ? <><FaPause className="mr-2" /> Pause</>
+                            : <><BsPlayFill className="mr-2" /> Resume</>
+                          }
+                        </button>
+                        <button 
+                          onClick={() => handleDeletePost(post.id)}
+                          className="bg-red-100 text-red-700 px-4 py-2.5 rounded-xl text-sm flex items-center hover:bg-red-200 transition-all shadow-sm"
+                        >
+                          <FaTrash className="mr-2" /> Delete
+                        </button>
+                      </>
+                    ) : post.status === 'hired' ? (
+                      <>
+                        <button className="bg-[#E6EBF4] text-[#133E87] px-4 py-2.5 rounded-xl text-sm flex items-center hover:bg-[#d9e1f1] transition-all shadow-sm">
+                          <FaComments className="mr-2" /> Chat
+                        </button>
+                        <button className="bg-gray-100 text-gray-700 px-4 py-2.5 rounded-xl text-sm flex items-center hover:bg-gray-200 transition-all shadow-sm">
+                          <FaFile className="mr-2" /> Agreement
+                        </button>
+                        <button className="bg-amber-100 text-amber-700 px-4 py-2.5 rounded-xl text-sm flex items-center hover:bg-amber-200 transition-all shadow-sm">
+                          <FaSync className="mr-2" /> Replace
+                        </button>
+                      </>
+                    ) : (
                       <button 
                         onClick={() => handleEditPost(post.id)}
-                        className="bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm flex items-center hover:bg-gray-200 transition-colors"
+                        className="bg-gray-100 text-gray-700 px-4 py-2.5 rounded-xl text-sm flex items-center hover:bg-gray-200 transition-all shadow-sm"
                       >
-                        <FaEdit className="mr-1.5" /> Edit
+                        <FaEye className="mr-2" /> View Details
                       </button>
-                      <button 
-                        onClick={() => handlePauseResumePost(post.id, post.status)}
-                        className={`${
-                          post.status === 'active' 
-                            ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' 
-                            : 'bg-green-100 text-green-700 hover:bg-green-200'
-                        } px-3 py-2 rounded-md text-sm flex items-center transition-colors`}
-                      >
-                        {post.status === 'active' 
-                          ? <><FaPause className="mr-1.5" /> Pause</>
-                          : <><BsPlayFill className="mr-1.5" /> Resume</>
-                        }
-                      </button>
-                      <button 
-                        onClick={() => handleDeletePost(post.id)}
-                        className="bg-red-100 text-red-700 px-3 py-2 rounded-md text-sm flex items-center hover:bg-red-200 transition-colors"
-                      >
-                        <FaTrash className="mr-1.5" /> Delete
-                      </button>
-                    </>
-                  ) : post.status === 'hired' ? (
-                    <>
-                      <button className="bg-[#E6EBF4] text-[#133E87] px-3 py-2 rounded-md text-sm flex items-center hover:bg-[#d9e1f1] transition-colors">
-                        <FaComments className="mr-1.5" /> Chat
-                      </button>
-                      <button className="bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm flex items-center hover:bg-gray-200 transition-colors">
-                        <FaFile className="mr-1.5" /> View Agreement
-                      </button>
-                      <button className="bg-amber-100 text-amber-700 px-3 py-2 rounded-md text-sm flex items-center hover:bg-amber-200 transition-colors">
-                        <FaSync className="mr-1.5" /> Replace
-                      </button>
-                    </>
-                  ) : (
-                    <button 
-                      onClick={() => handleEditPost(post.id)}
-                      className="bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm flex items-center hover:bg-gray-200 transition-colors"
-                    >
-                      <FaEye className="mr-1.5" /> View Details
-                    </button>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
-      {/* Applicants Modal - Removed getProfileImageUrl prop */}
+      {/* Applicants Modal */}
       {selectedPost && (
         <ApplicantsModal
           isOpen={showApplicants}
