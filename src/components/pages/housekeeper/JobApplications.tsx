@@ -4,6 +4,7 @@ import useDocumentTitle from '../../../hooks/useDocumentTitle';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import JobApplicationModal from '../../modals/JobApplicationModal';
 
 // Types
 type JobStatus = 'active' | 'paused' | 'hired' | 'archived';
@@ -18,6 +19,9 @@ interface JobApplicant {
   message?: string;
   userId: string;
   userImage?: string;
+  availableDays?: {[key: string]: boolean};
+  startDate?: string;
+  experienceSummary?: string;
 }
 
 interface JobPost {
@@ -33,6 +37,7 @@ interface JobPost {
     days?: string[];
     frequency?: string;
     time?: string;
+    timeRanges?: {[key: string]: string};
   };
   skills: string[];
   budget: {
@@ -297,12 +302,9 @@ const JobApplications: React.FC = () => {
   const [filteredJobs, setFilteredJobs] = useState<JobPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<'all' | 'applied' | 'not-applied'>('all');
-  const [showApplyModal, setShowApplyModal] = useState(false);
   const [showJobDetailsModal, setShowJobDetailsModal] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobPost | null>(null);
-  const [applicationMessage, setApplicationMessage] = useState('');
-  const [applicationRate, setApplicationRate] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
   const [myApplications, setMyApplications] = useState<{[key: string]: JobApplicant}>({});
   const [user, setUser] = useState<any>(null);
   
@@ -432,52 +434,7 @@ const JobApplications: React.FC = () => {
         }
         
         // Fetch my applications
-        const applicationsResponse = await axios.get(
-          `${import.meta.env.VITE_API_URL}/job-posts/my-applications`,
-          { headers: { Authorization: `Bearer ${token}` }}
-        );
-        
-        console.log("Full my applications API response:", applicationsResponse);
-        
-        // Create a map of job ID to application for easy lookup
-        const applicationsMap: {[key: string]: JobApplicant} = {};
-        
-        // Handle different possible response structures
-        if (applicationsResponse.data && applicationsResponse.data.applications) {
-          applicationsResponse.data.applications.forEach((app: any) => {
-            if (app && app.jobId && app.application) {
-              applicationsMap[app.jobId] = {
-                id: app.application.id,
-                userId: app.userId || '',
-                name: 'You',
-                rate: app.application.proposedRate,
-                status: app.application.status,
-                dateApplied: app.application.dateApplied,
-                message: app.application.message,
-                experience: ''
-              };
-            }
-          });
-        } else if (Array.isArray(applicationsResponse.data)) {
-          // Try an alternative structure if the data is just an array
-          applicationsResponse.data.forEach((app: any) => {
-            if (app && app.jobId) {
-              applicationsMap[app.jobId] = {
-                id: app.id || '',
-                userId: app.userId || '',
-                name: 'You',
-                rate: app.proposedRate || 0,
-                status: app.status || 'pending',
-                dateApplied: app.dateApplied || new Date().toISOString(),
-                message: app.message || '',
-                experience: ''
-              };
-            }
-          });
-        }
-        
-        console.log("Created applications map:", applicationsMap);
-        setMyApplications(applicationsMap);
+        await fetchApplications();
       } catch (err) {
         console.error('Error fetching data:', err);
         toast.error('Failed to load job posts and applications');
@@ -591,56 +548,77 @@ const JobApplications: React.FC = () => {
     }
     
     setSelectedJob(job);
-    setApplicationMessage('');
-    setApplicationRate('');
-    setShowApplyModal(true);
+    setShowApplicationModal(true);
   };
   
-  const submitApplication = async () => {
-    if (!selectedJob) return;
-    
-    if (!applicationMessage.trim()) {
-      toast.error('Please provide a message to the homeowner');
-      return;
-    }
-    
-    if (!applicationRate.trim() || isNaN(parseFloat(applicationRate))) {
-      toast.error('Please provide a valid rate');
-      return;
-    }
-    
-    setSubmitting(true);
-    
+  const handleApplicationSuccess = () => {
+    // Refresh applications data
+    fetchApplications();
+  };
+  
+  const fetchApplications = async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('Authentication required');
       }
       
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/job-posts/${selectedJob.id}/apply`,
-        {
-          message: applicationMessage,
-          proposedRate: parseFloat(applicationRate)
-        },
+      // Fetch my applications
+      const applicationsResponse = await axios.get(
+        `${import.meta.env.VITE_API_URL}/job-posts/my-applications`,
         { headers: { Authorization: `Bearer ${token}` }}
       );
-        
-      // Update the local state
-      const newApplication = response.data.application;
-      setMyApplications(prev => ({
-        ...prev,
-          [selectedJob.id]: newApplication
-      }));
-        
-      setShowApplyModal(false);
-      setSelectedJob(null);
-      toast.success('Application submitted successfully');
+      
+      console.log("Full my applications API response:", applicationsResponse);
+      
+      // Create a map of job ID to application for easy lookup
+      const applicationsMap: {[key: string]: JobApplicant} = {};
+      
+      // Handle different possible response structures
+      if (applicationsResponse.data && applicationsResponse.data.applications) {
+        applicationsResponse.data.applications.forEach((app: any) => {
+          if (app && app.jobId && app.application) {
+            applicationsMap[app.jobId] = {
+              id: app.application.id,
+              userId: app.userId || '',
+              name: 'You',
+              rate: app.application.proposedRate,
+              status: app.application.status,
+              dateApplied: app.application.dateApplied,
+              message: app.application.message,
+              experience: app.application.experienceSummary || '',
+              availableDays: app.application.availableDays || {},
+              startDate: app.application.startDate,
+              experienceSummary: app.application.experienceSummary || ''
+            };
+          }
+        });
+      } else if (Array.isArray(applicationsResponse.data)) {
+        // Try an alternative structure if the data is just an array
+        applicationsResponse.data.forEach((app: any) => {
+          if (app && app.jobId) {
+            applicationsMap[app.jobId] = {
+              id: app.id || '',
+              userId: app.userId || '',
+              name: 'You',
+              rate: app.proposedRate || 0,
+              status: app.status || 'pending',
+              dateApplied: app.dateApplied || new Date().toISOString(),
+              message: app.message || '',
+              experience: app.experienceSummary || '',
+              availableDays: app.availableDays || {},
+              startDate: app.startDate,
+              experienceSummary: app.experienceSummary || ''
+            };
+          }
+        });
+      }
+      
+      console.log("Created applications map:", applicationsMap);
+      setMyApplications(applicationsMap);
     } catch (err) {
-      console.error('Error submitting application:', err);
-      toast.error('Failed to submit application');
-    } finally {
-      setSubmitting(false);
+      console.error('Error fetching applications:', err);
+      toast.error('Failed to load applications');
     }
   };
   
@@ -1098,95 +1076,13 @@ const JobApplications: React.FC = () => {
         </div>
       </div>
       
-      {/* Apply Modal */}
-      {showApplyModal && selectedJob && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-3 md:p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-xl animate-fadeIn max-h-[90vh] overflow-y-auto">
-            <div className="p-3 sm:p-4 md:p-6 border-b border-gray-100">
-              <div className="flex justify-between items-center">
-                <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-800 pr-2 sm:pr-4">
-                  Apply for {selectedJob.title}
-                </h2>
-                <button 
-                  onClick={() => setShowApplyModal(false)}
-                  className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-all duration-150"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="flex items-center mt-2 sm:mt-3">
-                <div className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full bg-blue-100 flex items-center justify-center mr-2 sm:mr-3">
-                  <FaMoneyBillWave className="text-blue-600" size={12} />
-                </div>
-                <div>
-                  <p className="text-[10px] xs:text-xs sm:text-sm text-gray-500">Budget</p>
-                  <p className="font-semibold text-gray-800 text-xs sm:text-sm md:text-base">{renderBudget(selectedJob.budget)}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-3 sm:p-4 md:p-6">
-              <div className="mb-3 sm:mb-5">
-                <label htmlFor="rate" className="block text-gray-700 font-medium mb-1 sm:mb-2 flex items-center text-xs sm:text-sm">
-                  <FaMoneyBillWave className="mr-1.5 sm:mr-2 text-green-600" size={12} />
-                  Your Rate (₱) <span className="text-red-500 ml-1">*</span>
-                </label>
-                <input
-                  type="number"
-                  id="rate"
-                  value={applicationRate}
-                  onChange={(e) => setApplicationRate(e.target.value)}
-                  className="w-full px-2 sm:px-3 py-1.5 sm:py-2 md:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all duration-150 text-xs sm:text-sm"
-                  placeholder="Enter your proposed rate"
-                  min="0"
-                />
-              </div>
-              
-              <div className="mb-3 sm:mb-5">
-                <label htmlFor="message" className="block text-gray-700 font-medium mb-1 sm:mb-2 flex items-center text-xs sm:text-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1.5 sm:mr-2 text-[#133E87]">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                  </svg>
-                  Message to Homeowner <span className="text-red-500 ml-1">*</span>
-                </label>
-                <textarea
-                  id="message"
-                  value={applicationMessage}
-                  onChange={(e) => setApplicationMessage(e.target.value)}
-                  rows={5}
-                  className="w-full px-2 sm:px-3 py-1.5 sm:py-2 md:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#133E87] transition-all duration-150 resize-none text-xs sm:text-sm"
-                  placeholder="Introduce yourself and explain why you're a good fit for this job..."
-                ></textarea>
-                <p className="text-[10px] xs:text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">
-                  Let the homeowner know about your experience, availability, and why you're interested in this job.
-                </p>
-              </div>
-            </div>
-            
-            <div className="p-3 sm:p-4 md:p-6 border-t border-gray-100 bg-gray-50 flex justify-end space-x-2 sm:space-x-3 rounded-b-xl">
-                <button
-                  onClick={() => setShowApplyModal(false)}
-                  className="px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-all duration-150 font-medium text-xs sm:text-sm"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={submitApplication}
-                  disabled={submitting}
-                  className="px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 md:py-2.5 bg-[#133E87] text-white rounded-lg hover:bg-[#0f2f66] transition-all duration-150 shadow-md hover:shadow-lg disabled:opacity-70 font-medium text-xs sm:text-sm"
-                >
-                  {submitting ? (
-                  <div className="flex items-center justify-center">
-                    <FaSpinner className="animate-spin mr-1.5 sm:mr-2" /> Submitting...
-                  </div>
-                  ) : (
-                    'Submit Application'
-                  )}
-                </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Job Application Modal */}
+      <JobApplicationModal
+        isOpen={showApplicationModal}
+        onClose={() => setShowApplicationModal(false)}
+        job={selectedJob}
+        onSuccess={handleApplicationSuccess}
+      />
       
       {/* Job Details Modal */}
       <JobPostDetailsModal

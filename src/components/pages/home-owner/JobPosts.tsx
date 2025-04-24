@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import CreateJobPostModal from '../../modals/CreateJobPostModal';
+import ApplicantsModal from '../../modals/ApplicantsModal';
 import useDocumentTitle  from '../../../hooks/useDocumentTitle';
 
 // Define types
@@ -14,7 +15,6 @@ type SortOption = 'newest' | 'mostApplicants' | 'soonestStartDate';
 interface Applicant {
   id: string;
   name: string;
-  credentials: string;
   message: string;
   hasId: boolean;
   hasCertifications: boolean;
@@ -23,6 +23,11 @@ interface Applicant {
   rate: number;
   status: 'pending' | 'accepted' | 'rejected';
   dateApplied: string;
+  startDate?: string;
+  availableDays?: { [key: string]: boolean };
+  experienceSummary?: string;
+  idVerificationStatus?: string;
+  certificationStatus?: string;
 }
 
 interface JobPost {
@@ -37,11 +42,7 @@ interface JobPost {
   createdAt: Date;
   schedule?: {
     type: string;
-    startDate?: string;
-    endDate?: string;
     days?: string[];
-    frequency?: string;
-    time?: string;
   };
   budget?: {
     type: string;
@@ -211,35 +212,21 @@ const JobPosts: React.FC = () => {
     }
   };
 
-  const handleHireApplicant = async (postId: string, applicant: Applicant) => {
+  const handleHireApplicant = async (jobId: string, applicant: Applicant) => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication required');
-      }
+      if (!token) throw new Error('Authentication required');
 
       await axios.patch(
-        `${import.meta.env.VITE_API_URL}/job-posts/${postId}/applicants/${applicant.id}/status`,
+        `${import.meta.env.VITE_API_URL}/job-posts/${jobId}/applicants/${applicant.id}/status`,
         { status: 'accepted' },
         { headers: { Authorization: `Bearer ${token}` }}
       );
       
-      // API call will update job status to 'hired' and set hired person
-      // Refresh job posts to get the updated data
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/job-posts/my-posts`,
-        { 
-          headers: { Authorization: `Bearer ${token}` },
-          params: { status: activeFilter }
-        }
-      );
-
-      setJobPosts(response.data.posts.map((post: any) => ({
-        ...post,
-        createdAt: new Date(post.createdAt)
-      })));
+      // Refresh needed data or update state locally
+      fetchJobPosts(); // Re-fetch all posts to reflect hired status
       
-      setShowApplicants(false);
+      setShowApplicants(false); // Close modal after hiring
       toast.success(`${applicant.name} has been hired!`);
     } catch (err) {
       console.error('Error hiring applicant:', err);
@@ -247,33 +234,27 @@ const JobPosts: React.FC = () => {
     }
   };
 
-  const handleRejectApplicant = async (postId: string, applicantId: string) => {
+  const handleRejectApplicant = async (jobId: string, applicantId: string) => {
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication required');
-      }
+      if (!token) throw new Error('Authentication required');
 
       await axios.patch(
-        `${import.meta.env.VITE_API_URL}/job-posts/${postId}/applicants/${applicantId}/status`,
+        `${import.meta.env.VITE_API_URL}/job-posts/${jobId}/applicants/${applicantId}/status`,
         { status: 'rejected' },
         { headers: { Authorization: `Bearer ${token}` }}
       );
       
-      // Update the local state
-      setJobPosts(prevPosts => 
-        prevPosts.map(post => 
-          post.id === postId 
-            ? {
-                ...post,
-                applicants: post.applicants.filter(a => a.id !== applicantId)
-              } 
-            : post
-        )
+      // Update local state immediately for responsiveness
+      const updatedPosts = jobPosts.map(post => 
+        post.id === jobId 
+          ? { ...post, applicants: post.applicants.filter(a => a.id !== applicantId) }
+          : post
       );
+      setJobPosts(updatedPosts);
 
-      // Also update selected post if it's the same one
-      if (selectedPost && selectedPost.id === postId) {
+      // Update selected post if it's the one being viewed
+      if (selectedPost && selectedPost.id === jobId) {
         setSelectedPost({
           ...selectedPost,
           applicants: selectedPost.applicants.filter(a => a.id !== applicantId)
@@ -281,6 +262,7 @@ const JobPosts: React.FC = () => {
       }
 
       toast.success('Applicant rejected');
+      // Keep modal open after rejection if desired, or close with setShowApplicants(false)
     } catch (err) {
       console.error('Error rejecting applicant:', err);
       toast.error('Failed to reject applicant');
@@ -503,123 +485,18 @@ const JobPosts: React.FC = () => {
         </div>
       )}
 
-      {/* Applicants Modal */}
-      {showApplicants && selectedPost && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white/95 rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden border border-gray-200/50">
-            <div className="p-6 border-b border-gray-200/70 sticky top-0 bg-white/95 backdrop-blur-sm z-10">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-800">
-                  Applicants for <span className="text-[#133E87]">{selectedPost.title}</span>
-                </h2>
-                <button 
-                  onClick={() => setShowApplicants(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-            
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-10rem)]">
-              {selectedPost.applicants.length === 0 ? (
-                <div className="text-center py-10">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <FaEye className="text-2xl text-gray-400" />
-                  </div>
-                  <p className="text-gray-500 text-lg font-medium">No applicants yet</p>
-                  <p className="text-gray-400 mt-2">Check back later for applications</p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {selectedPost.applicants.map((applicant, index) => (
-                    <div 
-                      key={applicant.id}
-                      className="bg-white rounded-lg p-5 shadow-sm border border-gray-100 hover:shadow-md transition-all"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="w-14 h-14 rounded-full bg-gray-200 flex-shrink-0 overflow-hidden shadow-sm">
-                          {applicant.profileImage ? (
-                            <img 
-                              src={applicant.profileImage} 
-                              alt={applicant.name} 
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-500 text-xl font-bold">
-                              {applicant.name.charAt(0)}
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-800">{applicant.name}</h3>
-                          <p className="text-green-600 mb-3 font-medium">{applicant.credentials}</p>
-                          <div className="p-4 bg-gray-50 rounded-lg mb-4 italic text-gray-700">
-                            <p>"{applicant.message}"</p>
-                          </div>
-                          <p className="text-gray-700 mb-3 font-medium">
-                            💰 Proposed Rate: <span className="text-[#133E87]">₱{applicant.rate}</span>
-                          </p>
-                          
-                          <div className="mb-4">
-                            <p className="text-gray-600 mb-2 font-medium">
-                              📎 Documents:
-                            </p>
-                            <div className="flex gap-2">
-                              {applicant.hasId && (
-                                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-medium">Valid ID</span>
-                              )}
-                              {applicant.hasCertifications && (
-                                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-medium">Certifications</span>
-                              )}
-                              {!applicant.hasId && !applicant.hasCertifications && (
-                                <span className="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-xs">No documents</span>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-100">
-                            <button 
-                              onClick={() => navigate(`/housekeeper-profile/${applicant.userId}`)}
-                              className="bg-gray-100 text-gray-700 px-3 py-2 rounded-md text-sm hover:bg-gray-200 transition-colors"
-                            >
-                              View Profile
-                            </button>
-                            <button className="bg-[#E6EBF4] text-[#133E87] px-3 py-2 rounded-md text-sm hover:bg-[#d9e1f1] transition-colors">
-                              Chat
-                            </button>
-                            <button 
-                              onClick={() => handleHireApplicant(selectedPost.id, applicant)}
-                              className="bg-green-100 text-green-700 px-3 py-2 rounded-md text-sm hover:bg-green-200 transition-colors"
-                            >
-                              Hire
-                            </button>
-                            <button 
-                              onClick={() => handleRejectApplicant(selectedPost.id, applicant.id)}
-                              className="bg-red-100 text-red-700 px-3 py-2 rounded-md text-sm hover:bg-red-200 transition-colors"
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            
-            <div className="p-6 border-t border-gray-200/70 bg-gray-50/70 sticky bottom-0">
-              <button
-                onClick={() => setShowApplicants(false)}
-                className="bg-white border border-gray-300 text-gray-700 px-5 py-2.5 rounded-lg hover:bg-gray-50 font-medium transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Applicants Modal - Removed getProfileImageUrl prop */}
+      {selectedPost && (
+        <ApplicantsModal
+          isOpen={showApplicants}
+          onClose={() => setShowApplicants(false)}
+          applicants={selectedPost.applicants}
+          jobTitle={selectedPost.title}
+          jobSchedule={selectedPost.schedule} 
+          jobId={selectedPost.id} 
+          onHire={handleHireApplicant} 
+          onReject={handleRejectApplicant}
+        />
       )}
 
       {/* Job Post Creation/Edit Modal */}
